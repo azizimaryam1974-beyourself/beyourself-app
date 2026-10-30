@@ -39,7 +39,7 @@ test("Fachbegriffe: Markup nur bei Treffer, längster Begriff gewinnt", () => {
   assert.equal(r.changed, true);
   assert.equal(
     r.text,
-    'Hier gilt <mstrans:dictionary translation="right before left">rechts vor links</mstrans:dictionary> und <mstrans:dictionary translation="give way">Vorfahrt gewähren</mstrans:dictionary>.',
+    'Hier gilt <mstrans:dictionary translation="priority to the right">rechts vor links</mstrans:dictionary> und <mstrans:dictionary translation="give way">Vorfahrt gewähren</mstrans:dictionary>.',
   );
   assert.deepEqual(applyGlossary("Guten Abend zusammen", "en"), { text: "Guten Abend zusammen", changed: false });
   // Für Türkisch ist noch nichts fest hinterlegt -> kein Markup

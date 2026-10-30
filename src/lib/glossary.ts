@@ -17,7 +17,10 @@ export interface GlossaryTerm {
 }
 
 export const DEFAULT_GLOSSARY: GlossaryTerm[] = [
-  { de: "rechts vor links", translations: { en: "right before left" } },
+  // Azure übersetzt "rechts vor links" ohne Glossar sinnentstellt
+  // (z. B. RU "прямо перед левым поворотом", ES "justo antes de la izquierda").
+  // Weitere Sprachen nach Prüfung durch Muttersprachler ergänzen.
+  { de: "rechts vor links", translations: { en: "priority to the right" } },
   { de: "Vorfahrt gewähren", translations: { en: "give way" } },
   { de: "Vorfahrtstraße", translations: { en: "priority road" } },
   { de: "Fahrstreifen", translations: { en: "lane" } },

@@ -109,6 +109,9 @@ Sicherung: `deploy/backup.sh` per Cron täglich (legt `backups/` an, hält 30 Ta
 
 ## Vor dem Livegang
 
+**Verbindliche Liste: [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md)** (Sicherheit & Datenschutz).
+
+
 - [ ] `/impressum`, `/datenschutz`, `/sprachpaket` mit echten Angaben füllen und rechtlich prüfen
       (Widerrufsbelehrung + Muster-Widerrufsformular für das Sprachpaket).
 - [ ] Mikrofon testen: Headset oder Ansteckmikrofon am Laptop – deutlich bessere Erkennung als Laptop-Mikro.

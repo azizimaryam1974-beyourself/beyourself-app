@@ -105,3 +105,49 @@ test("Satznummern laufen nach Neustart weiter (nichts wird überschrieben)", asy
   assert.deepEqual(segs.map((s) => [s.seq, s.original]), [[1, "Eins."], [2, "Zwei."], [3, "Drei."]]);
   assert.equal(segs[0].translations.tr, "[TR] Eins.");
 });
+
+// ---------- Claude-Übersetzer ----------
+import { ClaudeTranslator, parseTranslations } from "../src/lib/translation/claude-translator";
+import { FallbackTranslator } from "../src/lib/translation/fallback";
+
+test("Claude: eine Anfrage für alle Sprachen, Fachbegriffe + Kontext im Prompt", async () => {
+  const calls: { url: string; body: any; headers: Record<string, string> }[] = [];
+  const fakeFetch = (async (url: string, init: RequestInit) => {
+    calls.push({ url, body: JSON.parse(String(init.body)), headers: init.headers as Record<string, string> });
+    return new Response(JSON.stringify({ content: [{ type: "text", text: '```json\n{"tr":"Sağdan gelenin önceliği geçerlidir.","ru":"Действует помеха справа.","fa":"حق تقدم با سمت راست است."}\n```' }] }), { status: 200 });
+  }) as unknown as typeof fetch;
+  const t = new ClaudeTranslator({ apiKey: "sk-test", fetchImpl: fakeFetch });
+  const out = await t.translate("Hier gilt rechts vor links.", ["tr", "ru", "fa"], { context: ["Wir sind an einer Kreuzung."] });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "https://api.anthropic.com/v1/messages");
+  assert.equal(calls[0].headers["x-api-key"], "sk-test");
+  assert.equal(calls[0].body.model, "claude-haiku-5-5");
+  const msg = calls[0].body.messages[0].content as string;
+  assert.match(msg, /rechts vor links" → tr: sağdan gelenin önceliği \| ru: помеха справа \| fa: حق تقدم با سمت راست/);
+  assert.match(msg, /Wir sind an einer Kreuzung/);
+  assert.doesNotMatch(msg, /Rettungsgasse/, "nur passende Fachbegriffe");
+  assert.equal(out.ru, "Действует помеха справа.");
+});
+
+test("Claude: kaputte Antwort -> Fehler; fehlende Sprachen werden weggelassen", () => {
+  assert.throws(() => parseTranslations("Entschuldigung", ["tr"]));
+  assert.deepEqual(parseTranslations('{"tr":"a","xx":"b","ru":""}', ["tr", "ru"]), { tr: "a" });
+});
+
+test("Fallback: Claude fällt aus oder lässt Sprache weg -> Azure übernimmt", async () => {
+  const azure = new MockTranslator();
+  const down = new FallbackTranslator({ name: "claude", translate: async () => { throw new Error("529 overloaded"); } }, azure);
+  assert.deepEqual(await down.translate("Satz.", ["tr", "ar"]), { tr: "[TR] Satz.", ar: "[AR] Satz." });
+  const partial = new FallbackTranslator({ name: "claude", translate: async () => ({ tr: "cümle" }) }, azure);
+  assert.deepEqual(await partial.translate("Satz.", ["tr", "ar"]), { tr: "cümle", ar: "[AR] Satz." });
+  assert.deepEqual(azure.calls.at(-1)!.targets, ["ar"]);
+});
+
+test("LiveHub gibt die letzten Sätze als Kontext mit", async () => {
+  const seen: (string[] | undefined)[] = [];
+  const hub = new LiveHub({ translator: { name: "x", translate: async (t, _l, o) => { seen.push(o?.context); return { en: t }; } } });
+  hub.subscribe("k", { id: "a", userId: "u", language: "en", send: () => {} });
+  for (const s of ["eins", "zwei", "drei", "vier", "fünf"]) await hub.publish("k", s);
+  assert.deepEqual(seen[0], []);
+  assert.deepEqual(seen[4], ["zwei", "drei", "vier"]);
+});

@@ -19,10 +19,10 @@ export default async function TeacherHome() {
   return (
     <>
       <h1>Theorieunterricht</h1>
-      {(provider !== "azure" || !speechConfigured()) && (
+      {(provider === "mock" || !speechConfigured()) && (
         <div className="alert alert-info">
           <strong>Testmodus:</strong>{" "}
-          {provider !== "azure" && "Übersetzung läuft mit dem Test-Dienst (kein Azure). "}
+          {provider === "mock" && "Übersetzung läuft mit dem Test-Dienst (kein Azure). "}
           {!speechConfigured() && "Spracherkennung ist nicht eingerichtet – Sätze können per Tastatur gesendet werden. "}
           Schlüssel in der <span className="mono">.env</span> eintragen, siehe Anleitung.
         </div>

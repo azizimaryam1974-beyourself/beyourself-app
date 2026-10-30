@@ -160,7 +160,7 @@ export function TeacherConsole({ lesson, initialSent, phrases, speechLocale, spe
       </div>
 
       {error && <div className="alert alert-error" role="alert">{error}</div>}
-      {provider !== "azure" && <div className="alert alert-info">Testmodus: Übersetzungen sind nur markiert (z. B. „[TR] …“).</div>}
+      {provider === "mock" && <div className="alert alert-info">Testmodus: Übersetzungen sind nur markiert (z. B. „[TR] …“).</div>}
 
       <div className="grid grid-2">
         <div className="card" style={{ marginBottom: 0 }}>

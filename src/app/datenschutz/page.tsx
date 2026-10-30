@@ -12,6 +12,9 @@ export default function Datenschutz() {
         Vorlesestimme laufen über Microsoft Azure AI Services in Rechenzentren in Deutschland/EU (Region „Germany West Central“,
         europäischer Übersetzungs-Endpunkt). Mit Microsoft besteht ein Auftragsverarbeitungsvertrag (Data Protection Addendum).
         Microsoft speichert Audio und Texte dieser Dienste nicht zu eigenen Zwecken. Dein Mikrofon wird nie verwendet.</p>
+      <p>Die Übersetzung der erkannten deutschen Sätze erfolgt mit dem KI-Modell Claude der Anthropic PBC (USA) über deren
+        Programmierschnittstelle. Übermittelt wird nur der Text der Lehrkraft, keine Daten von Schülern. Grundlage sind ein
+        Auftragsverarbeitungsvertrag und EU-Standardvertragsklauseln. [Bitte vor dem Livegang prüfen und Angaben bestätigen.]</p>
       <p>Die erkannten Sätze einer Stunde und ihre Übersetzungen speichern wir, damit du sie nachlesen kannst, und löschen sie nach [Frist, z. B. Ende der Ausbildung].</p>
       <h2>Cookies</h2>
       <p>Wir setzen nur ein technisch notwendiges Anmelde-Cookie. Keine Werbung, kein Tracking, keine externen Schriften.</p>

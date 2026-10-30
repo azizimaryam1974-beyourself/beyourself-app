@@ -34,7 +34,23 @@ npm test
 Im Testmodus werden Übersetzungen nur markiert („[TR] …“) und Sätze werden in der
 Konsole eingetippt statt gesprochen.
 
+## Übersetzung: Claude + Azure
+
+Empfohlen ist `TRANSLATION_PROVIDER=claude`: Claude übersetzt jeden Satz mit
+Zusammenhang (letzte 3 Sätze) und Fachbegriff-Liste in alle gebuchten Sprachen
+in einer Anfrage. Fällt Claude aus, übernimmt automatisch Azure Translator.
+Azure Speech bleibt für Spracherkennung und Vorlesen zuständig.
+
+Grund: Azure allein übersetzt z. B. „rechts vor links“ in allen Sprachen
+sinnentstellt. Schlüssel: <https://console.anthropic.com> → API Keys
+(Abrechnung nach Verbrauch, Prepaid-Guthaben möglich).
+
 ## 1. Azure einrichten (einmalig, ca. 15 Minuten)
+
+**Erledigt am 31.10.2026:** Ressourcengruppe `beyourself`, `beyourself-speech` und
+`beyourself-translator` (beide F0, Germany West Central) im Abonnement
+„Azure subscription 1“ (Verzeichnis „Default Directory“). Schlüssel stehen im
+Portal unter der jeweiligen Ressource → „Schlüssel und Endpunkt“.
 
 1. Konto auf <https://portal.azure.com> anlegen (Firmenkonto der Fahrschule).
 2. **Ressourcengruppe** `beyourself` anlegen, Region **Germany West Central**.

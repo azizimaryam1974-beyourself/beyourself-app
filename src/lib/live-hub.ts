@@ -57,6 +57,8 @@ interface SessionState {
   live: boolean;
   /** Sätze werden der Reihe nach verarbeitet, damit die Reihenfolge stimmt. */
   queue: Promise<void>;
+  /** Letzte Sätze als Kontext für die Übersetzung. */
+  recent: string[];
 }
 
 export class LiveHub {
@@ -66,7 +68,7 @@ export class LiveHub {
   private state(sessionId: string): SessionState {
     let s = this.sessions.get(sessionId);
     if (!s) {
-      s = { listeners: new Map(), seq: this.opts.initialSeq?.(sessionId) ?? 0, live: false, queue: Promise.resolve() };
+      s = { listeners: new Map(), seq: this.opts.initialSeq?.(sessionId) ?? 0, live: false, queue: Promise.resolve(), recent: [] };
       this.sessions.set(sessionId, s);
     }
     return s;
@@ -119,12 +121,13 @@ export class LiveHub {
       let error: string | undefined;
       if (languages.length) {
         try {
-          translations = await this.opts.translator.translate(text, languages);
+          translations = await this.opts.translator.translate(text, languages, { context: [...s.recent] });
         } catch (e) {
           error = "Übersetzung vorübergehend nicht verfügbar";
           console.error("[live-hub] translate failed", e);
         }
       }
+      s.recent = [...s.recent, text].slice(-3);
       for (const l of s.listeners.values()) {
         const translated = l.language ? translations[l.language] ?? null : text;
         l.send({

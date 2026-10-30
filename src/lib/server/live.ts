@@ -3,6 +3,8 @@ import { createSpeechTokenCache, type SpeechToken } from "../azure-speech-token"
 import { LiveHub } from "../live-hub";
 import { AzureTranslator } from "../translation/azure-translator";
 import { MockTranslator } from "../translation/mock";
+import { ClaudeTranslator } from "../translation/claude-translator";
+import { FallbackTranslator } from "../translation/fallback";
 import type { TranslationProvider } from "../translation/types";
 import { db } from "./db";
 import { lastSeq, saveSegment } from "./repo";
@@ -19,14 +21,31 @@ const g = globalThis as unknown as {
   __bySpeechToken?: () => Promise<SpeechToken>;
 };
 
+function azure(): AzureTranslator {
+  return new AzureTranslator({
+    key: process.env.AZURE_TRANSLATOR_KEY || "",
+    region: process.env.AZURE_TRANSLATOR_REGION || "",
+    endpoint: process.env.AZURE_TRANSLATOR_ENDPOINT || undefined,
+  });
+}
+
+/**
+ * TRANSLATION_PROVIDER:
+ *   claude – Claude übersetzt, Azure springt bei Störung ein (empfohlen)
+ *   azure  – nur Azure Translator
+ *   mock   – Testbetrieb ohne Konten
+ */
 export function translator(): TranslationProvider {
   if (!g.__byTranslator) {
-    if (process.env.TRANSLATION_PROVIDER === "azure") {
-      g.__byTranslator = new AzureTranslator({
-        key: process.env.AZURE_TRANSLATOR_KEY || "",
-        region: process.env.AZURE_TRANSLATOR_REGION || "",
-        endpoint: process.env.AZURE_TRANSLATOR_ENDPOINT || undefined,
+    const p = process.env.TRANSLATION_PROVIDER;
+    if (p === "claude") {
+      const claude = new ClaudeTranslator({
+        apiKey: process.env.ANTHROPIC_API_KEY || "",
+        model: process.env.CLAUDE_MODEL || undefined,
       });
+      g.__byTranslator = process.env.AZURE_TRANSLATOR_KEY ? new FallbackTranslator(claude, azure()) : claude;
+    } else if (p === "azure") {
+      g.__byTranslator = azure();
     } else {
       g.__byTranslator = new MockTranslator();
     }

@@ -8,60 +8,66 @@ import type { TargetLanguageCode } from "./languages";
  * 2. Ist für eine Zielsprache eine feste Übersetzung hinterlegt, wird sie
  *    über das "dynamische Wörterbuch" von Azure Translator erzwungen.
  *
- * WICHTIG: Feste Übersetzungen nur von Muttersprachlern/geprüften Quellen
- * eintragen. Leere Felder = Azure übersetzt selbst.
+ * 3. Beim Übersetzer "claude" gehen die Begriffe als verbindliche Vorgaben
+ *    in die Anweisung an das Sprachmodell (passt die Grammatik selbst an).
+ *
+ * Leere Felder = der Übersetzer entscheidet selbst.
  */
 export interface GlossaryTerm {
   de: string;
   translations: Partial<Record<TargetLanguageCode, string>>;
 }
 
+/**
+ * Stand 31.10.2026: Übersetzungen von Claude (KI) erstellt.
+ * Geprüft: "rechts vor links" auf Farsi (Maryam). Alles andere bei
+ * Gelegenheit von Muttersprachlern gegenlesen lassen.
+ * Hintergrund: Ohne Glossar übersetzt Azure "rechts vor links" in allen
+ * Sprachen sinnentstellt (RU "прямо перед левым поворотом" u. a.).
+ */
 export const DEFAULT_GLOSSARY: GlossaryTerm[] = [
-  // Azure übersetzt "rechts vor links" ohne Glossar sinnentstellt
-  // (z. B. RU "прямо перед левым поворотом", ES "justo antes de la izquierda").
-  // Weitere Sprachen nach Prüfung durch Muttersprachler ergänzen.
-  { de: "rechts vor links", translations: { en: "priority to the right" } },
-  { de: "Vorfahrt gewähren", translations: { en: "give way" } },
-  { de: "Vorfahrtstraße", translations: { en: "priority road" } },
-  { de: "Fahrstreifen", translations: { en: "lane" } },
-  { de: "Fußgängerüberweg", translations: { en: "pedestrian crossing" } },
-  { de: "Zebrastreifen", translations: { en: "zebra crossing" } },
-  { de: "Lichtzeichenanlage", translations: { en: "traffic lights" } },
-  { de: "Haltelinie", translations: { en: "stop line" } },
-  { de: "Sicherheitsabstand", translations: { en: "safe following distance" } },
-  { de: "Anhalteweg", translations: { en: "stopping distance" } },
-  { de: "Bremsweg", translations: { en: "braking distance" } },
-  { de: "Reaktionsweg", translations: { en: "reaction distance" } },
-  { de: "Schulterblick", translations: { en: "shoulder check" } },
-  { de: "Probezeit", translations: { en: "probationary period" } },
-  { de: "Punkte in Flensburg", translations: { en: "penalty points (Flensburg register)" } },
-  { de: "Verkehrszeichen", translations: {} },
-  { de: "Zusatzzeichen", translations: { en: "additional sign" } },
-  { de: "Gefahrzeichen", translations: { en: "warning sign" } },
-  { de: "Vorschriftzeichen", translations: { en: "regulatory sign" } },
-  { de: "Richtzeichen", translations: { en: "informational sign" } },
-  { de: "Kreisverkehr", translations: { en: "roundabout" } },
-  { de: "Autobahn", translations: {} },
-  { de: "Kraftfahrstraße", translations: { en: "motorway-style road" } },
-  { de: "Rettungsgasse", translations: { en: "emergency corridor" } },
-  { de: "Reißverschlussverfahren", translations: { en: "zipper merge" } },
-  { de: "Überholverbot", translations: { en: "no overtaking" } },
-  { de: "Halteverbot", translations: { en: "no stopping" } },
-  { de: "Parkverbot", translations: { en: "no parking" } },
-  { de: "Promillegrenze", translations: { en: "blood alcohol limit" } },
-  { de: "Fahrerlaubnis", translations: { en: "driving licence" } },
-  { de: "Führerschein", translations: {} },
-  { de: "Umschreibung", translations: { en: "conversion of a foreign licence" } },
-  { de: "Theorieprüfung", translations: { en: "theory test" } },
-  { de: "Fehlerpunkte", translations: { en: "error points" } },
-  { de: "Bahnübergang", translations: { en: "level crossing" } },
-  { de: "Andreaskreuz", translations: { en: "St Andrew's cross (railway crossing sign)" } },
-  { de: "verkehrsberuhigter Bereich", translations: { en: "traffic-calmed area" } },
-  { de: "Tempo-30-Zone", translations: { en: "30 km/h zone" } },
-  { de: "Abblendlicht", translations: { en: "dipped headlights" } },
-  { de: "Fernlicht", translations: { en: "full beam" } },
-  { de: "Warnblinklicht", translations: { en: "hazard lights" } },
-  { de: "Warndreieck", translations: { en: "warning triangle" } },
+  { de: "rechts vor links", translations: { en: "priority to the right", tr: "sağdan gelenin önceliği", ru: "помеха справа", ar: "الأولوية للقادم من اليمين", es: "prioridad a la derecha", fa: "حق تقدم با سمت راست" } },
+  { de: "Vorfahrt gewähren", translations: { en: "give way", tr: "yol ver", ru: "уступить дорогу", ar: "إعطاء الأولوية", es: "ceder el paso", fa: "حق تقدم دادن" } },
+  { de: "Vorfahrtstraße", translations: { en: "priority road", tr: "ana yol", ru: "главная дорога", ar: "طريق ذو أولوية", es: "vía con prioridad", fa: "خیابان اصلی دارای حق تقدم" } },
+  { de: "Fahrstreifen", translations: { en: "lane", tr: "şerit", ru: "полоса движения", ar: "حارة السير", es: "carril", fa: "خط عبور" } },
+  { de: "Fußgängerüberweg", translations: { en: "pedestrian crossing", tr: "yaya geçidi", ru: "пешеходный переход", ar: "معبر المشاة", es: "paso de peatones", fa: "گذرگاه عابر پیاده" } },
+  { de: "Zebrastreifen", translations: { en: "zebra crossing", tr: "yaya geçidi", ru: "«зебра»", ar: "ممر المشاة المخطط", es: "paso de cebra", fa: "خط عابر پیاده" } },
+  { de: "Lichtzeichenanlage", translations: { en: "traffic lights", tr: "trafik ışıkları", ru: "светофор", ar: "إشارة المرور الضوئية", es: "semáforo", fa: "چراغ راهنمایی" } },
+  { de: "Haltelinie", translations: { en: "stop line", tr: "durma çizgisi", ru: "стоп-линия", ar: "خط التوقف", es: "línea de detención", fa: "خط ایست" } },
+  { de: "Sicherheitsabstand", translations: { en: "safe following distance", tr: "güvenli takip mesafesi", ru: "безопасная дистанция", ar: "مسافة الأمان", es: "distancia de seguridad", fa: "فاصله ایمنی" } },
+  { de: "Anhalteweg", translations: { en: "stopping distance", tr: "durma mesafesi", ru: "остановочный путь", ar: "مسافة التوقف", es: "distancia de detención", fa: "مسافت توقف" } },
+  { de: "Bremsweg", translations: { en: "braking distance", tr: "fren mesafesi", ru: "тормозной путь", ar: "مسافة الكبح", es: "distancia de frenado", fa: "مسافت ترمز" } },
+  { de: "Reaktionsweg", translations: { en: "reaction distance", tr: "reaksiyon mesafesi", ru: "путь за время реакции", ar: "مسافة رد الفعل", es: "distancia de reacción", fa: "مسافت واکنش" } },
+  { de: "Schulterblick", translations: { en: "shoulder check", tr: "omuz kontrolü", ru: "взгляд через плечо", ar: "النظر من فوق الكتف", es: "mirada por encima del hombro", fa: "نگاه از روی شانه" } },
+  { de: "Probezeit", translations: { en: "probationary period", tr: "deneme süresi", ru: "испытательный срок", ar: "فترة الاختبار", es: "período de prueba", fa: "دوره آزمایشی" } },
+  { de: "Punkte in Flensburg", translations: { en: "penalty points (Flensburg register)", tr: "Flensburg ceza puanları", ru: "штрафные баллы во Фленсбурге", ar: "نقاط المخالفات في سجل فلنسبورغ", es: "puntos en Flensburgo", fa: "امتیاز منفی در فلنزبورگ" } },
+  { de: "Verkehrszeichen", translations: { en: "traffic sign", tr: "trafik işareti", ru: "дорожный знак", ar: "إشارة مرور", es: "señal de tráfico", fa: "تابلوی راهنمایی و رانندگی" } },
+  { de: "Zusatzzeichen", translations: { en: "additional sign", tr: "ek levha", ru: "дополнительная табличка", ar: "لوحة إضافية", es: "panel complementario", fa: "تابلوی تکمیلی" } },
+  { de: "Gefahrzeichen", translations: { en: "warning sign", tr: "tehlike uyarı işareti", ru: "предупреждающий знак", ar: "إشارة تحذير", es: "señal de peligro", fa: "تابلوی هشدار" } },
+  { de: "Vorschriftzeichen", translations: { en: "regulatory sign", tr: "düzenleyici işaret", ru: "предписывающий знак", ar: "إشارة تنظيمية", es: "señal de reglamentación", fa: "تابلوی انتظامی" } },
+  { de: "Richtzeichen", translations: { en: "informational sign", tr: "bilgi işareti", ru: "информационный знак", ar: "إشارة إرشادية", es: "señal de indicación", fa: "تابلوی اخباری" } },
+  { de: "Kreisverkehr", translations: { en: "roundabout", tr: "döner kavşak", ru: "круговое движение", ar: "دوار", es: "rotonda", fa: "میدان" } },
+  { de: "Autobahn", translations: { en: "motorway", tr: "otoyol", ru: "автобан", ar: "الطريق السريع (أوتوبان)", es: "autopista", fa: "بزرگراه" } },
+  { de: "Kraftfahrstraße", translations: { en: "motorway-style road", tr: "motorlu taşıt yolu", ru: "дорога для автомобилей", ar: "طريق مخصص للسيارات", es: "vía para automóviles", fa: "جاده مخصوص خودرو" } },
+  { de: "Rettungsgasse", translations: { en: "emergency corridor", tr: "kurtarma koridoru", ru: "коридор для спецтранспорта", ar: "ممر الطوارئ", es: "pasillo de emergencia", fa: "مسیر امدادی" } },
+  { de: "Reißverschlussverfahren", translations: { en: "zipper merge", tr: "fermuar sistemi", ru: "принцип застёжки-молнии", ar: "الاندماج بالتناوب", es: "incorporación en cremallera", fa: "ادغام زیپی" } },
+  { de: "Überholverbot", translations: { en: "no overtaking", tr: "sollama yasağı", ru: "обгон запрещён", ar: "ممنوع التجاوز", es: "prohibido adelantar", fa: "سبقت ممنوع" } },
+  { de: "Halteverbot", translations: { en: "no stopping", tr: "duraklama yasağı", ru: "остановка запрещена", ar: "ممنوع الوقوف", es: "prohibido detenerse", fa: "توقف ممنوع" } },
+  { de: "Parkverbot", translations: { en: "no parking", tr: "park yasağı", ru: "стоянка запрещена", ar: "ممنوع الانتظار", es: "prohibido aparcar", fa: "پارک ممنوع" } },
+  { de: "Promillegrenze", translations: { en: "blood alcohol limit", tr: "promil sınırı", ru: "допустимый уровень алкоголя в крови", ar: "الحد المسموح لنسبة الكحول في الدم", es: "límite de alcoholemia", fa: "حد مجاز الکل خون" } },
+  { de: "Fahrerlaubnis", translations: { en: "driving licence", tr: "sürücü belgesi", ru: "право на управление транспортным средством", ar: "رخصة القيادة", es: "permiso de conducir", fa: "گواهینامه رانندگی" } },
+  { de: "Führerschein", translations: { en: "driving licence", tr: "ehliyet", ru: "водительское удостоверение", ar: "رخصة القيادة", es: "carné de conducir", fa: "گواهینامه" } },
+  { de: "Umschreibung", translations: { en: "conversion of a foreign licence", tr: "yabancı ehliyetin dönüştürülmesi", ru: "замена иностранного удостоверения", ar: "تحويل رخصة القيادة الأجنبية", es: "canje del permiso extranjero", fa: "تبدیل گواهینامه خارجی" } },
+  { de: "Theorieprüfung", translations: { en: "theory test", tr: "teori sınavı", ru: "теоретический экзамен", ar: "الامتحان النظري", es: "examen teórico", fa: "آزمون تئوری" } },
+  { de: "Fehlerpunkte", translations: { en: "error points", tr: "hata puanları", ru: "штрафные баллы на экзамене", ar: "نقاط الخطأ", es: "puntos de error", fa: "امتیاز خطا" } },
+  { de: "Bahnübergang", translations: { en: "level crossing", tr: "hemzemin geçit", ru: "железнодорожный переезд", ar: "معبر السكة الحديدية", es: "paso a nivel", fa: "تقاطع راه‌آهن" } },
+  { de: "Andreaskreuz", translations: { en: "St Andrew's cross (railway crossing sign)", tr: "Andreas haçı (hemzemin geçit işareti)", ru: "Андреевский крест", ar: "صليب أندراوس (إشارة معبر السكة)", es: "cruz de San Andrés", fa: "علامت صلیب تقاطع راه‌آهن" } },
+  { de: "verkehrsberuhigter Bereich", translations: { en: "traffic-calmed area", tr: "trafiği sakinleştirilmiş alan", ru: "жилая зона", ar: "منطقة تهدئة المرور", es: "zona de tráfico calmado", fa: "محدوده آرام‌سازی ترافیک" } },
+  { de: "Tempo-30-Zone", translations: { en: "30 km/h zone", tr: "30 km/s bölgesi", ru: "зона 30 км/ч", ar: "منطقة سرعة 30 كم/س", es: "zona 30", fa: "محدوده سرعت ۳۰" } },
+  { de: "Abblendlicht", translations: { en: "dipped headlights", tr: "kısa far", ru: "ближний свет", ar: "الضوء المنخفض", es: "luz de cruce", fa: "نور پایین" } },
+  { de: "Fernlicht", translations: { en: "full beam", tr: "uzun far", ru: "дальний свет", ar: "الضوء العالي", es: "luz de carretera", fa: "نور بالا" } },
+  { de: "Warnblinklicht", translations: { en: "hazard lights", tr: "dörtlü flaşör", ru: "аварийная сигнализация", ar: "أضواء التحذير", es: "luces de emergencia", fa: "چراغ فلاشر" } },
+  { de: "Warndreieck", translations: { en: "warning triangle", tr: "uyarı üçgeni", ru: "знак аварийной остановки", ar: "مثلث التحذير", es: "triángulo de emergencia", fa: "مثلث خطر" } },
 ];
 
 /** Deutsche Begriffe für die Phrase List der Spracherkennung. */

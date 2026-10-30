@@ -42,8 +42,8 @@ test("Fachbegriffe: Markup nur bei Treffer, längster Begriff gewinnt", () => {
     'Hier gilt <mstrans:dictionary translation="priority to the right">rechts vor links</mstrans:dictionary> und <mstrans:dictionary translation="give way">Vorfahrt gewähren</mstrans:dictionary>.',
   );
   assert.deepEqual(applyGlossary("Guten Abend zusammen", "en"), { text: "Guten Abend zusammen", changed: false });
-  // Für Türkisch ist noch nichts fest hinterlegt -> kein Markup
-  assert.equal(applyGlossary("rechts vor links", "tr").changed, false);
+  // Türkisch hat jetzt ebenfalls einen festen Begriff
+  assert.match(applyGlossary("rechts vor links", "tr").text, /sağdan gelenin önceliği/);
   // Kein Treffer mitten im Wort
   assert.equal(applyGlossary("Bremswegberechnung", "en").changed, false);
   assert.ok(recognitionPhrases().includes("Rettungsgasse"));
@@ -57,7 +57,7 @@ test("Azure Translator: richtige Anfrage, EU-Endpunkt, Glossar getrennt", async 
     return new Response(JSON.stringify([{ translations: to.map((t) => ({ to: t, text: `${t}:ok` })) }]), { status: 200 });
   }) as unknown as typeof fetch;
 
-  const t = new AzureTranslator({ key: "k", region: "germanywestcentral", fetchImpl: fakeFetch });
+  const t = new AzureTranslator({ key: "k", region: "germanywestcentral", fetchImpl: fakeFetch, glossary: [{ de: "Schulterblick", translations: { en: "shoulder check" } }] });
   const out = await t.translate("Achte auf den Schulterblick.", ["tr", "en", "ar"]);
   assert.deepEqual(out, { tr: "tr:ok", ar: "ar:ok", en: "en:ok" });
   assert.equal(calls.length, 2, "eine gemeinsame Anfrage + eine Glossar-Anfrage für en");

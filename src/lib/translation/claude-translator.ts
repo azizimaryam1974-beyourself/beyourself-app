@@ -92,7 +92,6 @@ export class ClaudeTranslator implements TranslationProvider {
         body: JSON.stringify({
           model: this.model,
           max_tokens: 1024,
-          temperature: 0,
           system: SYSTEM_PROMPT,
           messages: [{ role: "user", content: this.buildUserMessage(text, unique, options.context?.slice(-3)) }],
         }),

@@ -1,0 +1,14 @@
+# HTTPS-Zertifikat holt Caddy automatisch (Let's Encrypt),
+# sobald die DNS-Einträge bei IONOS auf diesen Server zeigen.
+fahrschule-beyourself.de {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy app:3000 {
+		# Live-Untertitel sofort durchreichen (Server-Sent Events)
+		flush_interval -1
+	}
+}
+
+www.fahrschule-beyourself.de {
+	redir https://fahrschule-beyourself.de{uri} permanent
+}

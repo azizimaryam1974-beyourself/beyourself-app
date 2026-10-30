@@ -1,0 +1,248 @@
+import type Database from "better-sqlite3";
+import { randomUUID } from "node:crypto";
+import {
+  LANGUAGE_PACKAGE_PRICE_CENTS,
+  type LanguagePackage,
+  type LanguagePackageStatus,
+} from "../language-package";
+import type { TargetLanguageCode } from "../languages";
+import type { StoredSegment } from "../live-hub";
+import type { Translations } from "../translation/types";
+
+export const SCHOOL_ID = "beyourself";
+
+export type Role = "student" | "teacher";
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  role: Role;
+  created_at: string;
+}
+
+interface UserRow extends User {
+  password_hash: string;
+}
+
+const nowIso = () => new Date().toISOString();
+
+// ---------- Benutzer ----------------------------------------------------------
+
+export function createUser(
+  db: Database.Database,
+  u: { email: string; name: string; phone?: string | null; passwordHash: string; role: Role },
+): User {
+  const user: UserRow = {
+    id: randomUUID(),
+    email: u.email.trim().toLowerCase(),
+    name: u.name.trim(),
+    phone: u.phone?.trim() || null,
+    password_hash: u.passwordHash,
+    role: u.role,
+    created_at: nowIso(),
+  };
+  db.prepare(
+    `INSERT INTO users (id,email,name,phone,password_hash,role,created_at)
+     VALUES (@id,@email,@name,@phone,@password_hash,@role,@created_at)`,
+  ).run(user);
+  const { password_hash: _, ...pub } = user;
+  return pub;
+}
+
+export function findUserByEmail(db: Database.Database, email: string): UserRow | undefined {
+  return db.prepare(`SELECT * FROM users WHERE email = ?`).get(email.trim().toLowerCase()) as UserRow | undefined;
+}
+
+export function getUser(db: Database.Database, id: string): User | undefined {
+  return db
+    .prepare(`SELECT id,email,name,phone,role,created_at FROM users WHERE id = ?`)
+    .get(id) as User | undefined;
+}
+
+export function setUserPassword(db: Database.Database, id: string, passwordHash: string): void {
+  db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`).run(passwordHash, id);
+}
+
+export function setUserRole(db: Database.Database, id: string, role: Role): void {
+  db.prepare(`UPDATE users SET role = ? WHERE id = ?`).run(role, id);
+}
+
+// ---------- Login-Sitzungen --------------------------------------------------
+
+export function insertAuthSession(db: Database.Database, tokenHash: string, userId: string, expiresAt: number) {
+  db.prepare(`INSERT INTO auth_sessions (token_hash,user_id,expires_at) VALUES (?,?,?)`).run(tokenHash, userId, expiresAt);
+}
+
+export function userForSession(db: Database.Database, tokenHash: string): User | undefined {
+  return db
+    .prepare(
+      `SELECT u.id,u.email,u.name,u.phone,u.role,u.created_at
+       FROM auth_sessions s JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ? AND s.expires_at > ?`,
+    )
+    .get(tokenHash, Date.now()) as User | undefined;
+}
+
+export function deleteAuthSession(db: Database.Database, tokenHash: string) {
+  db.prepare(`DELETE FROM auth_sessions WHERE token_hash = ?`).run(tokenHash);
+}
+
+export function purgeExpiredSessions(db: Database.Database) {
+  db.prepare(`DELETE FROM auth_sessions WHERE expires_at <= ?`).run(Date.now());
+}
+
+// ---------- Sprachpakete -----------------------------------------------------
+
+export interface PackageRow extends LanguagePackage {
+  paidAt: string | null;
+  cancelledAt: string | null;
+}
+
+function mapPkg(r: Record<string, unknown> | undefined): PackageRow | null {
+  if (!r) return null;
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    schoolId: r.school_id as string,
+    language: r.language as TargetLanguageCode,
+    priceCents: r.price_cents as number,
+    status: r.status as LanguagePackageStatus,
+    bookedAt: r.booked_at as string,
+    paidAt: (r.paid_at as string) ?? null,
+    cancelledAt: (r.cancelled_at as string) ?? null,
+  };
+}
+
+/** Aktuelles (nicht storniertes) Paket, sonst das zuletzt stornierte. */
+export function currentPackage(db: Database.Database, userId: string): PackageRow | null {
+  return mapPkg(
+    db
+      .prepare(
+        `SELECT * FROM language_packages WHERE user_id = ?
+         ORDER BY (status = 'cancelled') ASC, booked_at DESC LIMIT 1`,
+      )
+      .get(userId) as Record<string, unknown> | undefined,
+  );
+}
+
+export class PackageAlreadyBookedError extends Error {
+  constructor() {
+    super("Für dieses Konto ist bereits ein Sprachpaket gebucht.");
+  }
+}
+
+export function bookPackage(db: Database.Database, userId: string, language: TargetLanguageCode): PackageRow {
+  const existing = currentPackage(db, userId);
+  if (existing && existing.status !== "cancelled") throw new PackageAlreadyBookedError();
+  const at = nowIso();
+  const id = randomUUID();
+  db.prepare(
+    `INSERT INTO language_packages
+       (id,user_id,school_id,language,price_cents,status,booked_at,terms_accepted_at)
+     VALUES (?,?,?,?,?, 'booked', ?, ?)`,
+  ).run(id, userId, SCHOOL_ID, language, LANGUAGE_PACKAGE_PRICE_CENTS, at, at);
+  return currentPackage(db, userId)!;
+}
+
+export function setPackageStatus(db: Database.Database, packageId: string, status: LanguagePackageStatus) {
+  const at = nowIso();
+  if (status === "paid") {
+    db.prepare(`UPDATE language_packages SET status='paid', paid_at=?, cancelled_at=NULL WHERE id=?`).run(at, packageId);
+  } else if (status === "cancelled") {
+    db.prepare(`UPDATE language_packages SET status='cancelled', cancelled_at=? WHERE id=?`).run(at, packageId);
+  } else {
+    db.prepare(`UPDATE language_packages SET status='booked', paid_at=NULL, cancelled_at=NULL WHERE id=?`).run(packageId);
+  }
+}
+
+export function setPackageLanguage(db: Database.Database, packageId: string, language: TargetLanguageCode) {
+  db.prepare(`UPDATE language_packages SET language=? WHERE id=?`).run(language, packageId);
+}
+
+export interface StudentOverview extends User {
+  pkg: PackageRow | null;
+}
+
+export function listStudents(db: Database.Database): StudentOverview[] {
+  const users = db
+    .prepare(`SELECT id,email,name,phone,role,created_at FROM users WHERE role='student' ORDER BY created_at DESC`)
+    .all() as User[];
+  return users.map((u) => ({ ...u, pkg: currentPackage(db, u.id) }));
+}
+
+// ---------- Theoriestunden ---------------------------------------------------
+
+export type LessonStatus = "planned" | "live" | "ended";
+
+export interface Lesson {
+  id: string;
+  title: string;
+  status: LessonStatus;
+  created_by: string;
+  created_at: string;
+  started_at: string | null;
+  ended_at: string | null;
+}
+
+export function createLesson(db: Database.Database, title: string, createdBy: string): Lesson {
+  const l: Lesson = {
+    id: randomUUID(),
+    title: title.trim() || "Theoriestunde",
+    status: "planned",
+    created_by: createdBy,
+    created_at: nowIso(),
+    started_at: null,
+    ended_at: null,
+  };
+  db.prepare(
+    `INSERT INTO lessons (id,title,status,created_by,created_at,started_at,ended_at)
+     VALUES (@id,@title,@status,@created_by,@created_at,@started_at,@ended_at)`,
+  ).run(l);
+  return l;
+}
+
+export function getLesson(db: Database.Database, id: string): Lesson | undefined {
+  return db.prepare(`SELECT * FROM lessons WHERE id = ?`).get(id) as Lesson | undefined;
+}
+
+export function listLessons(db: Database.Database, limit = 30): Lesson[] {
+  return db
+    .prepare(`SELECT * FROM lessons ORDER BY (status='live') DESC, created_at DESC LIMIT ?`)
+    .all(limit) as Lesson[];
+}
+
+export function setLessonStatus(db: Database.Database, id: string, status: LessonStatus) {
+  if (status === "live") {
+    db.prepare(`UPDATE lessons SET status='live', started_at=COALESCE(started_at, ?), ended_at=NULL WHERE id=?`).run(nowIso(), id);
+  } else if (status === "ended") {
+    db.prepare(`UPDATE lessons SET status='ended', ended_at=? WHERE id=?`).run(nowIso(), id);
+  } else {
+    db.prepare(`UPDATE lessons SET status='planned' WHERE id=?`).run(id);
+  }
+}
+
+export function lastSeq(db: Database.Database, lessonId: string): number {
+  const r = db.prepare(`SELECT MAX(seq) AS m FROM lesson_segments WHERE lesson_id = ?`).get(lessonId) as { m: number | null };
+  return r.m ?? 0;
+}
+
+export function saveSegment(db: Database.Database, s: StoredSegment) {
+  db.prepare(
+    `INSERT OR REPLACE INTO lesson_segments (lesson_id,seq,original,translations,at) VALUES (?,?,?,?,?)`,
+  ).run(s.sessionId, s.seq, s.original, JSON.stringify(s.translations), s.at);
+}
+
+export function listSegments(db: Database.Database, lessonId: string): StoredSegment[] {
+  const rows = db
+    .prepare(`SELECT * FROM lesson_segments WHERE lesson_id = ? ORDER BY seq ASC`)
+    .all(lessonId) as { lesson_id: string; seq: number; original: string; translations: string; at: string }[];
+  return rows.map((r) => ({
+    sessionId: r.lesson_id,
+    seq: r.seq,
+    original: r.original,
+    translations: JSON.parse(r.translations) as Translations,
+    at: r.at,
+  }));
+}

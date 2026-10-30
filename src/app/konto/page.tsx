@@ -1,0 +1,95 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/server/auth";
+import { db } from "@/lib/server/db";
+import { currentPackage, listLessons } from "@/lib/server/repo";
+import { bookableLanguages, getLanguage } from "@/lib/languages";
+import { formatPrice, hasTranslationAccess, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
+import { BookLaterForm } from "./BookLaterForm";
+
+export const metadata = { title: "Mein Konto" };
+export const dynamic = "force-dynamic";
+
+const STATUS_TEXT = {
+  booked: { label: "Gebucht – Zahlung offen", cls: "badge-warn" },
+  paid: { label: "Bezahlt", cls: "badge-ok" },
+  cancelled: { label: "Storniert", cls: "badge-muted" },
+} as const;
+
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ gebucht?: string }> }) {
+  const user = await requireUser();
+  if (user.role === "teacher") redirect("/unterricht");
+  const { gebucht } = await searchParams;
+  const pkg = currentPackage(db(), user.id);
+  const access = hasTranslationAccess(pkg);
+  const lang = pkg ? getLanguage(pkg.language) : undefined;
+  const lessons = listLessons(db(), 20).filter((l) => l.status !== "planned");
+  const live = lessons.filter((l) => l.status === "live");
+  const past = lessons.filter((l) => l.status === "ended").slice(0, 8);
+  const price = formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS);
+  const languages = bookableLanguages().map(({ code, labelDe, nativeLabel, rtl }) => ({ code, labelDe, nativeLabel, rtl }));
+
+  return (
+    <>
+      <h1>Hallo {user.name.split(" ")[0]}!</h1>
+      {gebucht && (
+        <div className="alert alert-ok">
+          Dein Sprachpaket ist gebucht. Die Live-Übersetzung ist ab sofort freigeschaltet. Die {price} bezahlst du
+          bei der Fahrschule (bar, EC oder Überweisung).
+        </div>
+      )}
+
+      <div className="card">
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <h2 style={{ margin: 0 }}>Live-Unterricht</h2>
+          {live.length > 0 && <span className="badge badge-live">LIVE</span>}
+        </div>
+        {live.length === 0 ? (
+          <p className="hint" style={{ marginTop: 12 }}>Gerade läuft keine Theoriestunde. Diese Seite zeigt sie an, sobald sie beginnt.</p>
+        ) : (
+          <ul className="list">
+            {live.map((l) => (
+              <li key={l.id}>
+                <span><span className="dot dot-live" /> {l.title}</span>
+                <Link className="btn" href={`/live/${l.id}`}>{access ? `Mitlesen auf ${lang?.labelDe}` : "Mitlesen (Deutsch)"}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Sprachpaket</h2>
+        {pkg && pkg.status !== "cancelled" ? (
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <div>
+              <div lang={lang?.code} dir={lang?.rtl ? "rtl" : "ltr"} style={{ fontSize: "1.2rem", fontWeight: 700 }}>{lang?.nativeLabel}</div>
+              <div className="hint">{lang?.labelDe} · {formatPrice(pkg.priceCents)}</div>
+            </div>
+            <span className={`badge ${STATUS_TEXT[pkg.status].cls}`}>{STATUS_TEXT[pkg.status].label}</span>
+          </div>
+        ) : (
+          <>
+            {pkg?.status === "cancelled" && <div className="alert alert-info">Dein letztes Sprachpaket wurde storniert.</div>}
+            <p>Noch kein Sprachpaket. Für {price} (einmalig, inkl. MwSt.) liest du jede Theoriestunde übersetzt mit.</p>
+            <BookLaterForm languages={languages} price={price} />
+          </>
+        )}
+      </div>
+
+      {past.length > 0 && (
+        <div className="card">
+          <h2>Vergangene Stunden nachlesen</h2>
+          <ul className="list">
+            {past.map((l) => (
+              <li key={l.id}>
+                <span>{l.title} <span className="hint">· {new Date(l.started_at ?? l.created_at).toLocaleDateString("de-DE")}</span></span>
+                <Link className="btn btn-secondary btn-small" href={`/live/${l.id}`}>Öffnen</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  );
+}

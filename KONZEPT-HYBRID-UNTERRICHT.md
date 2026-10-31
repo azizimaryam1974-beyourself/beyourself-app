@@ -43,3 +43,18 @@ Eine Stunde, zwei Gruppen:
 3. **Aufzeichnen:** ja – Stunden können später angeschaut werden (Aufbewahrungsdauer festlegen; Speicherplatz außerhalb des Servers).
    Wer das Wort bekommt, sieht vorher den Hinweis „wird aufgezeichnet“.
 4. **Name auf dem Beamer:** „Vorname + Initial“ (z. B. Lona S.).
+
+## Technischer Plan Video & Aufnahme (besprochen 01.11.2026)
+- **Video-Server:** LiveKit (WebRTC, ~0,5–1 Sek. Verzögerung). Weg A: LiveKit Cloud (Test gratis 5.000 Teilnehmer-Min/Monat,
+  danach „Ship“ 50 $/Monat inkl. 150.000 Min; US-Firma, Region fest erst im Scale-Tarif). Weg B (Empfehlung): eigener Server in
+  Deutschland (~15–30 €/Monat) + Speicher für Aufnahmen (z. B. Hetzner Object Storage 6,49 €/Monat für 1 TB).
+- **Rechnung:** 1 Stunde mit 15 Teilnehmern zu Hause ≈ 1.440 Teilnehmer-Minuten; 8 Stunden/Monat ≈ 11.500 Min.
+- **Hardware:** Laptop (Chrome/Edge), Ansteck-Funkmikrofon mit USB-Empfänger (wichtigstes Teil), Full-HD-Webcam auf Stativ
+  (nur Lehrerin + Tafel im Bild, nicht die Klasse), HDMI zum LED als 2. Bildschirm (Beamer-Ansicht), Lautsprecher, Upload ≥ 5–10 Mbit/s (Kabel).
+- **Ablauf:** „Stunde starten“ mit Schalter „Video + Aufnahme“ → Laptop sendet Bild/Ton an Video-Server, Spracherkennung läuft parallel.
+  Schüler zu Hause: nur Angemeldete bekommen einen persönlichen Zugangsschlüssel; Mikrofon serverseitig gesperrt.
+  Hand heben → „Wort geben“ → Server erlaubt nur diesem Schüler das Mikrofon (Hinweis „wird aufgezeichnet“) → „Wort entziehen“ / Auto-Ende nach 2 Min.
+- **Aufnahme:** Bild + Ton der Lehrerin (+ Ton der Sprechenden), MP4 (90 Min ≈ 1–1,5 GB) im Speicher in Deutschland; Abspielen über
+  kurzlebige Links; Untertitel daneben; automatisches Löschen nach Frist.
+- **App:** Video im Handy-Browser sofort; in der Expo-App erst mit echter App-Version (EAS-Build), nicht in Expo Go.
+- **Reihenfolge:** Hardware + Speedtest → Video + Wort geben → Aufnahme → (nach Reform) Schüler-Kameras + Anwesenheit → Video in der App.

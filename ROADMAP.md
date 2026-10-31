@@ -1,5 +1,7 @@
 # Fahrplan – Fahrschule Be Yourself
 
+> **Aktueller Stand & Merkliste für die nächste Sitzung: siehe [STAND.md](STAND.md)** (01.11.2026)
+
 Stand: 31.10.2026, 13:20 · Ziel für heute: **neue Webseite sichtbar** + **App in Expo auf dem Handy**.
 Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbindlich vor dem echten Start).
 

@@ -5,6 +5,7 @@ import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice } from "@/lib/language-package";
 import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "@/app/actions";
 import { StudentTools } from "./StudentTools";
+import { AdminTabs } from "./AdminTabs";
 
 export const metadata = { title: "Verwaltung" };
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export default async function AdminPage() {
   return (
     <>
       <h1>Verwaltung</h1>
+      <AdminTabs active="/verwaltung" />
       <div className="grid grid-2">
         <div className="card"><div className="hint">Schüler</div><div className="price">{students.length}</div></div>
         <div className="card">

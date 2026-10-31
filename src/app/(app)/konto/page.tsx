@@ -6,6 +6,9 @@ import { currentPackage, listLessons } from "@/lib/server/repo";
 import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice, hasTranslationAccess, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { BookLaterForm } from "./BookLaterForm";
+import { orderProductAction } from "@/app/booking-actions";
+import { getOffer, isBookable, listBookingsForUser } from "@/lib/server/booking";
+import { fmtSlot } from "@/lib/time";
 
 export const metadata = { title: "Mein Konto" };
 export const dynamic = "force-dynamic";
@@ -27,6 +30,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const live = lessons.filter((l) => l.status === "live");
   const past = lessons.filter((l) => l.status === "ended").slice(0, 8);
   const price = formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS);
+  const langOffer = getOffer(db(), "sprachpaket");
+  const canPayOnline = pkg?.status === "booked" && !!langOffer && isBookable(langOffer);
+  const now = Date.now();
+  const next = listBookingsForUser(db(), user.id)
+    .filter((b) => b.status === "paid" && (b.startsAt ?? 0) > now)
+    .sort((a, b) => (a.startsAt ?? 0) - (b.startsAt ?? 0))[0];
   const languages = bookableLanguages().map(({ code, labelDe, nativeLabel, rtl }) => ({ code, labelDe, nativeLabel, rtl }));
 
   return (
@@ -34,10 +43,22 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1>Hallo {user.name.split(" ")[0]}!</h1>
       {gebucht && (
         <div className="alert alert-ok">
-          Dein Sprachpaket ist gebucht. Die Live-Übersetzung ist ab sofort freigeschaltet. Die {price} bezahlst du
-          bei der Fahrschule (bar, EC oder Überweisung).
+          Dein Sprachpaket ist gebucht. Die Live-Übersetzung ist ab sofort freigeschaltet. Die {price} kannst du unten
+          online bezahlen oder bar/EC in der Fahrschule.
         </div>
       )}
+
+      <div className="card card-accent">
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Fahrstunden & Termine</h2>
+            <p className="hint" style={{ margin: "6px 0 0" }}>
+              {next && next.startsAt && next.endsAt ? <>Nächster Termin: <strong>{next.title}</strong>, {fmtSlot(next.startsAt, next.endsAt)}</> : "Freie Termine ansehen, anfragen und online bezahlen."}
+            </p>
+          </div>
+          <Link className="btn btn-gold" href="/termine">Termine & Buchen</Link>
+        </div>
+      </div>
 
       <div className="card">
         <div className="row" style={{ justifyContent: "space-between" }}>
@@ -66,7 +87,15 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               <div lang={lang?.code} dir={lang?.rtl ? "rtl" : "ltr"} style={{ fontSize: "1.2rem", fontWeight: 700 }}>{lang?.nativeLabel}</div>
               <div className="hint">{lang?.labelDe} · {formatPrice(pkg.priceCents)}</div>
             </div>
-            <span className={`badge ${STATUS_TEXT[pkg.status].cls}`}>{STATUS_TEXT[pkg.status].label}</span>
+            <div className="row">
+              <span className={`badge ${STATUS_TEXT[pkg.status].cls}`}>{STATUS_TEXT[pkg.status].label}</span>
+              {canPayOnline && (
+                <form action={orderProductAction}>
+                  <input type="hidden" name="offerId" value="sprachpaket" />
+                  <button className="btn btn-small" type="submit">Jetzt online bezahlen</button>
+                </form>
+              )}
+            </div>
           </div>
         ) : (
           <>

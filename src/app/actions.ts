@@ -85,7 +85,7 @@ export async function loginAction(_prev: FormState, form: FormData): Promise<For
   }
   lim.email.reset(email);
   await startSession(user.id);
-  redirect(user.role === "teacher" ? "/unterricht" : "/konto");
+  redirect(user.role === "teacher" ? "/verwaltung/kalender" : "/konto");
 }
 
 export async function logoutAction(): Promise<void> {

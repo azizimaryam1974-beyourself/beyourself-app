@@ -302,6 +302,8 @@ export interface PersonalDataExport {
   exportedAt: string;
   account: User;
   languagePackages: PackageRow[];
+  bookings: unknown[];
+  notifications: unknown[];
   activeSessions: number;
   note: string;
 }
@@ -316,9 +318,13 @@ export function exportPersonalData(db: Database.Database, userId: string): Perso
     exportedAt: new Date().toISOString(),
     account,
     languagePackages: pkgs,
+    bookings: db.prepare(
+      `SELECT b.title, b.price_cents, b.status, b.student_note, b.admin_message, b.created_at, b.paid_at, b.cancelled_at, b.refund_cents, b.provider, s.starts_at
+       FROM bookings b LEFT JOIN slots s ON s.id = b.slot_id WHERE b.user_id = ? ORDER BY b.created_at`).all(userId),
+    notifications: db.prepare(`SELECT title, body, created_at, read_at FROM notifications WHERE user_id = ? ORDER BY created_at`).all(userId),
     activeSessions: n,
     note:
-      "Gespeichert sind nur diese Kontodaten. Unterrichtsprotokolle enthalten ausschließlich Sätze der Lehrkraft und keine Daten von Schülern.",
+      "Gespeichert sind diese Kontodaten, Buchungen und Nachrichten. Zahlungsdaten (Karte, PayPal-Konto) liegen nur beim Zahlungsanbieter. Unterrichtsprotokolle enthalten ausschließlich Sätze der Lehrkraft und keine Daten von Schülern.",
   };
 }
 
@@ -332,6 +338,12 @@ export function deleteStudent(db: Database.Database, userId: string): boolean {
     if (!u || u.role !== "student") return false;
     db.prepare(`DELETE FROM auth_sessions WHERE user_id = ?`).run(userId);
     db.prepare(`DELETE FROM password_resets WHERE user_id = ?`).run(userId);
+    // Offene Anfragen zurückziehen (reservierte Termine werden wieder frei), Nachrichten löschen.
+    // Bezahlte Buchungen bleiben (Aufbewahrungspflicht), aber ohne Namen und Notizen.
+    db.prepare(`UPDATE slots SET status = 'open' WHERE status = 'reserved' AND id IN (SELECT slot_id FROM bookings WHERE user_id = ? AND status = 'awaiting_payment')`).run(userId);
+    db.prepare(`UPDATE bookings SET status = 'withdrawn', cancelled_at = ?, cancelled_by = 'student' WHERE user_id = ? AND status IN ('requested','awaiting_payment')`).run(Date.now(), userId);
+    db.prepare(`UPDATE bookings SET student_note = '' WHERE user_id = ?`).run(userId);
+    db.prepare(`DELETE FROM notifications WHERE user_id = ?`).run(userId);
     db.prepare(
       `UPDATE users SET email = ?, name = 'Gelöschtes Konto', phone = NULL, password_hash = 'deleted' WHERE id = ?`,
     ).run(`geloescht-${userId}@invalid`, userId);

@@ -21,11 +21,17 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
             </span>
             {user?.role === "teacher" && (
               <>
+                <Link href="/verwaltung/kalender">Kalender</Link>
                 <Link href="/unterricht">Unterricht</Link>
                 <Link href="/verwaltung">Verwaltung</Link>
               </>
             )}
-            {user?.role === "student" && <Link href="/konto">Mein Konto</Link>}
+            {user?.role === "student" && (
+              <>
+                <Link href="/termine">Termine</Link>
+                <Link href="/konto">Mein Konto</Link>
+              </>
+            )}
             {user ? (
               <form action={logoutAction}>
                 <button type="submit">Abmelden</button>

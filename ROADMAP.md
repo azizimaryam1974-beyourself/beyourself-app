@@ -36,6 +36,19 @@ Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbin
 - [ ] Datenschutzerklärung + Sprachpaket-Bedingungen + Widerrufsbelehrung → prüfen lassen
 - [ ] Texte, Preise, Fotos der Fahrschule
 
+## Baustein 3b – Online-Buchung & Bezahlen (31.10.)
+- [x] Kalender für die Fahrschule: Termine freigeben (Serien, mehrere Stunden am Stück), Anfragen bestätigen/ablehnen
+      mit Textvorlagen oder eigenem Text, Absagen mit Erstattung, „Bar/EC bezahlt“
+- [x] Schüler: freie Termine anfragen → nach Bestätigung 30 Min zum Bezahlen → sonst automatisch wieder frei
+- [x] Kostenlose Absage bis 24 Std vorher mit automatischer Rückzahlung; Regeln selbst einstellbar
+- [x] Angebote & Preise selbst pflegen (Fahrstunden, Sonderfahrten, Grundbeträge, Sprachpaket)
+- [x] Nachrichten im Konto + E-Mail (sobald SMTP eingetragen)
+- [ ] Stripe-Konto + PayPal-Geschäftskonto anlegen (Maryam), Schlüssel in .env
+- [ ] IONOS-Mailpasswort in .env (SMTP)
+- [ ] Preise eintragen
+- [ ] Buchungsbedingungen + Widerrufsbelehrung rechtlich prüfen lassen
+- [ ] Kalender & Anfragen auch in der Handy-App (Expo) + Push-Nachrichten
+
 ## Baustein 4 – Danach
 - [ ] E-Mails über info@fahrschule-beyourself.de (Passwort-Link, Buchungsbestätigung)
 - [ ] Theorie-Termine/Kalender, Erinnerungen

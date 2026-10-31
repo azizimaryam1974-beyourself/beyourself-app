@@ -18,7 +18,7 @@ export function runMaintenance(): void {
   }
 }
 
-const g = globalThis as unknown as { __byMaintenance?: ReturnType<typeof setInterval> };
+const g = globalThis as unknown as { __byMaintenance?: ReturnType<typeof setInterval>; __byBookingJobs?: ReturnType<typeof setInterval> };
 
 /** Beim Serverstart und dann alle 24 Stunden. */
 export function startMaintenance(): void {
@@ -26,4 +26,9 @@ export function startMaintenance(): void {
   runMaintenance();
   g.__byMaintenance = setInterval(runMaintenance, 24 * 60 * 60 * 1000);
   g.__byMaintenance.unref?.();
+  // Zahlungsfristen (30 Min) und Erinnerungen: jede Minute prüfen.
+  const jobs = () => import("./payments/service").then((m) => m.runBookingJobs()).catch((e) => console.error("[buchung] Hintergrund", e));
+  g.__byBookingJobs = setInterval(jobs, 60_000);
+  g.__byBookingJobs.unref?.();
+  void jobs();
 }

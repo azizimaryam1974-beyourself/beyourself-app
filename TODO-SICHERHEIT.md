@@ -54,6 +54,17 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 - [x] Automatisches Löschen alter Unterrichtsprotokolle (`LESSON_RETENTION_DAYS`, Standard 180) – 31.10.2026
 - [x] Verwaltung → „Mehr …“: Datenauskunft (JSON) und Konto löschen (Buchung bleibt anonym) – 31.10.2026
 
+### Online-Zahlung (neu 31.10.2026)
+- [ ] **Buchungsbedingungen + Widerrufsbelehrung** für Fahrstunden prüfen lassen (`/buchungsbedingungen` ist ein Entwurf).
+      Fragen dafür: Widerrufsrecht bei Fahrstunden, Ausfallgebühr bei später Absage, Rechnungen.
+- [ ] Datenschutzerklärung um **Stripe und PayPal** ergänzen (Zahlungsdaten liegen nur dort; AVV bzw. eigene Verantwortlichkeit).
+- [ ] Stripe + PayPal: **2FA** für beide Konten; Schlüssel nur in `.env`; nach Tests von Test- auf Live-Schlüssel wechseln.
+- [ ] `PAYMENTS_TEST_MODE=0` auf dem Server, bevor echte Schüler buchen.
+- [ ] In Stripe **keine Lastschrift (SEPA)** aktivieren – die Bestätigung dauert Tage, passt nicht zur 30-Minuten-Frist.
+- [ ] Steuerberater: Umsatzsteuer auf Fahrstunden, Belege/Rechnungen aus Stripe/PayPal, Kassenbuch für Barzahlungen.
+- [x] Webhook-Signatur von Stripe wird geprüft; Beträge kommen nur aus der Datenbank, nie vom Browser – 31.10.2026
+- [x] Zu späte Zahlung für bereits vergebenen Termin → automatische Rückzahlung – 31.10.2026
+
 ## B. Kurz nach dem Start
 - [ ] Fachbegriff-Übersetzungen von Muttersprachlern gegenlesen lassen
       (`src/lib/glossary.ts`; geprüft: „rechts vor links“ Farsi; Französisch neu seit 31.10.2026).

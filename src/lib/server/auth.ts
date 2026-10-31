@@ -1,5 +1,5 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "./db";
 import { hashToken, newSessionToken } from "./password";
@@ -30,8 +30,24 @@ export async function endSession(): Promise<void> {
   jar.delete(SESSION_COOKIE);
 }
 
+/** Token für die Handy-App (gleiche Sitzungstabelle, aber ohne Cookie). */
+export function issueAppToken(userId: string): { token: string; expiresAt: number } {
+  const token = newSessionToken();
+  const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+  purgeExpiredSessions(db());
+  insertAuthSession(db(), hashToken(token), userId, expiresAt);
+  return { token, expiresAt };
+}
+
+/** Bearer-Token aus dem Authorization-Header (App) – sonst null. */
+export async function bearerToken(): Promise<string | null> {
+  const h = (await headers()).get("authorization") ?? "";
+  const m = /^Bearer\s+([A-Za-z0-9_-]{20,})$/.exec(h.trim());
+  return m ? m[1] : null;
+}
+
 export async function currentUser(): Promise<User | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const token = (await bearerToken()) ?? (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return userForSession(db(), hashToken(token)) ?? null;
 }

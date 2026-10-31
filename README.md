@@ -1,7 +1,7 @@
 # Be Yourself – Fahrschul-App mit Live-Übersetzung
 
 Theorieunterricht auf Deutsch, Schüler lesen live in ihrer Sprache mit
-(Türkisch, Englisch, Russisch, Arabisch, Spanisch; Farsi zuschaltbar).
+(Türkisch, Englisch, Russisch, Arabisch, Spanisch, Französisch; Farsi zuschaltbar).
 Sprachpaket: **30 € einmalig** pro Ausbildung, wählbar bei der Anmeldung.
 
 ## Ablauf

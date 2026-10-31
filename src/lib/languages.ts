@@ -13,7 +13,7 @@ export const SOURCE_LANGUAGE = {
   translatorCode: "de",
 } as const;
 
-export type TargetLanguageCode = "tr" | "en" | "ru" | "ar" | "es" | "fa";
+export type TargetLanguageCode = "tr" | "en" | "ru" | "ar" | "es" | "fr" | "fa";
 
 export interface TargetLanguage {
   code: TargetLanguageCode;
@@ -37,6 +37,7 @@ export const TARGET_LANGUAGES: readonly TargetLanguage[] = [
   { code: "ru", labelDe: "Russisch", nativeLabel: "Русский", translatorCode: "ru", ttsVoice: "ru-RU-SvetlanaNeural", rtl: false, enabled: true },
   { code: "ar", labelDe: "Arabisch", nativeLabel: "العربية", translatorCode: "ar", ttsVoice: "ar-SA-ZariyahNeural", rtl: true, enabled: true },
   { code: "es", labelDe: "Spanisch", nativeLabel: "Español", translatorCode: "es", ttsVoice: "es-ES-ElviraNeural", rtl: false, enabled: true },
+  { code: "fr", labelDe: "Französisch", nativeLabel: "Français", translatorCode: "fr", ttsVoice: "fr-FR-DeniseNeural", rtl: false, enabled: true },
   { code: "fa", labelDe: "Farsi", nativeLabel: "فارسی", translatorCode: "fa", ttsVoice: "fa-IR-DilaraNeural", rtl: true, enabled: false },
 ] as const;
 

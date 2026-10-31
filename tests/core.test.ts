@@ -13,8 +13,8 @@ test("Sprachpaket kostet 30 €", () => {
   assert.match(formatPrice(3000), /30,00\s€/);
 });
 
-test("Buchbare Sprachen: 5 aktiv, Farsi vorbereitet aber aus", () => {
-  assert.deepEqual(bookableLanguages().map((l) => l.code), ["tr", "en", "ru", "ar", "es"]);
+test("Buchbare Sprachen: 6 aktiv (inkl. Französisch), Farsi vorbereitet aber aus", () => {
+  assert.deepEqual(bookableLanguages().map((l) => l.code), ["tr", "en", "ru", "ar", "es", "fr"]);
   assert.equal(isBookableLanguage("fa"), false);
   assert.equal(isBookableLanguage("tr"), true);
 });

@@ -55,13 +55,14 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 
 ## B. Kurz nach dem Start
 - [ ] Fachbegriff-Übersetzungen von Muttersprachlern gegenlesen lassen
-      (`src/lib/glossary.ts`; geprüft: „rechts vor links“ Farsi).
+      (`src/lib/glossary.ts`; geprüft: „rechts vor links“ Farsi; Französisch neu seit 31.10.2026).
 - [ ] Azure: Budget-Warnung anlegen, sobald auf bezahlten Tarif (S0/S1) gewechselt wird.
 - [ ] Nach den ersten Stunden: Kosten in Anthropic Console und Azure prüfen.
 
 ## Erledigt
 - [x] Server 82.165.0.233 (IONOS VPS 1-2-60), DNS @/www → Server, App online – 31.10.2026
-- [ ] ⚠ Erstes App-Passwort der Lehrkraft war im Terminal sichtbar → neu setzen (Befehl in install.sh-Ausgabe)
+- [x] Erstes App-Passwort der Lehrkraft (war im Terminal sichtbar) neu gesetzt – 31.10.2026
+- [x] Erster Live-Test mit Englisch erfolgreich; Französisch ergänzt – 31.10.2026
 - [x] Azure-Abonnement, Speech + Translator (F0, Germany West Central) – 31.10.2026
 - [x] Code auf GitHub, `.env` und Datenbank ausgeschlossen – 31.10.2026
 - [x] Claude-Übersetzung mit Azure als Reserve – 31.10.2026

@@ -40,6 +40,7 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 
 ### Server (IONOS VPS)
 - [x] Firewall nur 22/80/443 (ufw) – 31.10.2026
+- [ ] **Root-Passwort ändern** (`passwd` auf dem Server) – war am 31.10.2026 teilweise in einem Screenshot sichtbar.
 - [ ] SSH nur mit Schlüssel, Passwort-Login aus.
 - [x] Automatische Sicherheitsupdates (`unattended-upgrades`) – 31.10.2026
 - [ ] Tägliches Backup (`deploy/backup.sh`, per install.sh) **und eine Wiederherstellung testen**.

@@ -2,11 +2,12 @@ import Link from "next/link";
 import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getSettings, listBookingsByStatus, listRecentPaid, listSlotsBetween, listTemplates, type Booking } from "@/lib/server/booking";
-import { freeIntervals, getTemplate, listBlocks, mainTeacherId, syncFinishedDrives } from "@/lib/server/drive-booking";
+import { dayRanges, freeIntervals, listBlocks, mainTeacherId, STRIKE_NOTE, syncFinishedDrives, type Block } from "@/lib/server/drive-booking";
 import { availableProviders, runBookingJobs } from "@/lib/server/payments/service";
 import { markPaidCashAction } from "@/app/booking-actions";
-import { blockDayAction, deleteBlockAction } from "@/app/calendar-actions";
-import { closedReason, frameFor, sunsetMs, workIntervals } from "@/lib/calendar";
+import { deleteBlockAction, toggleHourAction } from "@/app/calendar-actions";
+import { DayTools } from "./DayTools";
+import { closedReason, frameFor, sunsetMs, workIntervals, type Interval } from "@/lib/calendar";
 import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime, isDayKey, mondayOf } from "@/lib/time";
 import { Countdown } from "@/components/booking/Countdown";
@@ -35,14 +36,29 @@ function Who({ b }: { b: Booking }) {
 }
 
 interface Item { b: Booking; start: number; end: number }
+interface Cell { start: number; end: number; state: "free" | "struck" | "busy" }
 
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ w?: string }> }) {
+/** Arbeitszeit in Stunden-Kästchen teilen (letztes ggf. kürzer) – zum Durchstreichen. */
+function hourCells(work: Interval[], blocks: Block[], items: Item[]): Cell[] {
+  const cells: Cell[] = [];
+  for (const w of work) {
+    for (let s = w.start; s < w.end; s += 3_600_000) {
+      const e = Math.min(s + 3_600_000, w.end);
+      const struck = blocks.some((b) => b.note === STRIKE_NOTE && b.startsAt === s && b.endsAt === e);
+      const busy = !struck && (items.some((i) => i.start < e && i.end > s) || blocks.some((b) => b.startsAt < e && b.endsAt > s));
+      cells.push({ start: s, end: e, state: struck ? "struck" : busy ? "busy" : "free" });
+    }
+  }
+  return cells;
+}
+
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ w?: string; fehler?: string }> }) {
   await requireTeacher();
   await runBookingJobs();
   const d = db();
   syncFinishedDrives(d);
   const tid = mainTeacherId(d)!;
-  const { w } = await searchParams;
+  const { w, fehler } = await searchParams;
   const now = Date.now();
   const today = dayKey(now);
   const monday = mondayOf(isDayKey(w) ? w : today);
@@ -51,7 +67,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const settings = getSettings(d);
   const requests = listBookingsByStatus(d, ["requested"]);
   const awaiting = listBookingsByStatus(d, ["awaiting_payment"]);
-  const tpl = getTemplate(d, tid);
   const blocks = listBlocks(d, from, to);
   const items: Item[] = listSlotsBetween(d, from, to).flatMap((s) => {
     const b = s.bookings.find((x) => ["requested", "awaiting_payment", "paid"].includes(x.status));
@@ -88,6 +103,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       <h1>Kalender</h1>
       <AdminTabs active="/verwaltung/kalender" />
 
+      {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
       {providers.length === 0 && (
         <div className="alert alert-info"><strong>Online-Zahlung ist noch nicht eingerichtet.</strong> Buchungen funktionieren schon; Zahlungen markierst du mit „Bar/EC bezahlt“.</div>
       )}
@@ -139,19 +155,18 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           </div>
           {days.map((day) => {
             const closed = closedReason(day);
-            const wd = (new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7;
-            const work = closed ? [] : workIntervals(day, tpl[wd]);
+            const dr = dayRanges(d, tid, day);
+            const work = closed ? [] : workIntervals(day, dr.ranges);
             const dayItems = items.filter((i) => dayKey(i.start) === day);
             const dayBlocks = blocks.filter((b) => b.endsAt > berlinToMs(day, "00:00") && b.startsAt < berlinToMs(addDays(day, 1), "00:00"));
+            const cells = day >= today ? hourCells(work, dayBlocks, dayItems) : [];
             const sunset = minOf(sunsetMs(day), day);
             const f = frameFor(day);
             return (
               <div key={day} className={`tl-day ${day === today ? "today" : ""} ${day < today ? "past" : ""}`}>
                 <div className="tl-head">
-                  <span>{fmtDayShort(berlinToMs(day, "12:00"))}</span>
-                  {!closed && day >= today && (
-                    <form action={blockDayAction}><input type="hidden" name="day" value={day} /><button className="link-btn" type="submit" title="Ganzen Tag sperren">sperren</button></form>
-                  )}
+                  <span>{fmtDayShort(berlinToMs(day, "12:00"))}{dr.custom && !closed && <i className="custom-dot" title="Für diesen Tag angepasst" />}</span>
+                  {!closed && day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} />}
                 </div>
                 <div className="tl-body">
                   {closed && <div className="tl-closed">{closed}</div>}
@@ -161,7 +176,19 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                     return <div key={i} className="tl-work" style={{ top: (a - minStart) * PX, height: (b - a) * PX }} />;
                   })}
                   {!closed && sunset > minStart && sunset < maxEnd && <div className="tl-sun" style={{ top: (sunset - minStart) * PX }} title={`Sonnenuntergang ${fmtTime(sunsetMs(day))}`}>☾</div>}
-                  {dayBlocks.map((b) => {
+                  {cells.map((c) => {
+                    const a = minOf(c.start, day), e = minOf(c.end, day);
+                    if (c.state === "busy") return null;
+                    return (
+                      <form key={c.start} action={toggleHourAction} className={`tl-hour ${c.state}`} style={{ top: (a - minStart) * PX, height: (e - a) * PX }}>
+                        <input type="hidden" name="start" value={c.start} /><input type="hidden" name="end" value={c.end} /><input type="hidden" name="w" value={monday} />
+                        <button type="submit" title={c.state === "struck" ? "Wieder freigeben" : "Stunde durchstreichen"} aria-label={`${fmtTime(c.start)}–${fmtTime(c.end)} ${c.state === "struck" ? "wieder freigeben" : "durchstreichen"}`}>
+                          {c.state === "struck" ? <span>✕ {fmtTime(c.start)}</span> : <span className="tl-hour-hint">✕</span>}
+                        </button>
+                      </form>
+                    );
+                  })}
+                  {dayBlocks.filter((b) => b.note !== STRIKE_NOTE).map((b) => {
                     const a = Math.max(minStart, minOf(Math.max(b.startsAt, berlinToMs(day, "00:00")), day));
                     const e = Math.min(maxEnd, minOf(Math.min(b.endsAt, berlinToMs(addDays(day, 1), "00:00")), day));
                     if (e <= a) return null;
@@ -198,21 +225,33 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             const free = closed ? [] : freeIntervals(d, tid, day).filter((i) => i.end > now);
             const dayBlocks = blocks.filter((b) => b.endsAt > berlinToMs(day, "00:00") && b.startsAt < berlinToMs(addDays(day, 1), "00:00"));
             if (day < today && !dayItems.length) return null;
+            const dr = dayRanges(d, tid, day);
+            const cells = closed || day < today ? [] : hourCells(workIntervals(day, dr.ranges), dayBlocks, dayItems);
             return (
               <div key={day} className={`tl-list-day ${day === today ? "today" : ""}`}>
                 <div className="tl-list-head">
                   <strong>{fmtDay(berlinToMs(day, "12:00"))}</strong>
-                  {closed ? <span className="badge badge-muted">{closed}</span> : day >= today && (
-                    <form action={blockDayAction}><input type="hidden" name="day" value={day} /><button className="link-btn" type="submit">Tag sperren</button></form>
-                  )}
+                  {closed ? <span className="badge badge-muted">{closed}</span> : day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} />}
                 </div>
+                {cells.length > 0 && (
+                  <div className="hour-chips" aria-label="Stunden antippen zum Durchstreichen">
+                    {cells.map((c) => c.state === "busy" ? (
+                      <span key={c.start} className="hour-chip busy" title="gebucht/gesperrt">{fmtTime(c.start)}</span>
+                    ) : (
+                      <form key={c.start} action={toggleHourAction}>
+                        <input type="hidden" name="start" value={c.start} /><input type="hidden" name="end" value={c.end} /><input type="hidden" name="w" value={monday} />
+                        <button type="submit" className={`hour-chip ${c.state}`} aria-pressed={c.state === "struck"}>{fmtTime(c.start)}</button>
+                      </form>
+                    ))}
+                  </div>
+                )}
                 {dayItems.map((it) => (
                   <details key={it.b.id} className={`tl-row ${KIND_CLS(it.b.kind)} st-${it.b.status}`}>
                     <summary><b>{fmtTime(it.start)}–{fmtTime(it.end)}</b> {it.b.userName} · {it.b.title} <span className="hint">· {STATUS_LABEL[it.b.status]}</span></summary>
                     <BookingPop it={it} />
                   </details>
                 ))}
-                {dayBlocks.map((b) => (
+                {dayBlocks.filter((b) => b.note !== STRIKE_NOTE).map((b) => (
                   <div key={b.id} className="tl-row lg-block-row">
                     <span>gesperrt {fmtTime(Math.max(b.startsAt, berlinToMs(day, "00:00")))}–{b.endsAt >= berlinToMs(addDays(day, 1), "00:00") ? "24:00" : fmtTime(b.endsAt)} {b.note && `· ${b.note}`}</span>
                     <form action={deleteBlockAction}><input type="hidden" name="id" value={b.id} /><button className="link-btn" type="submit">aufheben</button></form>
@@ -223,7 +262,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             );
           })}
         </div>
-        <p className="hint" style={{ marginTop: 12 }}>Arbeitszeiten und Urlaub änderst du unter <Link href="/verwaltung/arbeitszeiten">Arbeitszeiten</Link>.</p>
+        <p className="hint" style={{ marginTop: 12 }}>
+          <strong>Tipp:</strong> Eine freie Stunde antippen streicht sie durch (✕) – nochmal antippen gibt sie wieder frei. Über „Tag anpassen“ machst du früher Feierabend
+          oder legst für ein Datum eigene Zeiten fest. Die normale Woche stellst du unter <Link href="/verwaltung/arbeitszeiten">Arbeitszeiten</Link> ein.
+        </p>
       </section>
 
       {awaiting.length > 0 && (

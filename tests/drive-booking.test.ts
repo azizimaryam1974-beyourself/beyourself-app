@@ -98,3 +98,27 @@ test("Beleuchtung erst nach Sonnenuntergang; Sperrzeit blockiert", () => {
   assert.deepEqual(availableStarts(db, "automatik", 60, TUE, 1, NOW)[0].starts, []);
   void cancelByStudent;
 });
+
+import { dayRanges, finishEarly, setDayOverride, toggleStrike } from "../src/lib/server/drive-booking";
+
+test("Tag anpassen: früher Feierabend, eigene Zeiten, Stunde durchstreichen", () => {
+  const { db, teacher, a } = setup();
+  finishEarly(db, teacher.id, TUE, 11 * 60);
+  assert.deepEqual(dayRanges(db, teacher.id, TUE), { ranges: [{ from: 540, to: 660 }], custom: true });
+  assert.deepEqual(times(availableStarts(db, "automatik", 60, TUE, 1, NOW)), ["09:00", "10:00"]);
+  // Mittwoch ausnahmsweise arbeiten (laut Vorlage frei)
+  setDayOverride(db, teacher.id, "2026-11-04", [{ from: 14 * 60, to: 16 * 60 }]);
+  assert.deepEqual(times(availableStarts(db, "automatik", 60, "2026-11-04", 1, NOW), "2026-11-04"), ["14:00", "15:00"]);
+  // zurück zur Vorlage
+  setDayOverride(db, teacher.id, TUE, null);
+  assert.equal(dayRanges(db, teacher.id, TUE).custom, false);
+  // 10–11 durchstreichen und wieder freigeben
+  const s = berlinToMs(TUE, "10:00"), e = berlinToMs(TUE, "11:00");
+  assert.equal(toggleStrike(db, teacher.id, s, e), "struck");
+  assert.ok(!times(availableStarts(db, "automatik", 60, TUE, 1, NOW)).includes("10:00"));
+  assert.equal(toggleStrike(db, teacher.id, s, e), "restored");
+  assert.ok(times(availableStarts(db, "automatik", 60, TUE, 1, NOW)).includes("10:00"));
+  // gebuchte Stunde kann nicht durchgestrichen werden
+  bookDrive(db, { userId: a.id, kind: "automatik", minutes: 60, start: s, meetingPoint: "", note: "" }, NOW);
+  assert.throws(() => toggleStrike(db, teacher.id, s, e), /schon eine Fahrt/);
+});

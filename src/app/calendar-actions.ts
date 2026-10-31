@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { requireTeacher, requireUser } from "@/lib/server/auth";
 import { BookingError } from "@/lib/server/booking";
-import { addBlock, bookDrive, deleteBlock, mainTeacherId, saveTemplate } from "@/lib/server/drive-booking";
+import { addBlock, bookDrive, dayRanges, deleteBlock, finishEarly, mainTeacherId, saveTemplate, setDayOverride, toggleStrike } from "@/lib/server/drive-booking";
 import { isDriveKind } from "@/lib/server/training-repo";
 import { notifySchool, when } from "@/lib/server/payments/service";
 import { formatPrice } from "@/lib/language-package";
@@ -70,6 +70,45 @@ export async function blockDayAction(form: FormData): Promise<void> {
 export async function deleteBlockAction(form: FormData): Promise<void> {
   await teacherId();
   deleteBlock(db(), str(form, "id"));
+  refresh();
+}
+
+// ---------- Einzelne Tage im Kalender anpassen -------------------------------------------
+
+/** Stunde antippen → durchstreichen / wieder freigeben. */
+export async function toggleHourAction(form: FormData): Promise<void> {
+  const tid = await teacherId();
+  const start = Number(str(form, "start")), end = Number(str(form, "end"));
+  let msg = "";
+  try {
+    if (Number.isFinite(start) && end > start) toggleStrike(db(), tid, start, end);
+  } catch (e) {
+    msg = (e as Error).message;
+  }
+  refresh();
+  if (msg) redirect(`/verwaltung/kalender?w=${str(form, "w")}&fehler=${encodeURIComponent(msg)}`);
+}
+
+/** „Feierabend ab …“ für einen Tag. */
+export async function finishEarlyAction(form: FormData): Promise<void> {
+  const tid = await teacherId();
+  const day = str(form, "day"), m = toMin(str(form, "time"));
+  if (isDayKey(day) && !Number.isNaN(m)) finishEarly(db(), tid, day, m);
+  refresh();
+}
+
+/** Eigene Zeiten für ein Datum (bis zu 3 Bereiche) oder zurück zur Wochenvorlage. */
+export async function saveDayAction(form: FormData): Promise<void> {
+  const tid = await teacherId();
+  const day = str(form, "day");
+  if (!isDayKey(day)) return;
+  if (str(form, "reset") === "1") { setDayOverride(db(), tid, day, null); refresh(); return; }
+  const ranges: DayRange[] = [];
+  for (let i = 0; i < 3; i++) {
+    const f = toMin(str(form, `f${i}`)), t = toMin(str(form, `t${i}`));
+    if (!Number.isNaN(f) && !Number.isNaN(t) && t > f) ranges.push({ from: f, to: t });
+  }
+  setDayOverride(db(), tid, day, ranges);
   refresh();
 }
 

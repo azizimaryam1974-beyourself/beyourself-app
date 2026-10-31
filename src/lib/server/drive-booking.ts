@@ -60,6 +60,46 @@ export function saveTemplate(db: Database.Database, teacherId: string, days: Day
   })();
 }
 
+// ---------- Einzelne Tage anpassen (überschreibt die Vorlage für dieses Datum) -----------
+
+export function getDayOverride(db: Database.Database, teacherId: string, day: string): DayRange[] | null {
+  const r = db.prepare(`SELECT ranges FROM day_overrides WHERE teacher_id = ? AND day = ?`).get(teacherId, day) as { ranges: string } | undefined;
+  return r ? (JSON.parse(r.ranges) as DayRange[]) : null;
+}
+
+/** Arbeitszeiten eines bestimmten Tages: eigene Zeiten für das Datum, sonst die Wochenvorlage. */
+export function dayRanges(db: Database.Database, teacherId: string, day: string): { ranges: DayRange[]; custom: boolean } {
+  const o = getDayOverride(db, teacherId, day);
+  if (o) return { ranges: o, custom: true };
+  const wd = (new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7;
+  return { ranges: wd > 5 ? [] : getTemplate(db, teacherId)[wd], custom: false };
+}
+
+export function setDayOverride(db: Database.Database, teacherId: string, day: string, ranges: DayRange[] | null): void {
+  if (ranges === null) { db.prepare(`DELETE FROM day_overrides WHERE teacher_id = ? AND day = ?`).run(teacherId, day); return; }
+  const q = (m: number) => Math.round(m / 15) * 15;
+  const clean = ranges.map((r) => ({ from: q(r.from), to: q(r.to) })).filter((r) => r.to - r.from >= 30).sort((a, b) => a.from - b.from);
+  db.prepare(`INSERT INTO day_overrides (teacher_id, day, ranges) VALUES (?,?,?) ON CONFLICT(teacher_id, day) DO UPDATE SET ranges = excluded.ranges`)
+    .run(teacherId, day, JSON.stringify(clean));
+}
+
+/** „Feierabend ab …“: alle Zeiten des Tages enden spätestens zu dieser Uhrzeit (Minuten ab Mitternacht). */
+export function finishEarly(db: Database.Database, teacherId: string, day: string, endMin: number): void {
+  const { ranges } = dayRanges(db, teacherId, day);
+  setDayOverride(db, teacherId, day, ranges.filter((r) => r.from < endMin).map((r) => ({ from: r.from, to: Math.min(r.to, endMin) })));
+}
+
+/** Eine Stunde durchstreichen bzw. wieder freigeben (Sperrzeit mit Kennzeichen). */
+export const STRIKE_NOTE = "durchgestrichen";
+export function toggleStrike(db: Database.Database, teacherId: string, start: number, end: number): "struck" | "restored" {
+  const existing = db.prepare(`SELECT id FROM blocks WHERE teacher_id = ? AND starts_at = ? AND ends_at = ? AND note = ?`).get(teacherId, start, end, STRIKE_NOTE) as { id: string } | undefined;
+  if (existing) { deleteBlock(db, existing.id); return "restored"; }
+  const clash = db.prepare(`SELECT 1 FROM slots WHERE status IN ('reserved','booked') AND starts_at < ? AND ends_at > ?`).get(end, start);
+  if (clash) throw new BookingError("In dieser Stunde ist schon eine Fahrt gebucht. Bitte die Fahrt absagen, wenn du sie freihalten willst.");
+  addBlock(db, teacherId, start, end, STRIKE_NOTE);
+  return "struck";
+}
+
 // ---------- Sperrzeiten -----------------------------------------------------------------
 
 export interface Block { id: string; startsAt: number; endsAt: number; note: string }
@@ -88,10 +128,7 @@ export function busyBetween(db: Database.Database, from: number, to: number): In
 }
 
 export function freeIntervals(db: Database.Database, teacherId: string, day: string): Interval[] {
-  const tpl = getTemplate(db, teacherId);
-  const wd = (new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7;
-  if (wd > 5) return [];
-  const work = workIntervals(day, tpl[wd]);
+  const work = workIntervals(day, dayRanges(db, teacherId, day).ranges);
   if (!work.length) return [];
   return subtract(work, busyBetween(db, berlinToMs(day, "00:00"), berlinToMs(addDays(day, 1), "00:00")));
 }

@@ -126,6 +126,13 @@ CREATE TABLE IF NOT EXISTS work_template (
   PRIMARY KEY (teacher_id, weekday, start_min)
 );
 
+CREATE TABLE IF NOT EXISTS day_overrides (
+  teacher_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day        TEXT NOT NULL,
+  ranges     TEXT NOT NULL,
+  PRIMARY KEY (teacher_id, day)
+);
+
 CREATE TABLE IF NOT EXISTS blocks (
   id         TEXT PRIMARY KEY,
   teacher_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

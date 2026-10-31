@@ -19,7 +19,7 @@ Theorieprüfung bestanden · Grundbetrag bezahlt · Guthaben/offene Beträge · 
 max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Notizen des Fahrlehrers.
 
 ## Kalender
-- Rahmen: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**. Darin eine **Wochenvorlage** je Fahrlehrer
+- Rahmen: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**. Darin eine **Wochenvorlage** je Fahrlehrer – **jede Woche flexibel**: Stunden im Kalender antippen = durchstreichen, „Feierabend ab …“, eigene Zeiten für ein Datum;
   (wann er fährt, Pausen); einzelne Tage/Zeiten mit einem Tipp sperren.
 - **Keine Sonntage, keine Feiertage in Hessen** (jedes Jahr automatisch berechnet, inkl. Ostern/Pfingsten/Fronleichnam).
 - „Stunde“ (Ausbildungsstunde) = **45 Min**; gezählt wird in Minuten. **Buchbar: 60, 75 oder 90 Min**, Beleuchtungsfahrt zusätzlich **135 Min** (Entscheidung 31.10., ersetzt „immer 90 Min“).

@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { purgeAuthSessionsSafe } from "./maintenance-helpers";
-import { purgeOldSegments } from "./repo";
+import { endStaleLessons, purgeOldSegments } from "./repo";
 
 /** Aufbewahrung der Unterrichtsprotokolle in Tagen (Standard 180). */
 export function retentionDays(): number {
@@ -27,7 +27,14 @@ export function startMaintenance(): void {
   g.__byMaintenance = setInterval(runMaintenance, 24 * 60 * 60 * 1000);
   g.__byMaintenance.unref?.();
   // Zahlungsfristen (30 Min) und Erinnerungen: jede Minute prüfen.
-  const jobs = () => import("./payments/service").then((m) => m.runBookingJobs()).catch((e) => console.error("[buchung] Hintergrund", e));
+  const jobs = () => {
+    try {
+      // Vergessene Live-Stunden beenden (auch für verbundene Schüler)
+      const hub = (globalThis as unknown as { __byHub?: { setLive(id: string, live: boolean): void } }).__byHub;
+      for (const id of endStaleLessons(db())) hub?.setLive(id, false);
+    } catch (e) { console.error("[unterricht] Hintergrund", e); }
+    return import("./payments/service").then((m) => m.runBookingJobs()).catch((e) => console.error("[buchung] Hintergrund", e));
+  };
   g.__byBookingJobs = setInterval(jobs, 60_000);
   g.__byBookingJobs.unref?.();
   void jobs();

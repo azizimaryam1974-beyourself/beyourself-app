@@ -163,6 +163,11 @@ export async function setLessonLiveAction(lessonId: string, live: boolean): Prom
   revalidatePath("/konto");
 }
 
+/** Live-Stunde direkt aus der Liste beenden. */
+export async function endLessonAction(form: FormData): Promise<void> {
+  await setLessonLiveAction(String(form.get("lessonId") ?? ""), false);
+}
+
 // ---------- Passwort zurücksetzen ---------------------------------------------
 
 const RESET_TTL_MS = 24 * 60 * 60 * 1000;

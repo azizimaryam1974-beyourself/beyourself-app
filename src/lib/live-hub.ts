@@ -48,6 +48,8 @@ export interface LiveHubOptions {
   persist?: (segment: StoredSegment) => Promise<void> | void;
   /** Letzte gespeicherte Satznummer, damit nach einem Neustart nichts überschrieben wird. */
   initialSeq?: (sessionId: string) => number;
+  /** Status nach einem Neustart aus der Datenbank übernehmen. */
+  initialLive?: (sessionId: string) => boolean;
   now?: () => Date;
 }
 
@@ -68,14 +70,14 @@ export class LiveHub {
   private state(sessionId: string): SessionState {
     let s = this.sessions.get(sessionId);
     if (!s) {
-      s = { listeners: new Map(), seq: this.opts.initialSeq?.(sessionId) ?? 0, live: false, queue: Promise.resolve(), recent: [] };
+      s = { listeners: new Map(), seq: this.opts.initialSeq?.(sessionId) ?? 0, live: this.opts.initialLive?.(sessionId) ?? false, queue: Promise.resolve(), recent: [] };
       this.sessions.set(sessionId, s);
     }
     return s;
   }
 
   isLive(sessionId: string): boolean {
-    return this.sessions.get(sessionId)?.live ?? false;
+    return this.state(sessionId).live;
   }
 
   subscribe(sessionId: string, listener: Listener): () => void {

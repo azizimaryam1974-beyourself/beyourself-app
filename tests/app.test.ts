@@ -229,3 +229,24 @@ test("Vorlesen: SSML mit richtiger Sprache, Sonderzeichen sicher", () => {
   );
   assert.match(buildSsml("x", "ar-SA-ZariyahNeural"), /xml:lang="ar-SA"/);
 });
+
+import { endStaleLessons, setLessonStatus, getLesson } from "../src/lib/server/repo";
+
+test("Vergessene Live-Stunde endet automatisch (über 3 Std., 30 Min still)", () => {
+  const db = openDatabase(":memory:");
+  const t = createUser(db, { email: "t@x.de", name: "T", passwordHash: "x", role: "teacher" });
+  const l = createLesson(db, "Theorie", t.id);
+  setLessonStatus(db, l.id, "live");
+  const start = Date.parse(getLesson(db, l.id)!.started_at!);
+  assert.deepEqual(endStaleLessons(db, start + 2 * 3_600_000), [], "nach 2 Std. noch nicht");
+  saveSegment(db, { sessionId: l.id, seq: 1, original: "Hallo", translations: {}, at: new Date(start + 3 * 3_600_000).toISOString() });
+  assert.deepEqual(endStaleLessons(db, start + 3 * 3_600_000 + 10 * 60_000), [], "gerade gesprochen");
+  assert.deepEqual(endStaleLessons(db, start + 4 * 3_600_000), [l.id]);
+  assert.equal(getLesson(db, l.id)!.status, "ended");
+});
+
+test("Live-Status bleibt nach Neustart erhalten", () => {
+  const hub = new LiveHub({ translator: new MockTranslator(), initialLive: (id) => id === "x" });
+  assert.equal(hub.isLive("x"), true);
+  assert.equal(hub.isLive("y"), false);
+});

@@ -7,7 +7,7 @@ import { ClaudeTranslator } from "../translation/claude-translator";
 import { FallbackTranslator } from "../translation/fallback";
 import type { TranslationProvider } from "../translation/types";
 import { db } from "./db";
-import { lastSeq, saveSegment } from "./repo";
+import { lastSeq, getLesson, saveSegment } from "./repo";
 
 /**
  * Prozessweite Einzelinstanzen. Über globalThis, damit Next.js im
@@ -59,6 +59,7 @@ export function hub(): LiveHub {
       translator: translator(),
       persist: (segment) => saveSegment(db(), segment),
       initialSeq: (lessonId) => lastSeq(db(), lessonId),
+      initialLive: (lessonId) => getLesson(db(), lessonId)?.status === "live",
     });
   }
   return g.__byHub;

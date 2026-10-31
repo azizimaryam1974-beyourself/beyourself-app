@@ -213,6 +213,24 @@ export function listLessons(db: Database.Database, limit = 30): Lesson[] {
     .all(limit) as Lesson[];
 }
 
+/**
+ * Vergessene Live-Stunden automatisch beenden: läuft seit mehr als 3 Stunden und
+ * seit 30 Minuten wurde nichts mehr gesprochen. Gibt die beendeten IDs zurück.
+ */
+export function endStaleLessons(db: Database.Database, now = Date.now()): string[] {
+  const live = db.prepare(`SELECT id, started_at FROM lessons WHERE status = 'live'`).all() as Array<{ id: string; started_at: string | null }>;
+  const ended: string[] = [];
+  for (const l of live) {
+    const started = l.started_at ? Date.parse(l.started_at) : 0;
+    if (now - started < 3 * 3_600_000) continue;
+    const last = db.prepare(`SELECT MAX(at) AS at FROM lesson_segments WHERE lesson_id = ?`).get(l.id) as { at: string | null };
+    if (last.at && now - Date.parse(last.at) < 30 * 60_000) continue;
+    db.prepare(`UPDATE lessons SET status='ended', ended_at=? WHERE id=?`).run(new Date(now).toISOString(), l.id);
+    ended.push(l.id);
+  }
+  return ended;
+}
+
 export function setLessonStatus(db: Database.Database, id: string, status: LessonStatus) {
   if (status === "live") {
     db.prepare(`UPDATE lessons SET status='live', started_at=COALESCE(started_at, ?), ended_at=NULL WHERE id=?`).run(nowIso(), id);

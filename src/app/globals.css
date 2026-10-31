@@ -551,3 +551,6 @@ details.tl-row { display: block; }
 .sc-phase { font-weight: 700; color: var(--copper); }
 .student-card .mini-bar { max-width: none; height: 8px; }
 .sc-foot { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+.how-steps { margin: 0 0 12px; padding-left: 1.3em; display: grid; gap: 6px; }
+.how-steps li::marker { font-weight: 800; color: var(--gold-deep); }
+.app-main .alert-info { background: rgba(232, 240, 245, 0.96); }

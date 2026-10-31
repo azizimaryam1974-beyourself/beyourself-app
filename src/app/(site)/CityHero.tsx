@@ -13,10 +13,10 @@ interface Props {
   turnVideo: Record<string, string>;
 }
 
-async function exists(url: string): Promise<boolean> {
+async function exists(url: string, kind = "video"): Promise<boolean> {
   try {
     const r = await fetch(url, { method: "HEAD", cache: "force-cache" });
-    return r.ok && (r.headers.get("content-type") ?? "").startsWith("video");
+    return r.ok && (r.headers.get("content-type") ?? "").startsWith(kind);
   } catch {
     return false;
   }
@@ -30,6 +30,7 @@ async function exists(url: string): Promise<boolean> {
 export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
   const router = useRouter();
   const [hasLoop, setHasLoop] = useState(false);
+  const [hasPoster, setHasPoster] = useState(false);
   const [turning, setTurning] = useState<SignItem | null>(null);
   const turnRef = useRef<HTMLVideoElement>(null);
   const reduced = useRef(false);
@@ -37,6 +38,7 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     exists(heroLoop).then(setHasLoop);
+    exists(heroPoster, "image").then(setHasPoster);
     for (const s of signs) router.prefetch(`/klasse/${s.slug}`);
   }, [heroLoop, router, signs]);
 
@@ -59,12 +61,16 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
 
   return (
     <>
-      <div className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop ? "with-video" : ""}`} aria-hidden>
+      <div className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop || hasPoster ? "with-video" : ""}`} aria-hidden>
         {hasLoop && (
           <video className="city-video" src={heroLoop} poster={heroPoster} autoPlay muted loop playsInline preload="auto" />
         )}
         <video ref={turnRef} className="city-turn" muted playsInline preload="none" />
-        {!hasLoop && (
+        {!hasLoop && hasPoster && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="city-still" src={heroPoster} alt="" />
+        )}
+        {!hasLoop && !hasPoster && (
           <div className="city-fallback">
             <span className="glow g1" /><span className="glow g2" /><span className="glow g3" />
             <span className="wet" />

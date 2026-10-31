@@ -16,7 +16,7 @@ dann jeden Clip **aus diesem Bild** erzeugen („Image to Video“ / „Start-Fr
 **Technische Einstellungen für alle Clips**
 - Format **16:9**, 1920 × 1080 (wenn möglich zusätzlich 9:16 für Handys)
 - 24 Bilder/Sekunde, **ohne Ton**
-- Export als **MP4 (H.264)**, möglichst klein: Loop ≤ 6 MB, Abbiegen ≤ 3 MB
+- Export als MP4 – Format egal (Runway liefert HEVC). Claude wandelt alles in web-taugliches H.264 um und verkleinert die Dateien.
 - **Kommerzielle Nutzung** muss im Tarif des Generators erlaubt sein (meist nur in bezahlten Tarifen) – bitte prüfen.
 
 **Für jeden Prompt zusätzlich als „Negative Prompt“ (falls es das Feld gibt):**

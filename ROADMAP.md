@@ -18,6 +18,7 @@ Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbin
        Über uns · Kontakt (Karte, Telefon, WhatsApp, info@) · Anmeldung
 3a. [x] Stadt-Szene: Straßenschilder als Navigation (B ←, B197 →, BE ↑), Abbiegen → Klassen-Seite
 3b. [ ] **Videos von Maryam** per KI-Generator (Prompts: VIDEO-PROMPTS.md) → in public/video/
+       ✓ hero-poster.jpg, bg-b.mp4, bg-b197.mp4 (31.10.) · offen: hero-loop, turn-b/-b197/-be, bg-be
 3c. [ ] Echte Fotos, Telefon, Adresse, Bürozeiten
 4. [x] App-Bereiche (Konto, Live, Unterricht, Verwaltung) im neuen Design
 5. [ ] Test auf Handy + Laptop, dann Update auf den Server

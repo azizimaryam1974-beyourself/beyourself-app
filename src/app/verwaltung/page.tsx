@@ -4,6 +4,7 @@ import { listStudents } from "@/lib/server/repo";
 import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice } from "@/lib/language-package";
 import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "../actions";
+import { StudentTools } from "./StudentTools";
 
 export const metadata = { title: "Verwaltung" };
 export const dynamic = "force-dynamic";
@@ -93,6 +94,7 @@ export default async function AdminPage() {
                           </form>
                         </div>
                       )}
+                      <StudentTools userId={s.id} name={s.name} />
                     </td>
                   </tr>
                 );

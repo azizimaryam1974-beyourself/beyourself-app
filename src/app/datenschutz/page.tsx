@@ -15,7 +15,7 @@ export default function Datenschutz() {
       <p>Die Übersetzung der erkannten deutschen Sätze erfolgt mit dem KI-Modell Claude der Anthropic PBC (USA) über deren
         Programmierschnittstelle. Übermittelt wird nur der Text der Lehrkraft, keine Daten von Schülern. Grundlage sind ein
         Auftragsverarbeitungsvertrag und EU-Standardvertragsklauseln. [Bitte vor dem Livegang prüfen und Angaben bestätigen.]</p>
-      <p>Die erkannten Sätze einer Stunde und ihre Übersetzungen speichern wir, damit du sie nachlesen kannst, und löschen sie nach [Frist, z. B. Ende der Ausbildung].</p>
+      <p>Die erkannten Sätze einer Stunde und ihre Übersetzungen speichern wir, damit du sie nachlesen kannst, und löschen sie automatisch 180 Tage nach der Stunde. [Frist bitte bestätigen.] Bei Löschung deines Kontos entfernen wir Name, E-Mail und Telefon; die Buchung des Sprachpakets bleibt ohne Namen für die gesetzliche Aufbewahrung von Zahlungsbelegen erhalten.</p>
       <h2>Cookies</h2>
       <p>Wir setzen nur ein technisch notwendiges Anmelde-Cookie. Keine Werbung, kein Tracking, keine externen Schriften.</p>
       <h2>Hosting</h2>

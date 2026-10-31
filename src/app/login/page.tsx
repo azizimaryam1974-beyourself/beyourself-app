@@ -14,6 +14,7 @@ export default async function LoginPage() {
       <h1>Login</h1>
       <LoginForm />
       <p className="hint">Noch kein Konto? <Link href="/anmelden">Jetzt anmelden</Link></p>
+      <p className="hint">Passwort vergessen? Melde dich bei der Fahrschule – du bekommst einen Link für ein neues Passwort.</p>
     </div>
   );
 }

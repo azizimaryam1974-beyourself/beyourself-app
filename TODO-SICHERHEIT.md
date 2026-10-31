@@ -3,6 +3,9 @@
 Stand: 31.10.2026 · Abhaken mit `[x]` · Diese Liste ist verbindlich: Die App geht
 erst online, wenn alle Punkte unter **A** erledigt sind.
 
+**Anthropic API-Schlüssel:** Der erste Schlüssel stand im Chat → löschen und neu erstellen.
+Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig erneuern.
+
 ## A. Muss vor dem Livegang erledigt sein
 
 ### Recht & Datenschutz (Fachperson/Anwalt prüfen lassen)
@@ -17,7 +20,8 @@ erst online, wenn alle Punkte unter **A** erledigt sind.
 - [ ] **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30 DSGVO) anlegen.
 - [ ] **Impressum** mit echten Angaben füllen (`/impressum`).
 - [ ] **Sprachpaket-Bedingungen + Widerrufsbelehrung + Muster-Widerrufsformular** (`/sprachpaket`).
-- [ ] **Löschfrist** für Unterrichtsprotokolle festlegen und in Datenschutzerklärung eintragen.
+- [ ] **Löschfrist bestätigen**: voreingestellt 180 Tage nach der Stunde (auch so in der Datenschutzerklärung).
+- [ ] Aufbewahrung der Paketbuchungen mit Steuerberater klären (bleiben bei Kontolöschung anonym erhalten).
 - [ ] Hinweis an Schüler: Übersetzung ist maschinell, maßgeblich ist der deutsche Unterricht
       (steht in den Bedingungen – bei Anmeldung sichtbar machen).
 - [ ] Weitere Lehrkräfte (falls später): über Verarbeitung ihrer Stimme informieren.
@@ -39,10 +43,11 @@ erst online, wenn alle Punkte unter **A** erledigt sind.
 - [ ] HTTPS prüfen (Caddy holt das Zertifikat automatisch).
 
 ### App (Programmierung – erledigt Claude)
-- [ ] Schutz gegen Passwort-Raten beim Login (Rate Limiting).
-- [ ] „Passwort vergessen“-Funktion.
-- [ ] Automatisches Löschen alter Unterrichtsprotokolle nach der festgelegten Frist.
-- [ ] In der Verwaltung: Schülerdaten **exportieren** (Auskunft) und **löschen** (DSGVO-Rechte).
+- [x] Schutz gegen Passwort-Raten beim Login (5 Fehlversuche/15 Min pro E-Mail, 20 pro IP) – 31.10.2026
+- [x] „Passwort vergessen“: Einmal-Link (24 h) aus der Verwaltung – 31.10.2026
+      (später optional: Link automatisch per E-Mail, braucht IONOS-Postfach/SMTP)
+- [x] Automatisches Löschen alter Unterrichtsprotokolle (`LESSON_RETENTION_DAYS`, Standard 180) – 31.10.2026
+- [x] Verwaltung → „Mehr …“: Datenauskunft (JSON) und Konto löschen (Buchung bleibt anonym) – 31.10.2026
 
 ## B. Kurz nach dem Start
 - [ ] Fachbegriff-Übersetzungen von Muttersprachlern gegenlesen lassen

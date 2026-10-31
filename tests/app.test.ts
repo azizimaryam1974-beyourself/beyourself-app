@@ -151,3 +151,69 @@ test("LiveHub gibt die letzten Sätze als Kontext mit", async () => {
   assert.deepEqual(seen[0], []);
   assert.deepEqual(seen[4], ["zwei", "drei", "vier"]);
 });
+
+// ---------- Sicherheit & DSGVO ----------
+import { RateLimiter } from "../src/lib/server/rate-limit";
+import {
+  createPasswordReset, completePasswordReset, userForPasswordReset, purgeOldSegments,
+  exportPersonalData, deleteStudent, setLessonStatus, findUserByEmail,
+} from "../src/lib/server/repo";
+
+test("Login-Schutz: nach 5 Fehlversuchen gesperrt, nach Ablauf wieder frei", () => {
+  let now = 0;
+  const l = new RateLimiter(5, 15 * 60_000, () => now);
+  for (let i = 0; i < 4; i++) l.fail("a@b.de");
+  assert.equal(l.blockedFor("a@b.de"), 0);
+  l.fail("a@b.de");
+  assert.ok(l.blockedFor("a@b.de") > 0);
+  assert.equal(l.blockedFor("andere@b.de"), 0);
+  now = 15 * 60_000 + 1;
+  assert.equal(l.blockedFor("a@b.de"), 0);
+});
+
+test("Passwort-Link: einmalig, läuft ab, beendet alte Anmeldungen", () => {
+  const db = openDatabase(":memory:");
+  const u = createUser(db, { email: "p@b.de", name: "P", passwordHash: "alt", role: "student" });
+  insertAuthSession(db, hashToken("sitzung"), u.id, Date.now() + 60_000);
+  createPasswordReset(db, hashToken("link1"), u.id, "lehrer", 60_000);
+  createPasswordReset(db, hashToken("link2"), u.id, "lehrer", 60_000);
+  assert.equal(userForPasswordReset(db, hashToken("link1")), undefined, "älterer Link ungültig");
+  assert.equal(completePasswordReset(db, hashToken("link2"), "neu")!.id, u.id);
+  assert.equal(completePasswordReset(db, hashToken("link2"), "nochmal"), undefined, "nur einmal");
+  assert.equal(findUserByEmail(db, "p@b.de")!.password_hash, "neu");
+  assert.equal(userForSession(db, hashToken("sitzung")), undefined, "alte Anmeldung beendet");
+  createPasswordReset(db, hashToken("abgelaufen"), u.id, "lehrer", -1);
+  assert.equal(userForPasswordReset(db, hashToken("abgelaufen")), undefined);
+});
+
+test("Löschfrist: nur Sätze alter, beendeter Stunden werden gelöscht", () => {
+  const db = openDatabase(":memory:");
+  const t = createUser(db, { email: "t@b.de", name: "T", passwordHash: "x", role: "teacher" });
+  const alt = createLesson(db, "alt", t.id), neu = createLesson(db, "neu", t.id), live = createLesson(db, "live", t.id);
+  for (const l of [alt, neu, live]) saveSegment(db, { sessionId: l.id, seq: 1, original: "Satz", translations: {}, at: new Date().toISOString() });
+  setLessonStatus(db, alt.id, "ended");
+  db.prepare(`UPDATE lessons SET ended_at = ? WHERE id = ?`).run(new Date(Date.now() - 200 * 864e5).toISOString(), alt.id);
+  setLessonStatus(db, neu.id, "ended");
+  setLessonStatus(db, live.id, "live");
+  assert.equal(purgeOldSegments(db, 180), 1);
+  assert.equal(listSegments(db, alt.id).length, 0);
+  assert.equal(listSegments(db, neu.id).length, 1);
+  assert.equal(listSegments(db, live.id).length, 1);
+});
+
+test("DSGVO: Auskunft enthält Konto + Paket; Löschen anonymisiert, Buchung bleibt", () => {
+  const db = openDatabase(":memory:");
+  const u = createUser(db, { email: "s@b.de", name: "Sara", phone: "0170", passwordHash: "x", role: "student" });
+  bookPackage(db, u.id, "fa");
+  const ex = exportPersonalData(db, u.id)!;
+  assert.equal(ex.account.email, "s@b.de");
+  assert.equal(ex.languagePackages[0].language, "fa");
+  assert.ok(!JSON.stringify(ex).includes("password"));
+  assert.equal(deleteStudent(db, u.id), true);
+  assert.equal(findUserByEmail(db, "s@b.de"), undefined);
+  assert.equal(listStudents(db).length, 0);
+  const pkg = db.prepare(`SELECT * FROM language_packages WHERE user_id = ?`).get(u.id) as { price_cents: number };
+  assert.equal(pkg.price_cents, 3000, "Buchung bleibt für die Buchhaltung");
+  const t = createUser(db, { email: "t@b.de", name: "T", passwordHash: "x", role: "teacher" });
+  assert.equal(deleteStudent(db, t.id), false, "Lehrkräfte nicht über diese Funktion löschbar");
+});

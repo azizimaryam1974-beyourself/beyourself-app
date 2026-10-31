@@ -47,6 +47,14 @@ CREATE TABLE IF NOT EXISTS lessons (
   ended_at   TEXT
 );
 
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_by TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used_at    INTEGER
+);
+
 CREATE TABLE IF NOT EXISTS lesson_segments (
   lesson_id    TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
   seq          INTEGER NOT NULL,

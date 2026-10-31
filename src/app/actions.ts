@@ -1,13 +1,19 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { endSession, requireTeacher, requireUser, startSession } from "@/lib/server/auth";
-import { hashPassword, verifyPassword } from "@/lib/server/password";
+import { hashPassword, hashToken, newSessionToken, verifyPassword } from "@/lib/server/password";
+import { loginLimiters } from "@/lib/server/rate-limit";
 import {
   bookPackage,
+  completePasswordReset,
   createLesson,
+  createPasswordReset,
+  deleteStudent,
+  getUser,
   createUser,
   currentPackage,
   findUserByEmail,
@@ -60,14 +66,24 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
 }
 
 export async function loginAction(_prev: FormState, form: FormData): Promise<FormState> {
-  const email = String(form.get("email") ?? "").trim();
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "unbekannt";
+  const lim = loginLimiters();
+  const wait = Math.max(lim.email.blockedFor(email), lim.ip.blockedFor(ip));
+  if (wait > 0) {
+    return { error: `Zu viele Fehlversuche. Bitte in ${Math.ceil(wait / 60_000)} Minuten erneut versuchen.`, values: { email } };
+  }
   const user = findUserByEmail(db(), email);
   // Gleiche Meldung für beide Fälle, damit niemand Konten ausprobieren kann.
   if (!user || !(await verifyPassword(password, user.password_hash))) {
+    lim.email.fail(email);
+    lim.ip.fail(ip);
     await new Promise((r) => setTimeout(r, 400));
     return { error: "E-Mail oder Passwort stimmt nicht.", values: { email } };
   }
+  lim.email.reset(email);
   await startSession(user.id);
   redirect(user.role === "teacher" ? "/unterricht" : "/konto");
 }
@@ -142,4 +158,42 @@ export async function setLessonLiveAction(lessonId: string, live: boolean): Prom
   revalidatePath(`/unterricht/${lessonId}`);
   revalidatePath("/unterricht");
   revalidatePath("/konto");
+}
+
+// ---------- Passwort zurücksetzen ---------------------------------------------
+
+const RESET_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Lehrkraft erzeugt einen Einmal-Link (24 h) und gibt ihn dem Schüler. */
+export async function createResetLinkAction(_prev: { link?: string; error?: string }, form: FormData) {
+  const teacher = await requireTeacher();
+  const userId = String(form.get("userId"));
+  const user = getUser(db(), userId);
+  if (!user) return { error: "Konto nicht gefunden" };
+  const token = newSessionToken();
+  createPasswordReset(db(), hashToken(token), user.id, teacher.id, RESET_TTL_MS);
+  const base = process.env.APP_URL || "";
+  return { link: `${base}/passwort/${token}` };
+}
+
+export async function resetPasswordAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const token = String(form.get("token") ?? "");
+  const pw = String(form.get("password") ?? "");
+  const pw2 = String(form.get("password2") ?? "");
+  if (pw.length < 10) return { fieldErrors: { password: "Das Passwort braucht mindestens 10 Zeichen." } };
+  if (pw !== pw2) return { fieldErrors: { password: "Die beiden Passwörter sind nicht gleich." } };
+  const user = completePasswordReset(db(), hashToken(token), await hashPassword(pw));
+  if (!user) return { error: "Der Link ist abgelaufen oder wurde schon benutzt. Bitte bei der Fahrschule einen neuen anfordern." };
+  loginLimiters().email.reset(user.email);
+  await startSession(user.id);
+  redirect(user.role === "teacher" ? "/unterricht" : "/konto");
+}
+
+// ---------- DSGVO: Konto löschen ---------------------------------------------
+
+export async function deleteStudentAction(form: FormData): Promise<void> {
+  await requireTeacher();
+  if (form.get("confirm") !== "on") return;
+  deleteStudent(db(), String(form.get("userId")));
+  revalidatePath("/verwaltung");
 }

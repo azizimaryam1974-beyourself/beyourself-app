@@ -167,7 +167,7 @@ export interface StudentOverview extends User {
 
 export function listStudents(db: Database.Database): StudentOverview[] {
   const users = db
-    .prepare(`SELECT id,email,name,phone,role,created_at FROM users WHERE role='student' ORDER BY created_at DESC`)
+    .prepare(`SELECT id,email,name,phone,role,created_at FROM users WHERE role='student' AND password_hash <> 'deleted' ORDER BY created_at DESC`)
     .all() as User[];
   return users.map((u) => ({ ...u, pkg: currentPackage(db, u.id) }));
 }
@@ -245,4 +245,96 @@ export function listSegments(db: Database.Database, lessonId: string): StoredSeg
     translations: JSON.parse(r.translations) as Translations,
     at: r.at,
   }));
+}
+
+// ---------- Passwort zurücksetzen --------------------------------------------
+
+export function createPasswordReset(db: Database.Database, tokenHash: string, userId: string, createdBy: string, ttlMs: number) {
+  // Ältere, noch offene Links dieses Kontos ungültig machen
+  db.prepare(`UPDATE password_resets SET used_at = ? WHERE user_id = ? AND used_at IS NULL`).run(Date.now(), userId);
+  db.prepare(`INSERT INTO password_resets (token_hash,user_id,created_by,expires_at) VALUES (?,?,?,?)`).run(
+    tokenHash, userId, createdBy, Date.now() + ttlMs,
+  );
+}
+
+/** Gültiger, unbenutzter Link → Benutzer, sonst undefined. */
+export function userForPasswordReset(db: Database.Database, tokenHash: string): User | undefined {
+  return db
+    .prepare(
+      `SELECT u.id,u.email,u.name,u.phone,u.role,u.created_at
+       FROM password_resets r JOIN users u ON u.id = r.user_id
+       WHERE r.token_hash = ? AND r.used_at IS NULL AND r.expires_at > ?`,
+    )
+    .get(tokenHash, Date.now()) as User | undefined;
+}
+
+/** Neues Passwort setzen, Link verbrauchen, alle Anmeldungen beenden. */
+export function completePasswordReset(db: Database.Database, tokenHash: string, passwordHash: string): User | undefined {
+  return db.transaction(() => {
+    const user = userForPasswordReset(db, tokenHash);
+    if (!user) return undefined;
+    db.prepare(`UPDATE password_resets SET used_at = ? WHERE token_hash = ?`).run(Date.now(), tokenHash);
+    db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`).run(passwordHash, user.id);
+    db.prepare(`DELETE FROM auth_sessions WHERE user_id = ?`).run(user.id);
+    return user;
+  })();
+}
+
+// ---------- Löschfristen -----------------------------------------------------
+
+/**
+ * Löscht die Sätze (Protokolle) aller Stunden, die vor mehr als `days`
+ * Tagen beendet wurden. Die Stunde selbst (Titel, Datum) bleibt erhalten.
+ */
+export function purgeOldSegments(db: Database.Database, days: number, now = Date.now()): number {
+  const cutoff = new Date(now - days * 24 * 60 * 60 * 1000).toISOString();
+  return db
+    .prepare(
+      `DELETE FROM lesson_segments WHERE lesson_id IN
+         (SELECT id FROM lessons WHERE status = 'ended' AND ended_at IS NOT NULL AND ended_at < ?)`,
+    )
+    .run(cutoff).changes;
+}
+
+// ---------- DSGVO: Auskunft & Löschung ---------------------------------------
+
+export interface PersonalDataExport {
+  exportedAt: string;
+  account: User;
+  languagePackages: PackageRow[];
+  activeSessions: number;
+  note: string;
+}
+
+export function exportPersonalData(db: Database.Database, userId: string): PersonalDataExport | null {
+  const account = getUser(db, userId);
+  if (!account) return null;
+  const pkgs = (db.prepare(`SELECT * FROM language_packages WHERE user_id = ? ORDER BY booked_at`).all(userId) as Record<string, unknown>[])
+    .map((r) => mapPkg(r)!);
+  const { n } = db.prepare(`SELECT COUNT(*) AS n FROM auth_sessions WHERE user_id = ? AND expires_at > ?`).get(userId, Date.now()) as { n: number };
+  return {
+    exportedAt: new Date().toISOString(),
+    account,
+    languagePackages: pkgs,
+    activeSessions: n,
+    note:
+      "Gespeichert sind nur diese Kontodaten. Unterrichtsprotokolle enthalten ausschließlich Sätze der Lehrkraft und keine Daten von Schülern.",
+  };
+}
+
+/**
+ * Konto löschen. Personenbezogene Daten werden entfernt; die Buchung des
+ * Sprachpakets bleibt anonym erhalten (Aufbewahrungspflicht für Zahlungen).
+ */
+export function deleteStudent(db: Database.Database, userId: string): boolean {
+  return db.transaction(() => {
+    const u = getUser(db, userId);
+    if (!u || u.role !== "student") return false;
+    db.prepare(`DELETE FROM auth_sessions WHERE user_id = ?`).run(userId);
+    db.prepare(`DELETE FROM password_resets WHERE user_id = ?`).run(userId);
+    db.prepare(
+      `UPDATE users SET email = ?, name = 'Gelöschtes Konto', phone = NULL, password_hash = 'deleted' WHERE id = ?`,
+    ).run(`geloescht-${userId}@invalid`, userId);
+    return true;
+  })();
 }

@@ -8,8 +8,13 @@ import { formatPrice } from "@/lib/language-package";
 import { fmtSlot, fmtTime } from "@/lib/time";
 import * as stripe from "./stripe";
 import * as paypal from "./paypal";
+import { creditBalance, holdCredit, releaseHold } from "../credit";
+import { creditRefills } from "../cancel";
+import { releaseToWaitlist } from "../drive-booking";
+import { dueHoldNotifications, purgeOldWaitlist, takeExpiredHolds, waitersFor } from "../waitlist";
+import { getUser } from "../repo";
 
-export type Provider = "stripe" | "paypal" | "test";
+export type Provider = "stripe" | "paypal" | "test" | "guthaben";
 
 export function appUrl(): string {
   return (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -70,9 +75,17 @@ export async function startPayment(bookingId: string, userId: string, provider: 
   if (!b || b.userId !== userId) throw new PaymentError("Buchung nicht gefunden.");
   if (b.status !== "awaiting_payment") throw new PaymentError("Für diese Buchung ist keine Zahlung offen.");
   if (!b.payDeadline || b.payDeadline < Date.now()) throw new PaymentError("Die Zahlungsfrist ist abgelaufen.");
-  if (!availableProviders().includes(provider)) throw new PaymentError("Diese Zahlart ist nicht verfügbar.");
+  if (provider !== "guthaben" && !availableProviders().includes(provider)) throw new PaymentError("Diese Zahlart ist nicht verfügbar.");
   const now = Date.now();
   const description = when(b);
+  // Vorhandenes Guthaben wird immer zuerst verrechnet.
+  const credit = holdCredit(db(), userId, b.id, b.priceCents, now);
+  const toPay = b.priceCents - credit;
+  if (toPay <= 0) {
+    const r = await finalizePayment(b.id, "guthaben", `guthaben-${now}`, 0);
+    return `${appUrl()}/termine?${r.ok ? "bezahlt=1" : "zahlung=problem"}`;
+  }
+  if (provider === "guthaben") throw new PaymentError(`Dein Guthaben reicht nicht ganz – es fehlen ${formatPrice(toPay)}. Bitte wähle eine Zahlart.`);
 
   if (provider === "stripe") {
     // Offene Bezahlseite wiederverwenden (Schüler klickt zweimal / kommt zurück).
@@ -83,14 +96,14 @@ export async function startPayment(bookingId: string, userId: string, provider: 
       } catch { /* neu anlegen */ }
     }
     const s = await stripe.createCheckout({
-      bookingId: b.id, title: b.title, description, amountCents: b.priceCents, email: b.userEmail ?? "", expiresAt: b.payDeadline, baseUrl: appUrl(),
+      bookingId: b.id, title: b.title, description, amountCents: toPay, email: b.userEmail ?? "", expiresAt: b.payDeadline, baseUrl: appUrl(),
     });
     setPaymentRef(db(), b.id, "stripe", s.id, now);
     if (!s.url) throw new PaymentError("Stripe hat keine Bezahlseite geliefert.");
     return s.url;
   }
   if (provider === "paypal") {
-    const o = await paypal.createOrder({ bookingId: b.id, title: description ? `${b.title} · ${description}` : b.title, amountCents: b.priceCents, baseUrl: appUrl() });
+    const o = await paypal.createOrder({ bookingId: b.id, title: description ? `${b.title} · ${description}` : b.title, amountCents: toPay, baseUrl: appUrl() });
     setPaymentRef(db(), b.id, "paypal", o.id, now);
     return o.approveUrl;
   }
@@ -109,7 +122,12 @@ export async function finalizePayment(bookingId: string, provider: Provider | "b
       notifyStudent(b, "Bezahlt – alles fest", w
         ? `Deine Zahlung über ${formatPrice(b.priceCents)} ist angekommen. Dein Termin „${b.title}“ am ${w} ist fest gebucht.`
         : `Deine Zahlung über ${formatPrice(b.priceCents)} für „${b.title}“ ist angekommen. Danke!`);
-      notifySchool(b, `Bezahlt: ${b.userName} · ${b.title}`, `${b.userName} hat ${formatPrice(b.priceCents)} bezahlt (${provider}). ${w}`);
+      notifySchool(b, `Bezahlt: ${b.userName} · ${b.title}`, `${b.userName} hat ${formatPrice(b.priceCents)} bezahlt (${provider}${b.creditCents ? `, davon ${formatPrice(b.creditCents)} Guthaben` : ""}). ${w}`);
+      // Termin nach später Absage neu besetzt → Ausfallgebühr des anderen Schülers zurück als Guthaben
+      for (const r of creditRefills(db(), b)) {
+        const u = getUser(db(), r.userId);
+        if (u) notifyUser(u, "Gute Nachricht: Termin neu besetzt", `Dein abgesagter Termin wurde von jemand anderem übernommen. Dafür bekommst du ${formatPrice(r.cents)} als Guthaben zurück.`, "/termine#guthaben");
+      }
     }
     return res;
   }
@@ -119,6 +137,10 @@ export async function finalizePayment(bookingId: string, provider: Provider | "b
     const ok = await refundRaw(provider, paymentRef, amountCents, `conflict-${b.id}`);
     notifyStudent(b, "Termin leider schon vergeben", `Deine Zahlung kam nach Ablauf der Frist an, der Termin war da schon vergeben. ${ok ? "Du bekommst das Geld automatisch zurück." : "Die Fahrschule zahlt dir das Geld zurück."}`);
     notifySchool(b, `Zahlung zu spät: ${b.userName}`, `Zahlung für ${b.title} kam nach der Frist an. ${ok ? "Automatisch erstattet." : "BITTE MANUELL ERSTATTEN – automatische Rückzahlung fehlgeschlagen."}`);
+  } else if (b && res.reason === "amount" && b.status === "expired" && provider !== "bar" && amountCents) {
+    // Frist war abgelaufen und das Guthaben schon zurückgebucht → Zahlung automatisch zurück.
+    const ok = await refundRaw(provider, paymentRef, amountCents, `late-${b.id}`);
+    notifyStudent(b, "Zahlung kam zu spät", `Deine Zahlung kam nach Ablauf der Frist an. ${ok ? "Du bekommst das Geld automatisch zurück." : "Die Fahrschule zahlt dir das Geld zurück."} Bitte buche den Termin neu, falls er noch frei ist.`);
   } else if (b && res.reason === "amount") {
     notifySchool(b, `Zahlung mit falschem Betrag: ${b.userName}`, `Für ${b.title} kam ${amountCents} Cent statt ${b.priceCents} Cent an. Bitte prüfen (${provider} ${paymentRef}).`);
   }
@@ -160,9 +182,32 @@ export async function runBookingJobs(now = Date.now()): Promise<void> {
   }
   for (const b of expireDue(db(), now)) {
     if (b.provider === "stripe" && b.providerRef) await stripe.expireCheckout(b.providerRef);
+    releaseHold(db(), b.id, now);
+    if (b.kind && b.startsAt && b.endsAt) releaseToWaitlist(db(), b.startsAt, b.endsAt, b.userId, now);
     if (b.slotId) {
       notifyStudent(b, "Zahlungsfrist abgelaufen", `Für „${b.title}“ (${when(b)}) ist keine Zahlung eingegangen. Der Termin ist wieder frei für andere. Du kannst ihn gern erneut anfragen, falls er noch frei ist.`);
       notifySchool(b, `Frist abgelaufen: ${b.userName}`, `${b.userName} hat ${b.title} (${when(b)}) nicht bezahlt. Der Termin ist wieder frei.`);
     }
   }
+  runWaitlistJobs(now);
 }
+
+/** Warteliste: Platz 1 benachrichtigen, abgelaufene Reservierungen an alle weitergeben. */
+export function runWaitlistJobs(now = Date.now()): void {
+  const d = db();
+  for (const h of dueHoldNotifications(d, now)) {
+    const u = getUser(d, h.userId);
+    if (u) notifyUser(u, "Termin frei – nur für dich",
+      `Von der Warteliste: ${fmtSlot(h.startsAt, h.endsAt)} ist frei geworden. Bis ${fmtTime(h.expiresAt)} Uhr kannst nur du diese Zeit buchen – danach sehen sie alle.`, "/termine#buchen");
+  }
+  for (const h of takeExpiredHolds(d, now)) {
+    if (h.startsAt <= now) continue;
+    for (const w of waitersFor(d, h.startsAt, h.endsAt, h.userId)) {
+      const u = getUser(d, w.userId);
+      if (u) notifyUser(u, "Termin frei – wer zuerst bucht", `Von der Warteliste: Am ${fmtSlot(h.startsAt, h.endsAt)} ist Zeit frei geworden. Wer zuerst bucht, bekommt sie.`, "/termine#buchen");
+    }
+  }
+  purgeOldWaitlist(d, now);
+}
+
+export { creditBalance };

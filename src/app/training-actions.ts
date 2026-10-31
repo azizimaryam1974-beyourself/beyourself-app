@@ -6,6 +6,8 @@ import { requireTeacher } from "@/lib/server/auth";
 import { getUser } from "@/lib/server/repo";
 import { addRecord, deleteRecord, ensureProfile, getProfile, isDriveKind, isTrainingClass, setRecordStatus, updateProfile } from "@/lib/server/training-repo";
 import { notifyUser } from "@/lib/server/payments/service";
+import { applyNoShow } from "@/lib/server/cancel";
+import { formatPrice } from "@/lib/language-package";
 import { berlinToMs, isDayKey } from "@/lib/time";
 import { CLASS_LABEL, KIND_LABEL, MIN_REPEAT, type RecordStatus } from "@/lib/training";
 
@@ -134,8 +136,19 @@ export async function recordStatusAction(form: FormData): Promise<void> {
   await requireTeacher();
   const userId = str(form, "userId");
   const status = str(form, "status") as RecordStatus;
-  if (str(form, "do") === "delete") deleteRecord(db(), str(form, "recordId"));
-  else if (["done", "no_show", "late", "planned"].includes(status)) setRecordStatus(db(), str(form, "recordId"), status);
+  const recordId = str(form, "recordId");
+  if (str(form, "do") === "delete") deleteRecord(db(), recordId);
+  else if (["done", "no_show", "late", "planned"].includes(status)) {
+    setRecordStatus(db(), recordId, status);
+    // Gebuchte Fahrt: nicht erschienen / zu spät → 75 % berechnet, 25 % Guthaben (zurücknehmbar)
+    const rec = db().prepare(`SELECT booking_id FROM drive_records WHERE id = ?`).get(recordId) as { booking_id: string | null } | undefined;
+    if (rec?.booking_id) {
+      const credit = applyNoShow(db(), rec.booking_id, status === "no_show" || status === "late");
+      const u = getUser(db(), userId);
+      if (u && credit > 0) notifyUser(u, status === "late" ? "Fahrt ausgefallen (zu spät)" : "Fahrt ausgefallen (nicht erschienen)",
+        `Deine Fahrt ist ausgefallen, weil du ${status === "late" ? "mehr als 15 Minuten zu spät warst" : "nicht erschienen bist"}. Laut Buchungsbedingungen werden 75 % berechnet; ${formatPrice(credit)} bekommst du als Guthaben.`, "/termine#guthaben");
+    }
+  }
   refresh(userId);
 }
 

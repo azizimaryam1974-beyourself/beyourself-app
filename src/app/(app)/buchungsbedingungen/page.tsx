@@ -11,19 +11,28 @@ export default function TermsPage() {
       <div className="alert alert-info">Entwurf – wird vor dem Start rechtlich geprüft.</div>
       <h1>Buchungsbedingungen für Online-Buchungen</h1>
       <h2>1. Ablauf</h2>
-      <p>Du fragst einen freien Termin an. Die Fahrschule bestätigt oder lehnt ab. Nach der Bestätigung hast du {s.payWindowMin} Minuten
-        Zeit zum Bezahlen. Erst mit der Zahlung ist der Termin verbindlich für dich reserviert. Geht keine Zahlung ein, wird der Termin
-        wieder für andere freigegeben.</p>
-      <h2>2. Preise und Zahlung</h2>
+      <p>Du buchst eine freie Zeit, die zu deinem Ausbildungsstand passt. Die Zeit ist sofort für dich reserviert; du hast {s.payWindowMin} Minuten
+        Zeit zum Bezahlen. Erst mit der Zahlung ist die Fahrt verbindlich gebucht. Geht keine Zahlung ein, wird die Zeit wieder freigegeben.</p>
+      <h2>2. Preise, Zahlung und Guthaben</h2>
       <p>Alle Preise in Euro inkl. gesetzlicher Mehrwertsteuer. Zahlung per Karte, Apple Pay, Google Pay oder PayPal über unsere
-        Zahlungsdienstleister (Stripe, PayPal). Die Fahrschule erhält keine Karten- oder Kontodaten.</p>
+        Zahlungsdienstleister (Stripe, PayPal). Die Fahrschule erhält keine Karten- oder Kontodaten. Beträge aus Absagen werden dir als
+        Guthaben gutgeschrieben und bei der nächsten Buchung automatisch verrechnet.</p>
       <h2>3. Absage durch dich</h2>
-      <p>Bezahlte Termine kannst du bis {s.freeCancelHours} Stunden vor Beginn online kostenlos absagen; du erhältst den vollen Betrag
-        zurück. Bei späterer Absage oder Nichterscheinen wird die Fahrstunde berechnet, es sei denn, du hast den Ausfall nicht zu vertreten.</p>
+      <ul>
+        <li>Kostenlos bis {s.freeCancelHours} Stunden vor Beginn, spätestens bis {s.cancelCutoffHour}:00 Uhr am Vortag – der volle Betrag wird dir gutgeschrieben.</li>
+        <li>Danach (kurzfristige Absage): {s.lateChargePct} % des Preises werden berechnet, der Rest wird gutgeschrieben. Wird der Termin von jemand anderem übernommen, bekommst du auch die berechneten {s.lateChargePct} % gutgeschrieben.</li>
+        <li>Termine, die weniger als {s.freeCancelHours} Stunden vor Beginn gebucht wurden (Last-Minute), können nicht abgesagt werden.</li>
+        <li>Erscheinst du nicht oder kommst du mehr als 15 Minuten zu spät, fällt die Fahrt aus; {s.noShowChargePct} % des Preises werden berechnet, der Rest wird gutgeschrieben.</li>
+      </ul>
       <h2>4. Absage durch die Fahrschule</h2>
-      <p>Muss die Fahrschule einen Termin absagen (z. B. Krankheit, Fahrzeugausfall, Unwetter), erhältst du den vollen Betrag zurück
-        oder einen Ersatztermin.</p>
-      <h2>5. Widerrufsrecht</h2>
+      <p>Muss die Fahrschule einen Termin absagen (z. B. Krankheit, Fahrzeugausfall, Unwetter), erhältst du den vollen Betrag als Guthaben
+        oder auf Wunsch zurück auf dein Zahlungsmittel.</p>
+      <h2>5. Warteliste</h2>
+      <p>Du kannst dich pro Woche für einen Tag auf die Warteliste setzen. Wird eine passende Zeit frei, wird die erste Person benachrichtigt
+        und kann sie 30 Minuten lang exklusiv buchen; danach ist sie für alle buchbar. Zwischen 22 und 7 Uhr werden keine Nachrichten verschickt.</p>
+      <h2>6. Guthaben am Ende der Ausbildung</h2>
+      <p>Nicht verbrauchtes Guthaben wird dir am Ende der Ausbildung auf Wunsch ausgezahlt.</p>
+      <h2>7. Widerrufsrecht</h2>
       <p>Verbraucher haben ein gesetzliches Widerrufsrecht von 14 Tagen. Mit der Buchung verlangst du ausdrücklich, dass wir vor Ablauf
         der Widerrufsfrist mit der Leistung beginnen. Dein Widerrufsrecht erlischt, wenn die Leistung vollständig erbracht ist.
         Die vollständige Widerrufsbelehrung folgt.</p>

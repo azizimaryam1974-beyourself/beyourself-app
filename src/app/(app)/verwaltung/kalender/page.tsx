@@ -12,6 +12,8 @@ import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime, isDayKey, mondayOf } from "@/lib/time";
 import { Countdown } from "@/components/booking/Countdown";
 import { PageHead } from "@/components/PageHead";
+import { activeHolds } from "@/lib/server/waitlist";
+import { getUser } from "@/lib/server/repo";
 import { DecisionForm } from "./DecisionForm";
 import { CancelForm } from "./CancelForm";
 
@@ -130,6 +132,16 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           </ul>
         </section>
       )}
+
+      {activeHolds(d, now, now + 30 * 86_400_000, now).map((h) => {
+        const u = getUser(d, h.userId);
+        const short = u ? `${u.name.split(" ")[0]} ${u.name.split(" ").slice(-1)[0]?.[0] ?? ""}.` : "Schüler";
+        return (
+          <div key={h.id} className="alert alert-info">
+            <strong>Warteliste:</strong> {fmtSlot(h.startsAt, h.endsAt)} ist {h.notifyAt > now ? `ab ${fmtTime(h.notifyAt)} Uhr` : "gerade"} für {short} reserviert (bis {fmtTime(h.expiresAt)} Uhr), danach für alle frei.
+          </div>
+        );
+      })}
 
       <section className="card">
         <div className="cal-head">

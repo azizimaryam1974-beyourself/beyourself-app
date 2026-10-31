@@ -4,13 +4,16 @@ import { useActionState } from "react";
 import { deleteTemplateAction, saveSettingsAction, saveTemplateAction, type ActionState } from "@/app/booking-actions";
 import { FormMessage } from "@/components/booking/FormMessage";
 
-export function SettingsForm({ s, testfahrtMinutes }: { s: { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number }; testfahrtMinutes: number }) {
+export function SettingsForm({ s, testfahrtMinutes }: { s: { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number; cancelCutoffHour: number; lateChargePct: number; noShowChargePct: number }; testfahrtMinutes: number }) {
   const [state, action, pending] = useActionState(saveSettingsAction, {} as ActionState);
   return (
     <form action={action}>
       <div className="offer-grid">
         <div className="field"><label htmlFor="pw">Zeit zum Bezahlen nach Bestätigung (Min)</label><input id="pw" type="number" name="payWindowMin" min={10} max={1440} defaultValue={s.payWindowMin} /></div>
         <div className="field"><label htmlFor="fc">Kostenlos absagen bis … Std. vorher</label><input id="fc" type="number" name="freeCancelHours" min={0} max={336} defaultValue={s.freeCancelHours} /></div>
+        <div className="field"><label htmlFor="cc">… aber spätestens am Vortag um (Uhr)</label><input id="cc" type="number" name="cancelCutoffHour" min={12} max={24} defaultValue={s.cancelCutoffHour} /></div>
+        <div className="field"><label htmlFor="lc">Späte Absage: berechnet (%)</label><input id="lc" type="number" name="lateChargePct" min={0} max={100} defaultValue={s.lateChargePct} /></div>
+        <div className="field"><label htmlFor="ns">Nicht erschienen / zu spät: berechnet (%)</label><input id="ns" type="number" name="noShowChargePct" min={0} max={100} defaultValue={s.noShowChargePct} /></div>
         <div className="field"><label htmlFor="ml">Anfragen frühestens … Std. vorher</label><input id="ml" type="number" name="minLeadHours" min={0} max={336} defaultValue={s.minLeadHours} /></div>
         <div className="field"><label htmlFor="mo">Max. offene Anfragen je Schüler</label><input id="mo" type="number" name="maxOpenRequests" min={1} max={50} defaultValue={s.maxOpenRequests} /></div>
         <div className="field"><label htmlFor="tf">Testfahrt (B197)</label>

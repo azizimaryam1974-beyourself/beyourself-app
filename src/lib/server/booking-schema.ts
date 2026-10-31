@@ -144,6 +144,39 @@ CREATE TABLE IF NOT EXISTS blocks (
 );
 CREATE INDEX IF NOT EXISTS idx_blocks_time ON blocks(starts_at);
 
+CREATE TABLE IF NOT EXISTS credit_ledger (
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  booking_id  TEXT,
+  amount_cents INTEGER NOT NULL,
+  reason      TEXT NOT NULL,
+  note        TEXT NOT NULL DEFAULT '',
+  created_at  INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_credit_user ON credit_ledger(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_credit_once ON credit_ledger(booking_id, reason) WHERE booking_id IS NOT NULL AND reason NOT IN ('manual','payout');
+
+CREATE TABLE IF NOT EXISTS waitlist (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day        TEXT NOT NULL,
+  from_min   INTEGER NOT NULL,
+  to_min     INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_waitlist_day ON waitlist(day, created_at);
+
+CREATE TABLE IF NOT EXISTS waitlist_holds (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  starts_at  INTEGER NOT NULL,
+  ends_at    INTEGER NOT NULL,
+  notify_at  INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  notified   INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS payment_events (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL
@@ -205,6 +238,10 @@ export function seedBookingDefaults(db: Database.Database): void {
   addColumn(db, "bookings", "kind", "TEXT");
   addColumn(db, "bookings", "minutes", "INTEGER");
   addColumn(db, "bookings", "meeting_point", "TEXT NOT NULL DEFAULT ''");
+  // Guthaben & Absage-Regeln
+  addColumn(db, "bookings", "credit_cents", "INTEGER NOT NULL DEFAULT 0");
+  addColumn(db, "bookings", "charge_cents", "INTEGER NOT NULL DEFAULT 0");
+  addColumn(db, "bookings", "refill_credited", "INTEGER NOT NULL DEFAULT 0");
   const now = Date.now();
   const hasOffers = (db.prepare(`SELECT COUNT(*) AS n FROM offers`).get() as { n: number }).n > 0;
   if (!hasOffers) {

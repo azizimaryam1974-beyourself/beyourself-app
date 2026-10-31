@@ -230,7 +230,7 @@ test("Vorlesen: SSML mit richtiger Sprache, Sonderzeichen sicher", () => {
   assert.match(buildSsml("x", "ar-SA-ZariyahNeural"), /xml:lang="ar-SA"/);
 });
 
-import { endStaleLessons, setLessonStatus, getLesson } from "../src/lib/server/repo";
+import { endStaleLessons, getLesson } from "../src/lib/server/repo";
 
 test("Vergessene Live-Stunde endet automatisch (über 3 Std., 30 Min still)", () => {
   const db = openDatabase(":memory:");

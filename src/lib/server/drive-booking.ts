@@ -7,6 +7,7 @@ import {
 } from "../training";
 import { BookingError, getBooking, getOffer, getSettings, type Booking } from "./booking";
 import { getProfile, listRecords, testfahrtMinutes, type ProfileRow, type StoredRecord } from "./training-repo";
+import { activeHolds, clearHoldsOf, createHold, waitersFor, type Hold } from "./waitlist";
 
 /**
  * Buchen von Fahrten direkt aus den Arbeitszeiten der Fahrschule (keine vorab angelegten Termine mehr).
@@ -121,16 +122,47 @@ export function listBlocks(db: Database.Database, from: number, to: number): Blo
 
 // ---------- Freie Zeiten ------------------------------------------------------------------
 
-/** Belegte Zeiten: reservierte/gebuchte Fahrten + Sperrzeiten. */
-export function busyBetween(db: Database.Database, from: number, to: number): Interval[] {
+/**
+ * Belegte Zeiten: reservierte/gebuchte Fahrten, Sperrzeiten und Warteliste-Reservierungen
+ * (eine Reservierung ist nur für ihren Inhaber frei).
+ */
+export function busyBetween(db: Database.Database, from: number, to: number, forUser?: string, now = Date.now()): Interval[] {
   const slots = db.prepare(`SELECT starts_at, ends_at FROM slots WHERE status IN ('reserved','booked') AND ends_at > ? AND starts_at < ?`).all(from, to) as Array<{ starts_at: number; ends_at: number }>;
-  return [...slots.map((s) => ({ start: s.starts_at, end: s.ends_at })), ...listBlocks(db, from, to).map((b) => ({ start: b.startsAt, end: b.endsAt }))];
+  const holds = activeHolds(db, from, to, now).filter((h) => h.userId !== forUser);
+  return [
+    ...slots.map((s) => ({ start: s.starts_at, end: s.ends_at })),
+    ...listBlocks(db, from, to).map((b) => ({ start: b.startsAt, end: b.endsAt })),
+    ...holds.map((h) => ({ start: h.startsAt, end: h.endsAt })),
+  ];
 }
 
-export function freeIntervals(db: Database.Database, teacherId: string, day: string): Interval[] {
+export function freeIntervals(db: Database.Database, teacherId: string, day: string, forUser?: string, now = Date.now()): Interval[] {
   const work = workIntervals(day, dayRanges(db, teacherId, day).ranges);
   if (!work.length) return [];
-  return subtract(work, busyBetween(db, berlinToMs(day, "00:00"), berlinToMs(addDays(day, 1), "00:00")));
+  return subtract(work, busyBetween(db, berlinToMs(day, "00:00"), berlinToMs(addDays(day, 1), "00:00"), forUser, now));
+}
+
+/**
+ * Eine Zeit ist frei geworden (Absage, Frist abgelaufen, Ablehnung). Steht jemand passend auf der
+ * Warteliste, bekommt Platz 1 eine 30-Minuten-Reservierung. Rückgabe: die Reservierung (oder null).
+ */
+export function releaseToWaitlist(db: Database.Database, start: number, end: number, exceptUser?: string, now = Date.now()): Hold | null {
+  if (start <= now) return null;
+  const teacher = mainTeacherId(db);
+  if (!teacher) return null;
+  const day = dayKey(start);
+  // nur den Teil, der jetzt wirklich frei ist
+  const free = subtract([{ start, end }], busyBetween(db, berlinToMs(day, "00:00"), berlinToMs(addDays(day, 1), "00:00"), undefined, now));
+  const longest = free.sort((a, b) => b.end - b.start - (a.end - a.start))[0];
+  if (!longest || longest.end - longest.start < 60 * 60_000) return null;
+  const len = (longest.end - longest.start) / 60_000;
+  for (const w of waitersFor(db, longest.start, longest.end, exceptUser)) {
+    const t = trainingWithBookings(db, w.userId, now);
+    if (!t || t.profile.blocked) continue;
+    if (!t.state.bookable.some((o) => o.durations.some((d) => d <= len))) continue;
+    return createHold(db, w.userId, longest.start, longest.end, now);
+  }
+  return null;
 }
 
 export interface DayOption { day: string; closed: string | null; starts: number[] }
@@ -141,7 +173,7 @@ export function earliestStart(db: Database.Database, kind: DriveKind, day: strin
 }
 
 /** Freie Startzeiten für die nächsten `days` Tage. */
-export function availableStarts(db: Database.Database, kind: DriveKind, minutes: number, fromDay: string, days: number, now = Date.now()): DayOption[] {
+export function availableStarts(db: Database.Database, kind: DriveKind, minutes: number, fromDay: string, days: number, now = Date.now(), forUser?: string): DayOption[] {
   const teacher = mainTeacherId(db);
   if (!teacher) return [];
   const out: DayOption[] = [];
@@ -149,7 +181,7 @@ export function availableStarts(db: Database.Database, kind: DriveKind, minutes:
     const day = addDays(fromDay, i);
     const closed = closedReason(day);
     if (closed) { out.push({ day, closed, starts: [] }); continue; }
-    const starts = startTimes(freeIntervals(db, teacher, day), minutes, { notBefore: earliestStart(db, kind, day, now) });
+    const starts = startTimes(freeIntervals(db, teacher, day, forUser, now), minutes, { notBefore: earliestStart(db, kind, day, now) });
     out.push({ day, closed: null, starts });
   }
   return out;
@@ -229,7 +261,7 @@ export function bookDrive(db: Database.Database, inp: BookDriveInput, now = Date
     const day = dayKey(inp.start);
     const teacher = mainTeacherId(db);
     if (!teacher) throw new BookingError("Gerade sind keine Termine buchbar.");
-    const free = startTimes(freeIntervals(db, teacher, day), inp.minutes, { notBefore: earliestStart(db, inp.kind, day, now) });
+    const free = startTimes(freeIntervals(db, teacher, day, inp.userId, now), inp.minutes, { notBefore: earliestStart(db, inp.kind, day, now) });
     if (!free.includes(inp.start)) throw new BookingError("Diese Zeit ist leider nicht mehr frei. Bitte wähle eine andere.");
     const meeting = (MEETING_POINTS as readonly string[]).includes(inp.meetingPoint) ? inp.meetingPoint : MEETING_POINTS[0];
 
@@ -246,6 +278,7 @@ export function bookDrive(db: Database.Database, inp: BookDriveInput, now = Date
     ).run(id, inp.userId, offerId, slotId, `${KIND_LABEL[inp.kind]} · ${inp.minutes} Min`, priceCents(inp.kind, inp.minutes, priceConfig(db)),
       manual ? "requested" : "awaiting_payment", inp.note.trim().slice(0, 300), now, manual ? null : now,
       manual ? null : now + s.payWindowMin * 60_000, inp.kind, inp.minutes, meeting);
+    clearHoldsOf(db, inp.userId, inp.start, inp.start + inp.minutes * 60_000);
     return getBooking(db, id)!;
   })();
 }

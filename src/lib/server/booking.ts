@@ -31,20 +31,24 @@ export interface Booking {
   cancelledBy: string | null; refundCents: number; provider: string | null; providerRef: string | null;
   providerPayment: string | null; termsAt: number | null; reminded: boolean;
   kind: string | null; minutes: number | null; meetingPoint: string;
+  /** Mit Guthaben verrechnet / bei Absage einbehalten */
+  creditCents: number; chargeCents: number;
   // aus Join
   startsAt?: number | null; endsAt?: number | null; userName?: string; userEmail?: string; userPhone?: string | null;
 }
-export interface Settings { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number }
+export interface Settings { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number; cancelCutoffHour: number; lateChargePct: number; noShowChargePct: number }
 export interface Template { id: string; kind: TemplateKind; label: string; body: string; sort: number }
 
 export class BookingError extends Error {}
 
-const DEFAULTS: Settings = { payWindowMin: 30, freeCancelHours: 24, minLeadHours: 12, maxOpenRequests: 5 };
+const DEFAULTS: Settings = { payWindowMin: 30, freeCancelHours: 24, minLeadHours: 12, maxOpenRequests: 5, cancelCutoffHour: 21, lateChargePct: 70, noShowChargePct: 75 };
 const SETTING_KEYS: Record<keyof Settings, string> = {
   payWindowMin: "pay_window_min", freeCancelHours: "free_cancel_hours", minLeadHours: "min_lead_hours", maxOpenRequests: "max_open_requests",
+  cancelCutoffHour: "cancel_cutoff_hour", lateChargePct: "late_charge_pct", noShowChargePct: "no_show_charge_pct",
 };
 export const SETTING_LIMITS: Record<keyof Settings, [number, number]> = {
   payWindowMin: [10, 24 * 60], freeCancelHours: [0, 14 * 24], minLeadHours: [0, 14 * 24], maxOpenRequests: [1, 50],
+  cancelCutoffHour: [12, 24], lateChargePct: [0, 100], noShowChargePct: [0, 100],
 };
 
 // ---------- Mapping ----------------------------------------------------------
@@ -68,6 +72,7 @@ const mapBooking = (r: Row): Booking => ({
   refundCents: r.refund_cents as number, provider: (r.provider as string) ?? null, providerRef: (r.provider_ref as string) ?? null,
   providerPayment: (r.provider_payment as string) ?? null, termsAt: (r.terms_at as number) ?? null, reminded: !!r.reminded,
   kind: (r.kind as string) ?? null, minutes: (r.minutes as number) ?? null, meetingPoint: (r.meeting_point as string) ?? "",
+  creditCents: (r.credit_cents as number) ?? 0, chargeCents: (r.charge_cents as number) ?? 0,
   startsAt: (r.starts_at as number) ?? null, endsAt: (r.ends_at as number) ?? null,
   userName: r.user_name as string | undefined, userEmail: r.user_email as string | undefined, userPhone: (r.user_phone as string) ?? null,
 });
@@ -237,7 +242,7 @@ export function listRecentPaid(db: Database.Database, limit = 30): Booking[] {
   return (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'paid' ORDER BY b.paid_at DESC LIMIT ?`).all(limit) as Row[]).map(mapBooking);
 }
 
-function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage" | "kind" | "minutes" | "meetingPoint">): void {
+function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage" | "kind" | "minutes" | "meetingPoint" | "creditCents" | "chargeCents">): void {
   db.prepare(
     `INSERT INTO bookings (id,user_id,offer_id,slot_id,package_id,title,price_cents,status,student_note,created_at,pay_deadline)
      VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
@@ -374,7 +379,8 @@ export function markPaid(
     const b = getBooking(db, bookingId);
     if (!b) return { ok: false, reason: "not_found" };
     if (b.status === "paid") return { ok: true, booking: b, already: true };
-    if (p.amountCents !== null && p.amountCents !== b.priceCents) return { ok: false, reason: "amount", booking: b };
+    // Erwartet wird der Preis abzüglich des verrechneten Guthabens.
+    if (p.amountCents !== null && p.amountCents !== b.priceCents - b.creditCents) return { ok: false, reason: "amount", booking: b };
     if (b.status !== "awaiting_payment" && b.status !== "expired") return { ok: false, reason: "conflict", booking: b };
     if (b.slotId) {
       const slot = getSlot(db, b.slotId);

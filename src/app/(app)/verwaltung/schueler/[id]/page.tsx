@@ -9,6 +9,8 @@ import { CLASS_LABEL, KIND_LABEL, TRAINING_CLASSES, type DriveKind } from "@/lib
 import { dayKey, fmtDate } from "@/lib/time";
 import { ProgressView } from "@/components/training/ProgressView";
 import { StudentTools } from "../../StudentTools";
+import { CreditForm } from "./CreditForm";
+import { creditBalance, CREDIT_LABEL, listCredit } from "@/lib/server/credit";
 import { currentPackage } from "@/lib/server/repo";
 import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice } from "@/lib/language-package";
@@ -163,6 +165,25 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
           )}
         </section>
       )}
+
+      <section className="card">
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <h2 style={{ margin: 0 }}>Guthaben</h2>
+          <span className="credit-big">{formatPrice(creditBalance(d, id))}</span>
+        </div>
+        <p className="hint">Entsteht bei Absagen und wird bei der nächsten Buchung automatisch verrechnet. Auszahlen nur, wenn der Schüler die Ausbildung beendet oder es verlangt.</p>
+        {listCredit(d, id, 15).length > 0 && (
+          <ul className="list ledger">
+            {listCredit(d, id, 15).map((e) => (
+              <li key={e.id}>
+                <span>{CREDIT_LABEL[e.reason]}{e.note ? ` · ${e.note}` : ""} <span className="hint">· {fmtDate(e.createdAt)}</span></span>
+                <strong className={e.amountCents < 0 ? "neg" : "pos"}>{e.amountCents > 0 ? "+" : "−"}{formatPrice(Math.abs(e.amountCents))}</strong>
+              </li>
+            ))}
+          </ul>
+        )}
+        <CreditForm userId={id} />
+      </section>
 
       <section className="card">
         <h2>Sprachpaket</h2>

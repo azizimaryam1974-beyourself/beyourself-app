@@ -1,64 +1,94 @@
 # Arbeitsweise der Fahrschule – Ausbildungsablauf (Konzept)
 
-Stand: 31.10.2026, Vorgaben von Maryam. **Noch nicht gebaut** – erst nach Klärung der offenen Fragen (unten).
+Stand: 31.10.2026, 22 Uhr – Vorgaben von Maryam, 2. Runde. **Noch nicht gebaut.**
+Offene Punkte sind mit ❓ markiert.
 
 ## Grundprinzip
 - Schüler sehen und buchen **nur, was für ihren Ausbildungsstand freigeschaltet ist**.
-  Unpassende Anfragen dürfen gar nicht erst entstehen (auch nicht über Umwege – Prüfung auf dem Server).
-- Der Schüler sieht jederzeit: **was erledigt ist, was als Nächstes kommt, was noch fehlt**.
-- Die Fahrschule sieht: welche Termine frei sind, wer wo steht.
-- Gezählt wird nur, was **stattgefunden hat** (gebucht ≠ gefahren).
+  Unpassende Anfragen entstehen gar nicht erst (Prüfung auf dem Server, nicht nur ausgeblendet).
+- **Automatisch bestätigt**, wenn alle Regeln für diesen Schüler erfüllt sind → 30 Min zum Bezahlen.
+- Gezählt wird nur, was **gefahren** wurde. Eine Stunde gilt automatisch als gefahren,
+  außer die Fahrschule tippt innerhalb von 24 Std. „nicht erschienen“ oder „zu spät (> 15 Min)“.
+- Schüler und Fahrschule sehen den **Ausbildungsstand als Grafik** (zugleich digitaler Ausbildungsnachweis).
+
+## Faktoren je Schüler (Grundlage für die automatische Prüfung)
+Klasse · aktuelle Phase · gefahrene Stunden je Art (Automatik/Schalter/Überland/Autobahn/Beleuchtung/Wiederholung) ·
+vom Fahrlehrer festgelegte Mindestzahlen (Übungsfahrten, Wiederholung) · Testfahrt bestanden ·
+Prüfungsreife bestätigt · Unterlagen (Sehtest, Erste Hilfe, Antrag gestellt, Prüfauftrag liegt vor) ·
+Theorieprüfung bestanden · Grundbetrag bezahlt · Guthaben/offene Beträge · Anzahl „nicht erschienen“ ·
+max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Notizen des Fahrlehrers.
 
 ## Kalender
-- Arbeitszeit: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**.
-- Raster **45 Minuten**. Schüler buchen **immer 2 × 45 = 90 Minuten** am Stück.
-  Ausnahmen: Testfahrt und Warmstunde (30 Min).
-- Beleuchtungsfahrt (Dunkelheit) nur buchbar, wenn es zu der Zeit **tatsächlich dunkel** ist
-  (nach Sonnenuntergang, abhängig vom Datum) – z. B. nie 12 Uhr mittags.
+- Rahmen: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**. Darin eine **Wochenvorlage** je Fahrlehrer
+  (wann er fährt, Pausen); einzelne Tage/Zeiten mit einem Tipp sperren.
+- **Keine Sonntage, keine Feiertage in Hessen** (jedes Jahr automatisch berechnet, inkl. Ostern/Pfingsten/Fronleichnam).
+- Raster **45 Min**. **Übungsfahrten immer 90 Min** (2 × 45). Testfahrt und Warmstunde 30 Min.
+- **Beleuchtungsfahrt** nur, wenn es tatsächlich dunkel ist (Sonnenuntergang am Standort, je Datum berechnet).
+- Treffpunkt je Termin (Fahrschule / TÜV / vereinbart) – wichtig für Autowechsel am TÜV.
+- Ein Fahrlehrer (Maryam), Schalt- und Automatikauto immer verfügbar → keine Fahrzeugplanung nötig.
+- Übersichtliches Design: Tages-/Wochenansicht, Farben je Art, frei/gebucht auf einen Blick.
 
-## Preise (inkl. MwSt., Stand 31.10.2026)
-| Leistung | Dauer | Preis |
-|---|---|---|
-| Übungsfahrt | 45 Min | 68 € |
-| Sonderfahrt (Überland/Autobahn/Beleuchtung) | 45 Min | 75 € |
-| Warmstunde vor der Prüfung | 30 Min | 45 € |
-| Testfahrt (B197) | 30 Min | 45 € – Admin kann auf 45 Min / 68 € umstellen |
-| Praktische Prüfung (Gebühr) | – | 200 € |
-| Theorieprüfung (Gebühr) | – | 70 € |
+## Sonderfahrten (B, B197, B78)
+5 × Überland, 4 × Autobahn, 3 × Beleuchtung (je 45 Min).
+**Zuerst je einmal 90 Min Überland und 90 Min Autobahn.** Danach alle übrigen beliebig und einzeln (45 Min) buchbar.
 
 ## Ablauf je Klasse
+**B197:** 3 Std. Automatik → 10 Std. Schalter (beliebig verteilt) → Testfahrt (Fahrlehrer: bestanden / nicht bestanden
+→ dann weitere Schaltstunden) → Sonderfahrten → Wiederholung (mind. 3, Fahrlehrer kann erhöhen + Nachricht) → Prüfungsphase.
+**B (Schalter):** Übungsfahrten (Anzahl legt Fahrlehrer fest) → Sonderfahrten → Wiederholung → Fahrlehrer bestätigt
+Prüfungsreife (Nachricht an Schüler) → Prüfungsphase.
+**B78 (Automatik):** wie B, nur Automatik.
+**Umschreibung:** Übungsfahrten (Fahrlehrer legt fest) → keine Sonderfahrten → Wiederholung → Prüfungsreife → Prüfungsphase.
 
-### B197 (Prüfung auf Automatik, Schaltberechtigung durch Ausbildung)
-1. **Einstieg Automatik:** mindestens **3 Stunden** Übungsfahrt auf Automatik.
-2. **Schaltwagen:** **10 Stunden** Schalter (beliebig verteilt, Summe zählt).
-3. **Testfahrt** (Schaltkompetenz) wird freigeschaltet → Fahrlehrer bestätigt „bestanden“.
-4. **Sonderfahrten:** 5 × Überland, 4 × Autobahn, 3 × Beleuchtung (je 45 Min).
-   Reihenfolge frei, je nachdem was frei ist; gemischte 90-Min-Blöcke möglich (siehe Fragen).
-5. **Wiederholungsphase:** mindestens **3** Übungsfahrten; Fahrlehrer kann die Zahl pro Schüler erhöhen
-   (z. B. auf 6) – Schüler bekommt dazu eine Nachricht.
-6. **Prüfungsphase:** Schüler zahlt Prüfungsgebühr + Warmstunde. Den Termin **legt nur die Fahrschule fest**
-   (nach TÜV-Bestätigung) und lädt ein. Schüler bestätigt → Teilnahme verbindlich; Nichterscheinen = Geld verfallen.
+**Prüfungsphase (alle):** Voraussetzungen Theorie bestanden + Prüfauftrag liegt vor. Schüler zahlt Warmstunde + Prüfungsgebühr.
+Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. Schüler bestätigt → verbindlich.
 
-### B (alle Fahrten Schaltwagen)
-1. Übungsfahrten – **Anzahl entscheidet der Fahrlehrer**.
-2. Sonderfahrten 12 Stunden (5 Überland, 4 Autobahn, 3 Beleuchtung).
-3. Wiederholungsphase.
-4. Fahrlehrer bestätigt Prüfungsreife → Schüler bekommt Nachricht „Zertifizierung für die Prüfung“.
-5. Prüfungsphase wie oben.
+## Absagen, Ausfall, Guthaben
+- Bezahlt wird vorab. Rückgaben gehen als **Guthaben** aufs Konto (für die nächste Fahrt), nicht als Geld. ❓ siehe unten
+- **Kostenlos absagen** (100 % Guthaben) bis **24 Std. vor Beginn, spätestens 21 Uhr am Vortag** (das Frühere gilt). ❓ bestätigen
+- Wer **weniger als 24 Std. vorher bucht** („Last-Minute“), kann nicht mehr absagen.
+- **Späte Absage:** 70 % ❓ (oder 75 %) werden berechnet, Rest als Guthaben. Termin geht sofort an Warteliste + Kalender.
+  Wird er neu besetzt, entsteht kein Ausfall → ❓ volles Guthaben.
+- **Nicht erschienen oder > 15 Min zu spät:** Fahrlehrer muss nicht warten, Stunde fällt aus, ¾ des Preises werden berechnet.
 
-### B78 (alle Fahrten Automatik)
-Wie Klasse B, nur Automatik.
+## Warteliste
+Schüler tragen sich für Tag + Zeitraum ein (nur für Fahrten, die sie gerade buchen dürfen).
+Wird etwas frei: Nachricht an Platz 1, nach 30 Min ohne Reaktion an Platz 2 usw.
+Gleichzeitig ist der Termin für alle im Kalender buchbar – wer zuerst bucht, bekommt ihn.
 
-### Umschreibung
-1. Übungsfahrten – Anzahl entscheidet der Fahrlehrer.
-2. **Keine** Pflicht-Sonderfahrten.
-3. Wiederholungsphase → Fahrlehrer bestätigt Prüfungsreife → Nachricht an den Schüler.
-4. Prüfungsphase.
+## Preise (inkl. MwSt.)
+| Leistung | Dauer | Preis |
+|---|---|---|
+| Grundbetrag | – | 520 € ❓ für alle Klassen gleich? |
+| Übungsfahrt | 45 Min | 68 € (gebucht als 90 Min = 136 €) |
+| Sonderfahrt | 45 Min | 75 € |
+| Warmstunde | 30 Min | 45 € |
+| Testfahrt (B197) | 30 Min | 45 € – Admin kann auf 45 Min / 68 € umstellen |
+| Vorstellung praktische Prüfung | – | 200 € |
+| Vorstellung Theorieprüfung | – | 70 € |
+| TÜV-Gebühr Theorie (separat ausgewiesen) | – | 24,99 € |
+| TÜV-Gebühr Praxis (separat ausgewiesen) | – | 129,83 € |
 
-## Mehrere Fahrschulen, Lehrer, Rechte
-- Mehrere **Fahrschulen** mit eigenem Konto; je Fahrschule mehrere **Fahrlehrer**; ein **Inhaber/Admin** steuert alles.
-- Inhaber kann weitere Personen als Admin einladen und **jedes Recht einzeln** steuern
-  (z. B. Termine sehen ja, Zahlungen sehen nein).
+## Rollen & mehrere Fahrschulen
+- Inhaber lädt weitere Personen ein (Fahrlehrer, Admin, Büro); **jedes Recht einzeln** (z. B. Termine ja, Zahlungen nein).
+- Technisch von Anfang an für mehrere Fahrschulen gebaut; **freigeschaltet erst nach einigen Monaten Betrieb**
+  der eigenen Fahrschule (eigene Stripe-Konten, Verträge, Datenschutz je Schule).
 
-## Offene Fragen (vor dem Bau klären)
-Siehe Antwort im Chat vom 31.10.2026, 21:xx – Antworten hier eintragen.
+## Reihenfolge beim Bauen
+1. Ausbildungsstand + Regeln je Klasse, Fortschrittsgrafik, Fahrlehrer-Ansicht je Schüler
+2. Kalender neu: Rahmen, Wochenvorlage, Hessen-Feiertage, Dunkelheit, 90-Min-Buchung, automatische Bestätigung
+3. Guthaben, Absage-Regeln, nicht erschienen/zu spät, Warteliste
+4. Prüfungsphase (Einladung durch die Fahrschule), Grundbetrag, TÜV-Gebühren getrennt
+5. Rollen & Rechte
+6. Alles in der Handy-App + Push-Nachrichten
+7. Später: mehrere Fahrschulen
+
+## ❓ Noch offen
+1. Absagefrist: „24 Std. vorher, spätestens 21 Uhr am Vortag“ richtig verstanden?
+2. Späte Absage 70 % oder 75 % (wie bei „nicht erschienen“)?
+3. Termin über Warteliste neu besetzt → Schüler bekommt alles als Guthaben (kein Abzug)?
+4. Guthaben am Ende der Ausbildung: auszahlen auf Wunsch? (rechtlich prüfen)
+5. TÜV-Gebühren: über die App mitkassieren (als durchlaufender Posten) oder zahlt der Schüler direkt beim TÜV?
+6. Grundbetrag 520 € für alle Klassen, auch Umschreibung? Einmal vorab bezahlen, bevor gebucht werden kann?
+7. Standort (Ort) der Fahrschule für die Dunkelheits-Berechnung.
+8. Rechtlich prüfen lassen: Ausfallregeln (¾ Entgelt), Guthaben statt Rückzahlung, Attest-Klausel.

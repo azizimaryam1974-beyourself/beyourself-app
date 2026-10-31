@@ -32,8 +32,14 @@ Eine Stunde, zwei Gruppen:
 - **B – Video** für Teilnehmer von zu Hause (technisch testen, Kosten prüfen).
 - **C – nach Beschluss der Reform:** Anwesenheit von zu Hause anrechnen, Lernstandskontrolle, Sonderfahrten-Zahlen anpassen.
 
-## Offene Fragen an Maryam
-1. Teilnehmer zu Hause: eigene Kamera an (sichtbar, dass sie dabei sind) oder nur zuschauen?
-2. Fragen nur schriftlich – oder auch „Hand heben“ und live sprechen?
-3. Stunden aufzeichnen zum späteren Anschauen – ja/nein?
-4. Name auf dem Beamer: voller Name oder „Vorname + Initial“?
+## Entscheidungen (01.11.2026)
+1. **Kamera der Teilnehmer zu Hause:** soll später Pflicht sein – gebaut wird das erst, wenn die Reform beschlossen ist.
+   **Jetzt:** Mikrofon an/aus.
+2. **Hand heben** auf jeden Fall. **Live sprechen** ja – aber erst, wenn Maryam das Wort gibt (sonst bleibt das Mikrofon zu).
+   **Schriftliche Fragen** ja, in eigener Sprache, für Maryam übersetzt.
+   **Schutz vor Beleidigungen/Unsinn:** jede schriftliche Frage wird vor dem Anzeigen automatisch geprüft (alle Sprachen);
+   Beleidigungen/Schimpfwörter werden ausgeblendet. Auf den Beamer kommt nur, was Maryam freigibt.
+   Maryam kann einzelne Teilnehmer stummschalten oder für die Stunde sperren.
+3. **Aufzeichnen:** ja – Stunden können später angeschaut werden (Aufbewahrungsdauer festlegen; Speicherplatz außerhalb des Servers).
+   Wer das Wort bekommt, sieht vorher den Hinweis „wird aufgezeichnet“.
+4. **Name auf dem Beamer:** „Vorname + Initial“ (z. B. Lona S.).

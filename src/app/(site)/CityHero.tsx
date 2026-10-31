@@ -32,6 +32,8 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
   const [hasLoop, setHasLoop] = useState(false);
   const [hasPoster, setHasPoster] = useState(false);
   const [turning, setTurning] = useState<SignItem | null>(null);
+  const [viaVideo, setViaVideo] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const turnRef = useRef<HTMLVideoElement>(null);
   const cityRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<React.CSSProperties>({});
@@ -68,11 +70,17 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
     if (reduced.current) return go();
     const v = turnRef.current;
     if (v && (await exists(turnVideo[s.slug]))) {
+      // Echter Abbiege-Clip: erst blinkt das Auto im Standbild (auf der richtigen
+      // Seite – das kann der KI-Generator nicht zuverlässig), dann läuft das Video.
+      setViaVideo(true);
       v.src = turnVideo[s.slug];
+      v.load();
       v.onended = go;
       v.onerror = () => setTimeout(go, 400);
+      if (hasPoster && !hasLoop) await new Promise((r) => setTimeout(r, 950));
+      setPlaying(true);
       try { await v.play(); } catch { setTimeout(go, 400); }
-      setTimeout(go, 6000); // Sicherheitsnetz
+      setTimeout(go, 7000); // Sicherheitsnetz
     } else {
       setTimeout(go, 2600); // Ersatz-Animation: blinken (0,9 s) + Kameraschwenk
     }
@@ -80,7 +88,7 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
 
   return (
     <>
-      <div ref={cityRef} className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop || hasPoster ? "with-video" : ""} ${hasLoop ? "has-loop" : ""}`} aria-hidden>
+      <div ref={cityRef} className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop || hasPoster ? "with-video" : ""} ${hasLoop ? "has-loop" : ""} ${viaVideo ? "via-video" : ""} ${playing ? "playing" : ""}`} aria-hidden>
         {hasLoop && (
           <video className="city-video" src={heroLoop} poster={heroPoster} autoPlay muted loop playsInline preload="auto" />
         )}

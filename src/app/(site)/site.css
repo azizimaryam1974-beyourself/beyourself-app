@@ -175,7 +175,7 @@
 .city { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
 .city-video, .city-turn { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .city-turn { opacity: 0; transition: opacity 0.35s ease; }
-.city.turning .city-turn { opacity: 1; }
+.city.turning.playing .city-turn { opacity: 1; }
 /* Lesbarkeit: links dunkler, Licht bleibt rechts sichtbar */
 .city-veil { position: absolute; inset: 0; background:
   linear-gradient(90deg, rgba(15, 26, 44, 0.88) 0%, rgba(15, 26, 44, 0.55) 45%, rgba(15, 26, 44, 0.15) 100%),
@@ -315,3 +315,10 @@
   .city-still { object-position: 58% 50%; }
   .city.with-video .city-veil { background: linear-gradient(180deg, rgba(15, 26, 44, 0.7) 0%, rgba(15, 26, 44, 0.55) 45%, rgba(15, 26, 44, 0.85) 100%); }
 }
+
+/* Mit echtem Abbiege-Clip: Standbild bleibt ruhig (nur Blinker), dann übernimmt das Video */
+.city.via-video .city-stage { transform: none !important; filter: none !important; }
+.city.via-video .city-turn { transition: opacity 0.25s ease; }
+.city.via-video.playing .city-veil { background: linear-gradient(0deg, rgba(15, 26, 44, 0.5) 0%, transparent 30%); }
+.hero:has(.city.via-video)::after { display: none; }
+.hero:has(.city.via-video.playing) .signpost { opacity: 0; transition: opacity 0.4s ease; }

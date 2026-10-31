@@ -49,10 +49,13 @@ quiet mood. No text, no logos, no readable signs. 16:9.
 - Dauer **5 s**, Format **1280 × 720 (16:9)**. Pro Prompt 2–3 Varianten erzeugen, die beste nehmen.
   Claude kürzt die Clips danach auf die richtige Länge.
 
-**Achtung Richtung:** Das Auto schaut im Bild **zu uns**. Damit es keine Verwechslung gibt,
-sprechen die Prompts von „left/right **side of the frame**“ (Bildseite) – also so, wie
-du es auf dem Bildschirm siehst. Klasse B → biegt zur **linken Bildseite**, B197 → zur
-**rechten Bildseite**, B78 → kommt **auf die Kamera zu**.
+**Wichtig – aus Erfahrung (31.10.):**
+- **Keinen Blinker in den Prompt schreiben.** KI-Generatoren verwechseln die Blinker-Seite
+  (das Auto schaut zu uns – sein linker Blinker ist auf *unserer* rechten Seite) oder schalten
+  die Warnblinker an. **Den Blinker macht die Webseite selbst** – vor dem Video, auf der richtigen Seite.
+- **Nicht den Agent benutzen, sondern das normale Video-Werkzeug.** Der Agent schreibt Prompts
+  um („left side of the frame“ → „left turn signal“) und macht es dadurch falsch.
+- Richtung immer als **Bildseite** (wie du es am Bildschirm siehst), nie aus Sicht des Autos.
 
 ## 1 · Loop der Kreuzung → `hero-loop.mp4` (5 s)
 
@@ -64,37 +67,30 @@ reflections shimmer gently on the wet asphalt, distant lights twinkle softly.
 No other motion in the scene.
 ```
 
-## 2 · Klasse B – blinkt, biegt zur **linken Bildseite** ab → `turn-b.mp4` (5 s)
+## 2 · Klasse B – zur **linken Bildseite** → `turn-b.mp4` ✓ erledigt
+
+Vorhandenes Video (31.10.) ab Sekunde 2,5 geschnitten – passt.
+
+## 3 · Klasse B197 – zur **rechten Bildseite** → `turn-b197.mp4` (5 s)
 
 ```
-The dark sedan's turn signal on the left side of the frame blinks amber three times.
-Then the sedan pulls forward and turns smoothly toward the left side of the frame into the
-cross street. The camera follows the car in one continuous cinematic move: a smooth,
-accelerating orbit and pan to the left with a slight bank, as if the camera turns the corner
-together with the car. Golden reflections on the wet asphalt stretch and glide with the
-motion. The pedestrians stay still on the sidewalk.
-```
-
-## 3 · Klasse B197 – blinkt, biegt zur **rechten Bildseite** ab → `turn-b197.mp4` (5 s)
-
-```
-The dark sedan's turn signal on the right side of the frame blinks amber three times.
-Then the sedan pulls forward and turns smoothly toward the right side of the frame into the
-avenue with the glass towers. The camera follows the car in one continuous cinematic move:
-a smooth, accelerating orbit and pan to the right with a slight bank, as if the camera turns
-the corner together with the car. Golden reflections on the wet asphalt stretch and glide
-with the motion. The pedestrians stay still on the sidewalk.
+The dark sedan drives slowly toward the camera, then turns smoothly and exits toward the
+RIGHT EDGE of the frame, ending in a side view with the car moving to the right side of the
+screen. The camera follows in one continuous, smooth orbit to the right around the car, as
+if the camera turns the corner together with it. Golden reflections on the wet asphalt glide
+with the motion. The headlights stay steadily on; all other car lights stay off.
+The pedestrians stay still on the sidewalk.
 ```
 
 ## 4 · Klasse B78 – kommt **auf die Kamera zu** → `turn-b78.mp4` (5 s)
 
 ```
-Both headlights of the dark sedan flash once. The sedan accelerates steadily straight toward
-the camera along the center lane, growing larger in the frame with a strong 3D sense of
-depth. The camera holds low and steady at road level with a slow push-in. At the end the
-car's front fills the frame and glides past just beside the lens, its headlights blooming
-into a warm golden lens flare. Reflections on the wet asphalt stream toward the camera.
-The pedestrians stay still.
+The dark sedan accelerates steadily straight toward the camera along the center lane,
+growing larger in the frame with a strong 3D sense of depth. The camera holds low and steady
+at road level with a slow push-in. At the end the front of the car fills the frame and glides
+past just beside the lens, its headlights blooming into a warm golden lens flare. Reflections
+on the wet asphalt stream toward the camera. The headlights stay steadily on; all other car
+lights stay off. The pedestrians stay still.
 ```
 
 ## 5 · Hintergrund Klassen-Seite B → `bg-b.mp4` (6–8 Sekunden, Schleife)

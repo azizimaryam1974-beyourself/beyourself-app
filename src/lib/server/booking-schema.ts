@@ -118,6 +118,24 @@ CREATE TABLE IF NOT EXISTS drive_records (
 );
 CREATE INDEX IF NOT EXISTS idx_drive_user ON drive_records(user_id, at);
 
+CREATE TABLE IF NOT EXISTS work_template (
+  teacher_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  weekday    INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 5),
+  start_min  INTEGER NOT NULL,
+  end_min    INTEGER NOT NULL,
+  PRIMARY KEY (teacher_id, weekday, start_min)
+);
+
+CREATE TABLE IF NOT EXISTS blocks (
+  id         TEXT PRIMARY KEY,
+  teacher_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  starts_at  INTEGER NOT NULL,
+  ends_at    INTEGER NOT NULL,
+  note       TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_blocks_time ON blocks(starts_at);
+
 CREATE TABLE IF NOT EXISTS payment_events (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL
@@ -125,17 +143,7 @@ CREATE TABLE IF NOT EXISTS payment_events (
 `;
 
 const DEFAULT_OFFERS: Array<[string, string, string, number, number, number]> = [
-  // kind, title, description, minutes, needs_approval, active
-  ["slot", "Übungsfahrt", "Normale Fahrstunde (45 Minuten).", 45, 1, 1],
-  ["slot", "Doppelstunde", "Zwei Fahrstunden am Stück (90 Minuten).", 90, 1, 1],
-  ["slot", "Sonderfahrt Überland", "Pflicht-Sonderfahrt außerhalb geschlossener Ortschaften.", 45, 1, 1],
-  ["slot", "Sonderfahrt Autobahn", "Pflicht-Sonderfahrt auf der Autobahn.", 45, 1, 1],
-  ["slot", "Sonderfahrt Nacht", "Pflicht-Sonderfahrt bei Dunkelheit.", 45, 1, 1],
-  ["slot", "Praktische Prüfung", "Vorstellung zur praktischen Prüfung.", 60, 1, 1],
-  ["product", "Grundbetrag Klasse B", "Anmeldung, Theorieunterricht und Verwaltung für Klasse B.", 0, 0, 0],
-  ["product", "Grundbetrag Klasse B197", "Anmeldung, Theorieunterricht und Verwaltung für Klasse B197.", 0, 0, 0],
-  ["product", "Grundbetrag Klasse B78", "Anmeldung, Theorieunterricht und Verwaltung für Klasse B78.", 0, 0, 0],
-  ["product", "Lernmaterial / Lern-App", "Zugang zur Lern-App für die Theorieprüfung.", 0, 0, 0],
+  // kind, title, description, minutes, needs_approval, active – Fahrten und Gebühren kommen aus OFFERS_V2
   ["language", "Sprachpaket Live-Übersetzung", "Theorieunterricht live übersetzt in deine Sprache.", 0, 0, 1],
 ];
 
@@ -164,8 +172,31 @@ function migrate(db: Database.Database): void {
   }
 }
 
+/** Fahrstunden-Preise (je 45 Min) und Gebühren laut Preisliste vom 31.10.2026. */
+const OFFERS_V2: Array<[string, string, string, string, number, number, number]> = [
+  // id, kind, title, description, duration, price, active
+  ["drive-uebung", "slot", "Übungsfahrt", "Preis je 45 Min – buchbar 60, 75 oder 90 Min (anteilig).", 45, 6800, 1],
+  ["drive-sonder", "slot", "Sonderfahrt (Überland, Autobahn, Beleuchtung)", "Preis je 45 Min – buchbar 60, 75, 90 Min, Beleuchtung auch 135 Min.", 45, 7500, 1],
+  ["drive-testfahrt", "slot", "Testfahrt (B197)", "30 Min. Bei 45 Min gilt der Übungsfahrt-Preis.", 30, 4500, 1],
+  ["drive-warmstunde", "slot", "Warmstunde vor der Prüfung", "30 Min, Termin legt die Fahrschule fest.", 30, 4500, 1],
+  ["fee-grundbetrag", "product", "Grundbetrag", "Anmeldung, Theorieunterricht und Verwaltung.", 0, 52000, 0],
+  ["fee-pruefung", "product", "Vorstellung zur praktischen Prüfung", "Gebühr der Fahrschule.", 0, 20000, 0],
+  ["fee-theorie", "product", "Vorstellung zur Theorieprüfung", "Gebühr der Fahrschule.", 0, 7000, 0],
+  ["fee-tuev-praxis", "product", "TÜV-Gebühr praktische Prüfung", "Wird an den TÜV weitergeleitet.", 0, 12983, 0],
+  ["fee-tuev-theorie", "product", "TÜV-Gebühr Theorieprüfung", "Wird an den TÜV weitergeleitet.", 0, 2499, 0],
+];
+
+function addColumn(db: Database.Database, table: string, col: string, def: string): void {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  if (!cols.some((c) => c.name === col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+}
+
 export function seedBookingDefaults(db: Database.Database): void {
   migrate(db);
+  // Fahrten aus dem Kalender: Art, Länge, Treffpunkt
+  addColumn(db, "bookings", "kind", "TEXT");
+  addColumn(db, "bookings", "minutes", "INTEGER");
+  addColumn(db, "bookings", "meeting_point", "TEXT NOT NULL DEFAULT ''");
   const now = Date.now();
   const hasOffers = (db.prepare(`SELECT COUNT(*) AS n FROM offers`).get() as { n: number }).n > 0;
   if (!hasOffers) {
@@ -183,5 +214,15 @@ export function seedBookingDefaults(db: Database.Database): void {
   if (!hasTemplates) {
     const ins = db.prepare(`INSERT INTO templates (id,kind,label,body,sort) VALUES (?,?,?,?,?)`);
     DEFAULT_TEMPLATES.forEach(([kind, label, body], i) => ins.run(randomUUID(), kind, label, body, i));
+  }
+  const v2 = db.prepare(`SELECT value FROM settings WHERE key = 'offers_v2'`).get();
+  if (!v2) {
+    db.transaction(() => {
+      // Alte Beispiel-Angebote (vor der Preisliste) abschalten, Sprachpaket bleibt.
+      db.prepare(`UPDATE offers SET active = 0 WHERE id != 'sprachpaket' AND id NOT LIKE 'drive-%' AND id NOT LIKE 'fee-%'`).run();
+      const ins = db.prepare(`INSERT OR IGNORE INTO offers (id,kind,title,description,duration_min,price_cents,needs_approval,active,sort,created_at) VALUES (?,?,?,?,?,?,0,?,?,?)`);
+      OFFERS_V2.forEach(([id, kind, title, desc, dur, price, active], i) => ins.run(id, kind, title, desc, dur, price, active, i - 20, Date.now()));
+      db.prepare(`INSERT INTO settings (key,value) VALUES ('offers_v2','1')`).run();
+    })();
   }
 }

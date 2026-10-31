@@ -9,7 +9,7 @@ import { BookLaterForm } from "./BookLaterForm";
 import { orderProductAction } from "@/app/booking-actions";
 import { getOffer, isBookable, listBookingsForUser } from "@/lib/server/booking";
 import { fmtSlot } from "@/lib/time";
-import { autoCompletePast, trainingStateFor } from "@/lib/server/training-repo";
+import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
 import { ProgressView } from "@/components/training/ProgressView";
 import { CLASS_LABEL } from "@/lib/training";
 
@@ -33,7 +33,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const live = lessons.filter((l) => l.status === "live");
   const past = lessons.filter((l) => l.status === "ended").slice(0, 8);
   const price = formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS);
-  autoCompletePast(db());
+
   const training = trainingStateFor(db(), user.id);
   const langOffer = getOffer(db(), "sprachpaket");
   const canPayOnline = pkg?.status === "booked" && !!langOffer && isBookable(langOffer);

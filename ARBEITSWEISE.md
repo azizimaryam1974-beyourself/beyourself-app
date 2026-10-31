@@ -80,7 +80,7 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
 
 ## Reihenfolge beim Bauen
 1. ✓ Ausbildungsstand + Regeln je Klasse, Fortschrittsgrafik, Schülerakte (31.10.2026)
-2. Kalender neu: Rahmen, Wochenvorlage, Hessen-Feiertage, Dunkelheit, 90-Min-Buchung, automatische Bestätigung
+2. ✓ Kalender neu: Rahmen, Wochenvorlage, Hessen-Feiertage, Dunkelheit, Buchung 60/75/90/135, automatische Bestätigung (31.10.2026)
 3. Guthaben, Absage-Regeln, nicht erschienen/zu spät, Warteliste
 4. Prüfungsphase (Einladung durch die Fahrschule), Grundbetrag, TÜV-Gebühren getrennt
 5. Rollen & Rechte

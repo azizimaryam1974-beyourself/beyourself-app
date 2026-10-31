@@ -4,6 +4,7 @@ import { listBookingsByStatus } from "@/lib/server/booking";
 
 const TABS = [
   { href: "/verwaltung/kalender", label: "Kalender" },
+  { href: "/verwaltung/arbeitszeiten", label: "Arbeitszeiten" },
   { href: "/verwaltung", label: "Schüler" },
   { href: "/verwaltung/angebote", label: "Angebote & Preise" },
   { href: "/verwaltung/einstellungen", label: "Vorlagen & Regeln" },

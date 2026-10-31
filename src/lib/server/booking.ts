@@ -30,6 +30,7 @@ export interface Booking {
   decidedAt: number | null; payDeadline: number | null; paidAt: number | null; cancelledAt: number | null;
   cancelledBy: string | null; refundCents: number; provider: string | null; providerRef: string | null;
   providerPayment: string | null; termsAt: number | null; reminded: boolean;
+  kind: string | null; minutes: number | null; meetingPoint: string;
   // aus Join
   startsAt?: number | null; endsAt?: number | null; userName?: string; userEmail?: string; userPhone?: string | null;
 }
@@ -66,6 +67,7 @@ const mapBooking = (r: Row): Booking => ({
   paidAt: (r.paid_at as number) ?? null, cancelledAt: (r.cancelled_at as number) ?? null, cancelledBy: (r.cancelled_by as string) ?? null,
   refundCents: r.refund_cents as number, provider: (r.provider as string) ?? null, providerRef: (r.provider_ref as string) ?? null,
   providerPayment: (r.provider_payment as string) ?? null, termsAt: (r.terms_at as number) ?? null, reminded: !!r.reminded,
+  kind: (r.kind as string) ?? null, minutes: (r.minutes as number) ?? null, meetingPoint: (r.meeting_point as string) ?? "",
   startsAt: (r.starts_at as number) ?? null, endsAt: (r.ends_at as number) ?? null,
   userName: r.user_name as string | undefined, userEmail: r.user_email as string | undefined, userPhone: (r.user_phone as string) ?? null,
 });
@@ -235,7 +237,7 @@ export function listRecentPaid(db: Database.Database, limit = 30): Booking[] {
   return (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'paid' ORDER BY b.paid_at DESC LIMIT ?`).all(limit) as Row[]).map(mapBooking);
 }
 
-function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage">): void {
+function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage" | "kind" | "minutes" | "meetingPoint">): void {
   db.prepare(
     `INSERT INTO bookings (id,user_id,offer_id,slot_id,package_id,title,price_cents,status,student_note,created_at,pay_deadline)
      VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
@@ -311,7 +313,8 @@ export function confirmBooking(db: Database.Database, bookingId: string, message
     let autoDeclined: Booking[] = [];
     if (b.slotId) {
       const slot = getSlot(db, b.slotId);
-      if (!slot || slot.status !== "open") throw new BookingError("Der Termin ist nicht mehr frei.");
+      // Alte Termine: "open"; neue Kalender-Buchung: Zeit ist für diese Anfrage schon reserviert.
+      if (!slot || (slot.status !== "open" && !(slot.status === "reserved" && b.kind))) throw new BookingError("Der Termin ist nicht mehr frei.");
       db.prepare(`UPDATE slots SET status = 'reserved' WHERE id = ?`).run(b.slotId);
       autoDeclined = declineOthers(db, b.slotId, b.id, autoDeclineMessage, now);
     }
@@ -325,6 +328,7 @@ export function declineBooking(db: Database.Database, bookingId: string, message
   const b = getBooking(db, bookingId);
   if (!b || b.status !== "requested") throw new BookingError("Diese Anfrage ist nicht mehr offen.");
   db.prepare(`UPDATE bookings SET status = 'declined', admin_message = ?, decided_at = ? WHERE id = ?`).run(message.trim().slice(0, 1000), now, b.id);
+  if (b.slotId && b.kind) db.prepare(`UPDATE slots SET status = 'closed' WHERE id = ?`).run(b.slotId); // Zeit wird wieder frei
   return getBooking(db, b.id)!;
 }
 
@@ -334,7 +338,7 @@ export function expireDue(db: Database.Database, now = Date.now()): Booking[] {
     const due = (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'awaiting_payment' AND b.pay_deadline < ?`).all(now) as Row[]).map(mapBooking);
     for (const b of due) {
       db.prepare(`UPDATE bookings SET status = 'expired' WHERE id = ?`).run(b.id);
-      if (b.slotId) db.prepare(`UPDATE slots SET status = 'open' WHERE id = ? AND status = 'reserved'`).run(b.slotId);
+      if (b.slotId) db.prepare(`UPDATE slots SET status = ? WHERE id = ? AND status = 'reserved'`).run(b.kind ? "closed" : "open", b.slotId);
     }
     return due.map((b) => ({ ...b, status: "expired" as const }));
   })();
@@ -375,7 +379,14 @@ export function markPaid(
     if (b.slotId) {
       const slot = getSlot(db, b.slotId);
       const takenByOther = db.prepare(`SELECT 1 FROM bookings WHERE slot_id = ? AND id != ? AND status IN ('awaiting_payment','paid')`).get(b.slotId, b.id);
-      if (!slot || slot.status === "closed" || slot.status === "booked" || takenByOther) return { ok: false, reason: "conflict", booking: b };
+      let slotOk = !!slot && slot.status !== "closed" && slot.status !== "booked" && !takenByOther;
+      if (slot && slot.status === "closed" && b.kind && !takenByOther) {
+        // Frist war abgelaufen: Zahlung trotzdem annehmen, wenn die Zeit noch frei ist.
+        const clash = db.prepare(`SELECT 1 FROM slots WHERE id != ? AND status IN ('reserved','booked') AND starts_at < ? AND ends_at > ?`).get(slot.id, slot.endsAt, slot.startsAt)
+          || db.prepare(`SELECT 1 FROM blocks WHERE starts_at < ? AND ends_at > ?`).get(slot.endsAt, slot.startsAt);
+        slotOk = !clash;
+      }
+      if (!slotOk) return { ok: false, reason: "conflict", booking: b };
       db.prepare(`UPDATE slots SET status = 'booked' WHERE id = ?`).run(b.slotId);
       declineOthers(db, b.slotId, b.id, "Dieser Termin ist leider schon vergeben.", now);
     }
@@ -397,7 +408,7 @@ export function cancelByStudent(db: Database.Database, userId: string, bookingId
     if (!b || b.userId !== userId) throw new BookingError("Buchung nicht gefunden.");
     if (b.status === "requested" || b.status === "awaiting_payment") {
       db.prepare(`UPDATE bookings SET status = 'withdrawn', cancelled_at = ?, cancelled_by = 'student' WHERE id = ?`).run(now, b.id);
-      if (b.slotId && b.status === "awaiting_payment") db.prepare(`UPDATE slots SET status = 'open' WHERE id = ? AND status = 'reserved'`).run(b.slotId);
+      if (b.slotId && (b.status === "awaiting_payment" || b.kind)) db.prepare(`UPDATE slots SET status = ? WHERE id = ? AND status = 'reserved'`).run(b.kind ? "closed" : "open", b.slotId);
       return { booking: getBooking(db, b.id)!, refundCents: 0 };
     }
     if (b.status !== "paid" || !b.slotId || !b.startsAt) throw new BookingError("Diese Buchung kann online nicht abgesagt werden. Bitte melde dich bei der Fahrschule.");
@@ -406,7 +417,7 @@ export function cancelByStudent(db: Database.Database, userId: string, bookingId
       throw new BookingError(`Eine kostenlose Absage ist nur bis ${freeCancelHours} Stunden vor dem Termin möglich. Bitte melde dich bei der Fahrschule.`);
     }
     db.prepare(`UPDATE bookings SET status = 'cancelled', cancelled_at = ?, cancelled_by = 'student', refund_cents = ? WHERE id = ?`).run(now, b.priceCents, b.id);
-    db.prepare(`UPDATE slots SET status = 'open' WHERE id = ?`).run(b.slotId);
+    db.prepare(`UPDATE slots SET status = ? WHERE id = ?`).run(b.kind ? "closed" : "open", b.slotId);
     return { booking: getBooking(db, b.id)!, refundCents: b.priceCents };
   })();
 }
@@ -423,7 +434,16 @@ export function cancelByAdmin(
     const refundCents = b.status === "paid" && o.refund ? b.priceCents : 0;
     db.prepare(`UPDATE bookings SET status = 'cancelled', admin_message = ?, cancelled_at = ?, cancelled_by = 'school', refund_cents = ? WHERE id = ?`)
       .run(o.message.trim().slice(0, 1000), now, refundCents, b.id);
-    if (b.slotId && b.status !== "requested") {
+    if (b.slotId && b.kind) {
+      // Kalender-Fahrt: Zeit wird frei – außer die Fahrschule will sie nicht wieder anbieten (dann Sperrzeit).
+      const slot = getSlot(db, b.slotId);
+      db.prepare(`UPDATE slots SET status = 'closed' WHERE id = ?`).run(b.slotId);
+      if (!o.reopenSlot && slot) {
+        const teacher = db.prepare(`SELECT id FROM users WHERE role = 'teacher' ORDER BY created_at LIMIT 1`).get() as { id: string } | undefined;
+        if (teacher) db.prepare(`INSERT INTO blocks (id, teacher_id, starts_at, ends_at, note, created_at) VALUES (?,?,?,?,?,?)`)
+          .run(randomUUID(), teacher.id, slot.startsAt, slot.endsAt, "nach Absage gesperrt", now);
+      }
+    } else if (b.slotId && b.status !== "requested") {
       db.prepare(`UPDATE slots SET status = ? WHERE id = ?`).run(o.reopenSlot ? "open" : "closed", b.slotId);
     }
     return { booking: getBooking(db, b.id)!, refundCents };

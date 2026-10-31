@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getUser } from "@/lib/server/repo";
-import { autoCompletePast, trainingStateFor } from "@/lib/server/training-repo";
+import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
 import { examReadyAction, recordStatusAction, saveDocsAction, setClassAction, testfahrtAction } from "@/app/training-actions";
 import { CLASS_LABEL, KIND_LABEL, TRAINING_CLASSES, type DriveKind } from "@/lib/training";
 import { dayKey, fmtDate } from "@/lib/time";
@@ -29,7 +29,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
   const d = db();
   const user = getUser(d, id);
   if (!user || user.role !== "student") notFound();
-  autoCompletePast(d);
+
   const t = trainingStateFor(d, id);
 
   return (

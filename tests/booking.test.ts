@@ -32,11 +32,15 @@ test("Zeit: deutsche Zeit inkl. Winterzeit", () => {
   assert.equal(mondayOf("2026-11-08"), "2026-11-02");
 });
 
-test("Angebote ohne Preis sind nicht buchbar", () => {
+test("Preisliste: Fahrten je 45 Min, Gebühren hinterlegt", () => {
   const db = openDatabase(":memory:");
-  const offers = listOffers(db);
-  assert.ok(offers.some((o) => o.kind === "language" && isBookable(o)));
-  assert.ok(offers.filter((o) => o.kind === "slot").every((o) => !isBookable(o)));
+  const o = new Map(listOffers(db).map((x) => [x.id, x]));
+  assert.equal(o.get("drive-uebung")!.priceCents, 6800);
+  assert.equal(o.get("drive-sonder")!.priceCents, 7500);
+  assert.equal(o.get("fee-grundbetrag")!.priceCents, 52000);
+  assert.equal(o.get("fee-tuev-praxis")!.priceCents, 12983);
+  assert.ok(isBookable(o.get("sprachpaket")!));
+  assert.ok(!isBookable({ ...o.get("drive-uebung")!, priceCents: 0 }));
 });
 
 test("Ablauf: anfragen → bestätigen → andere automatisch abgelehnt → bezahlen", () => {

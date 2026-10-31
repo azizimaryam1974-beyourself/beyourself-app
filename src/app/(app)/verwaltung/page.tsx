@@ -7,7 +7,7 @@ import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } f
 import { StudentTools } from "./StudentTools";
 import { AdminTabs } from "./AdminTabs";
 import Link from "next/link";
-import { trainingStateFor } from "@/lib/server/training-repo";
+import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
 import { CLASS_LABEL } from "@/lib/training";
 
 export const metadata = { title: "Verwaltung" };

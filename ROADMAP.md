@@ -3,6 +3,37 @@
 Stand: 31.10.2026, 13:20 · Ziel für heute: **neue Webseite sichtbar** + **App in Expo auf dem Handy**.
 Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbindlich vor dem echten Start).
 
+## ⚠️ Angefangen, aber nicht fertig (Merkliste, Stand 31.10.2026 21 Uhr)
+**Auf dem Server fehlt noch:** die letzten 2 Updates (Kreuzung-Reparatur + Online-Buchung) →
+`cd /opt/beyourself && git pull && docker compose up -d --build`
+
+Webseite
+- [ ] Neuer Runway-Clip Klasse B (Linksabbiegen vom Startbild aus, gleiches Auto) – jetziger Clip ist ein Notbehelf
+- [ ] Hintergrund-Video Klasse B78 (`bg-b78.mp4`) fehlt
+- [ ] Echte Inhalte: Fotos, Adresse, Telefon, Bürozeiten, „Über uns“, Impressum
+- [ ] Preise auf der Webseite (jetzt bekannt, siehe ARBEITSWEISE.md) + Klasse Umschreibung bestätigt → Text anpassen
+
+Online-Buchung (gebaut, aber noch nicht im Einsatz)
+- [ ] Wird umgebaut nach ARBEITSWEISE.md (Ausbildungsablauf, 90-Min-Blöcke, Arbeitszeiten, Rechte)
+- [ ] Stripe-Konto + PayPal-Geschäftskonto (Maryam), Schlüssel in .env
+- [ ] IONOS-Mailpasswort in .env (E-Mails an Schüler)
+- [ ] Buchungsbedingungen, Widerrufsbelehrung, Datenschutz (Stripe/PayPal) rechtlich prüfen lassen
+- [ ] Pakete (z. B. 10 Fahrstunden im Voraus)
+
+Handy-App (Expo)
+- [ ] Noch nie auf Maryams iPhone in Expo Go geöffnet
+- [ ] Bisher nur Schüler-Funktionen; Kalender/Anfragen/Ausbildungsstand für Fahrlehrer fehlen
+- [ ] Push-Nachrichten fehlen (braucht EAS-Projekt)
+
+Live-Übersetzung
+- [ ] Fachbegriffe von Muttersprachlern gegenlesen (nur Farsi „rechts vor links“ geprüft)
+- [ ] Theorie-Termine/Kalender
+
+Sicherheit (Details: TODO-SICHERHEIT.md)
+- [ ] Root-Passwort ändern, SSH-Schlüssel statt Passwort, 2FA überall
+- [ ] Anthropic-Schlüssel, der im Chat stand, löschen/neu (bestätigen!), Ausgabenlimit
+- [ ] Azure-Schlüssel neu generieren, Backup außerhalb des Servers
+
 ## Bereits fertig (Stand heute)
 - [x] Web-App online: https://fahrschule-beyourself.de (IONOS VPS, HTTPS)
 - [x] Anmeldung mit Sprachpaket 30 €, Verwaltung (bezahlt/storniert, Passwort-Link, DSGVO)

@@ -132,10 +132,14 @@ fi
 # --- 7. Tägliche Sicherung ---------------------------------------------------
 say "Tägliche Datenbank-Sicherung (03:15 Uhr, 30 Tage)"
 chmod +x deploy/backup.sh
-( crontab -l 2>/dev/null | grep -v 'deploy/backup.sh' ; echo "15 3 * * * $DIR/deploy/backup.sh >> /var/log/beyourself-backup.log 2>&1" ) | crontab -
+command -v crontab >/dev/null 2>&1 || apt-get -y -qq install cron
+CURRENT_CRON=$(crontab -l 2>/dev/null | grep -v 'deploy/backup.sh' || true)
+printf '%s\n%s\n' "$CURRENT_CRON" "15 3 * * * $DIR/deploy/backup.sh >> /var/log/beyourself-backup.log 2>&1" | sed '/^$/d' | crontab -
+"$DIR/deploy/backup.sh" >/dev/null && ok "Erste Sicherung erstellt: $(ls -1 "$DIR"/backups | tail -1)"
 ok "Sicherung eingerichtet"
 
 say "Fertig"
 echo "  Adresse:      https://$DOMAIN"
 echo "  Logs:         cd $DIR && docker compose logs -f app"
 echo "  Update:       cd $DIR && bash deploy/install.sh"
+echo "  Passwort neu: cd $DIR && docker compose exec -it app npx tsx scripts/create-teacher.ts <email> \"<Name>\""

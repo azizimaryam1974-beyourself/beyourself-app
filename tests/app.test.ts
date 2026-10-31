@@ -217,3 +217,15 @@ test("DSGVO: Auskunft enthält Konto + Paket; Löschen anonymisiert, Buchung ble
   const t = createUser(db, { email: "t@b.de", name: "T", passwordHash: "x", role: "teacher" });
   assert.equal(deleteStudent(db, t.id), false, "Lehrkräfte nicht über diese Funktion löschbar");
 });
+
+// ---------- Vorlesen ----------
+import { buildSsml, escapeXml } from "../src/components/tts";
+
+test("Vorlesen: SSML mit richtiger Sprache, Sonderzeichen sicher", () => {
+  assert.equal(escapeXml(`a<b>&"c'`), "a&lt;b&gt;&amp;&quot;c&apos;");
+  assert.equal(
+    buildSsml("Priorité à droite <ok>", "fr-FR-DeniseNeural"),
+    '<speak version="1.0" xml:lang="fr-FR"><voice name="fr-FR-DeniseNeural">Priorité à droite &lt;ok&gt;</voice></speak>',
+  );
+  assert.match(buildSsml("x", "ar-SA-ZariyahNeural"), /xml:lang="ar-SA"/);
+});

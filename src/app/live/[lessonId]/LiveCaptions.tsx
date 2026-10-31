@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getSpeechToken, loadSpeechSdk } from "@/components/speech-client";
+import { getSpeechToken } from "@/components/speech-client";
+import { Speaker } from "@/components/tts";
 
 export interface Caption {
   seq: number;
@@ -31,42 +32,14 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
   const [ttsError, setTtsError] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
-  const speakRef = useRef(false);
-  const queue = useRef<Promise<void>>(Promise.resolve());
+  const speakerRef = useRef<Speaker | null>(null);
 
   // ---------- Vorlesen (Azure Neural Voice) ----------
-  const say = useCallback(
-    (text: string) => {
-      if (!language) return;
-      queue.current = queue.current.then(async () => {
-        if (!speakRef.current) return;
-        try {
-          const sdk = await loadSpeechSdk();
-          const { token, region } = await getSpeechToken();
-          const cfg = sdk.SpeechConfig.fromAuthorizationToken(token, region);
-          cfg.speechSynthesisVoiceName = language.ttsVoice;
-          const player = new sdk.SpeakerAudioDestination();
-          const audio = sdk.AudioConfig.fromSpeakerOutput(player);
-          const synth = new sdk.SpeechSynthesizer(cfg, audio);
-          await new Promise<void>((resolve) => {
-            const done = () => { try { synth.close(); } catch {} resolve(); };
-            player.onAudioEnd = done;
-            synth.speakTextAsync(
-              text,
-              (r) => { if (r.reason !== sdk.ResultReason.SynthesizingAudioCompleted) { setTtsError("Vorlesen fehlgeschlagen"); done(); } },
-              (err) => { setTtsError(String(err)); done(); },
-            );
-            setTimeout(done, 30_000); // Sicherheitsnetz
-          });
-        } catch (e) {
-          setTtsError(e instanceof Error ? e.message : "Vorlesen nicht verfügbar");
-        }
-      });
-    },
-    [language],
-  );
+  const say = useCallback((text: string) => {
+    speakerRef.current?.say(text);
+  }, []);
 
-  useEffect(() => { speakRef.current = speak; }, [speak]);
+  useEffect(() => () => speakerRef.current?.stop(), []);
 
   // ---------- Live-Verbindung ----------
   useEffect(() => {
@@ -95,13 +68,28 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
 
   const toggleSpeak = async () => {
     setTtsError(null);
-    if (!speak) {
-      // Entsperrt die Audiowiedergabe auf dem Handy (braucht eine Nutzeraktion).
-      try { await getSpeechToken(); } catch (e) { setTtsError(e instanceof Error ? e.message : "Vorlesen nicht verfügbar"); return; }
-      const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      try { const ctx = new Ctx(); await ctx.resume(); ctx.close(); } catch {}
+    if (speak) {
+      speakerRef.current?.stop();
+      speakerRef.current = null;
+      setSpeak(false);
+      return;
     }
-    setSpeak(!speak);
+    if (!language) return;
+    const sp = new Speaker(language.ttsVoice);
+    sp.onError = setTtsError;
+    try {
+      // Zuerst entsperren – noch im Fingertipp, vor jedem "await" auf das Netz.
+      await sp.unlock();
+      await getSpeechToken();
+    } catch (e) {
+      setTtsError(e instanceof Error && /NotAllowed/i.test(e.name + e.message)
+        ? "Das Handy hat den Ton blockiert. Bitte Lautstärke prüfen und noch einmal antippen."
+        : e instanceof Error ? e.message : "Vorlesen nicht verfügbar");
+      return;
+    }
+    speakerRef.current = sp;
+    setSpeak(true);
+    sp.say(language.nativeLabel); // kurzer Hörtest
   };
 
   const dir = language?.rtl ? "rtl" : "ltr";
@@ -134,6 +122,9 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
         </div>
       </div>
       {ttsError && <div className="alert alert-error">{ttsError}</div>}
+      {speak && !ttsError && (
+        <p className="hint" style={{ margin: 0 }}>Kopfhörer benutzen. Auf dem iPhone die Lautstärke-Tasten seitlich nach oben drücken.</p>
+      )}
 
       <div className="captions" ref={boxRef} onScroll={onScroll} aria-live="polite" aria-relevant="additions">
         {captions.length === 0 ? (

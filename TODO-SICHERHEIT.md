@@ -39,10 +39,12 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 - [ ] Zwei-Faktor-Anmeldung (2FA) für GitHub, Azure/Microsoft, Anthropic und IONOS.
 
 ### Server (IONOS VPS)
-- [ ] SSH nur mit Schlüssel, Passwort-Login aus, Firewall nur 22/80/443.
-- [ ] Automatische Sicherheitsupdates (`unattended-upgrades`).
-- [ ] Tägliches Backup (`deploy/backup.sh`) einrichten **und eine Wiederherstellung testen**.
-- [ ] HTTPS prüfen (Caddy holt das Zertifikat automatisch).
+- [x] Firewall nur 22/80/443 (ufw) – 31.10.2026
+- [ ] SSH nur mit Schlüssel, Passwort-Login aus.
+- [x] Automatische Sicherheitsupdates (`unattended-upgrades`) – 31.10.2026
+- [ ] Tägliches Backup (`deploy/backup.sh`, per install.sh) **und eine Wiederherstellung testen**.
+- [ ] Sicherung zusätzlich außerhalb des Servers ablegen (z. B. IONOS Object Storage).
+- [x] HTTPS aktiv, HSTS gesetzt, https://fahrschule-beyourself.de erreichbar – 31.10.2026
 
 ### App (Programmierung – erledigt Claude)
 - [x] Schutz gegen Passwort-Raten beim Login (5 Fehlversuche/15 Min pro E-Mail, 20 pro IP) – 31.10.2026
@@ -58,6 +60,8 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 - [ ] Nach den ersten Stunden: Kosten in Anthropic Console und Azure prüfen.
 
 ## Erledigt
+- [x] Server 82.165.0.233 (IONOS VPS 1-2-60), DNS @/www → Server, App online – 31.10.2026
+- [ ] ⚠ Erstes App-Passwort der Lehrkraft war im Terminal sichtbar → neu setzen (Befehl in install.sh-Ausgabe)
 - [x] Azure-Abonnement, Speech + Translator (F0, Germany West Central) – 31.10.2026
 - [x] Code auf GitHub, `.env` und Datenbank ausgeschlossen – 31.10.2026
 - [x] Claude-Übersetzung mit Azure als Reserve – 31.10.2026

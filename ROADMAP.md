@@ -25,7 +25,9 @@ Handy-App (Expo)
 - [ ] Bisher nur Schüler-Funktionen; Kalender/Anfragen/Ausbildungsstand für Fahrlehrer fehlen
 - [ ] Push-Nachrichten fehlen (braucht EAS-Projekt)
 
-Live-Übersetzung
+Live-Unterricht
+- [ ] **Hybrider Theorieunterricht** (Video, Fragen von zu Hause, Beamer-Ansicht, Theorie-Termine mit Anmeldung) – Konzept: KONZEPT-HYBRID-UNTERRICHT.md
+- [ ] Führerscheinreform (21/7404) beobachten: Präsenzpflicht, Sonderfahrten-Zahlen werden evtl. frei → in der App einstellbar machen
 - [ ] Fachbegriffe von Muttersprachlern gegenlesen (nur Farsi „rechts vor links“ geprüft)
 - [ ] Theorie-Termine/Kalender
 

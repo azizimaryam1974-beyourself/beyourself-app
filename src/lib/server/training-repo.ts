@@ -77,18 +77,18 @@ export function updateProfile(db: Database.Database, userId: string, patch: Prof
 
 export function listRecords(db: Database.Database, userId: string): StoredRecord[] {
   return (db.prepare(`SELECT * FROM drive_records WHERE user_id = ? ORDER BY at DESC, created_at DESC`).all(userId) as Row[]).map((r) => ({
-    id: r.id as string, userId: r.user_id as string, kind: r.kind as DriveKind, units: Number(r.units), status: r.status as RecordStatus,
+    id: r.id as string, userId: r.user_id as string, kind: r.kind as DriveKind, minutes: Number(r.minutes), status: r.status as RecordStatus,
     at: Number(r.at), source: r.source as string, note: r.note as string, bookingId: (r.booking_id as string) ?? null,
   }));
 }
 
-export function addRecord(db: Database.Database, r: { userId: string; kind: DriveKind; units: number; at: number; status: RecordStatus; note?: string; createdBy?: string; bookingId?: string; source?: string }): string {
+export function addRecord(db: Database.Database, r: { userId: string; kind: DriveKind; minutes: number; at: number; status: RecordStatus; note?: string; createdBy?: string; bookingId?: string; source?: string }): string {
   if (!isDriveKind(r.kind)) throw new Error("Art ungültig");
-  if (!Number.isInteger(r.units) || r.units < 1 || r.units > 4) throw new Error("Bitte 1 bis 4 Stunden.");
+  if (!Number.isInteger(r.minutes) || r.minutes < 15 || r.minutes > 240 || r.minutes % 15) throw new Error("Bitte eine Dauer zwischen 15 und 240 Minuten.");
   if (!Number.isFinite(r.at)) throw new Error("Datum ungültig");
   const id = randomUUID();
-  db.prepare(`INSERT INTO drive_records (id,user_id,kind,units,at,status,booking_id,source,note,created_by,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(id, r.userId, r.kind, r.units, r.at, r.status, r.bookingId ?? null, r.source ?? "manual", (r.note ?? "").slice(0, 300), r.createdBy ?? null, Date.now());
+  db.prepare(`INSERT INTO drive_records (id,user_id,kind,minutes,at,status,booking_id,source,note,created_by,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(id, r.userId, r.kind, r.minutes, r.at, r.status, r.bookingId ?? null, r.source ?? "manual", (r.note ?? "").slice(0, 300), r.createdBy ?? null, Date.now());
   return id;
 }
 
@@ -100,6 +100,12 @@ export function deleteRecord(db: Database.Database, id: string): void {
   db.prepare(`DELETE FROM drive_records WHERE id = ? AND source = 'manual'`).run(id);
 }
 
+/** Testfahrt 30 oder 45 Min (Einstellung der Fahrschule). */
+export function testfahrtMinutes(db: Database.Database): 30 | 45 {
+  const r = db.prepare(`SELECT value FROM settings WHERE key = 'testfahrt_minutes'`).get() as { value: string } | undefined;
+  return r?.value === "45" ? 45 : 30;
+}
+
 /** Geplante Fahrten, deren Ende vorbei ist und die 24 Std. nicht beanstandet wurden → „gefahren“. */
 export function autoCompletePast(db: Database.Database, now = Date.now()): number {
   return db.prepare(`UPDATE drive_records SET status = 'done' WHERE status = 'planned' AND at < ?`).run(now - 24 * 3_600_000).changes;
@@ -109,5 +115,5 @@ export function trainingStateFor(db: Database.Database, userId: string): { profi
   const profile = getProfile(db, userId);
   if (!profile) return null;
   const records = listRecords(db, userId);
-  return { profile, records, state: computeTraining(profile, records) };
+  return { profile, records, state: computeTraining(profile, records, { testfahrtMinutes: testfahrtMinutes(db) }) };
 }

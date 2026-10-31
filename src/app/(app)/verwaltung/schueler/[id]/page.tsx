@@ -140,7 +140,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
             <ul className="list rec-list" style={{ marginTop: 16 }}>
               {t.records.map((r) => (
                 <li key={r.id}>
-                  <span><strong>{fmtDate(r.at)}</strong> · {r.units} × {KIND_LABEL[r.kind]}{r.note && <span className="hint"> · {r.note}</span>}</span>
+                  <span><strong>{fmtDate(r.at)}</strong> · {r.minutes} Min {KIND_LABEL[r.kind]}{r.note && <span className="hint"> · {r.note}</span>}</span>
                   <span className="rec-actions">
                     <span className={`badge ${STATUS_CLS[r.status]}`}>{STATUS_LABEL[r.status]}</span>
                     <form action={recordStatusAction} className="rec-actions">

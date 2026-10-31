@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { deleteTemplateAction, saveSettingsAction, saveTemplateAction, type ActionState } from "@/app/booking-actions";
 import { FormMessage } from "@/components/booking/FormMessage";
 
-export function SettingsForm({ s }: { s: { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number } }) {
+export function SettingsForm({ s, testfahrtMinutes }: { s: { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number }; testfahrtMinutes: number }) {
   const [state, action, pending] = useActionState(saveSettingsAction, {} as ActionState);
   return (
     <form action={action}>
@@ -13,6 +13,12 @@ export function SettingsForm({ s }: { s: { payWindowMin: number; freeCancelHours
         <div className="field"><label htmlFor="fc">Kostenlos absagen bis … Std. vorher</label><input id="fc" type="number" name="freeCancelHours" min={0} max={336} defaultValue={s.freeCancelHours} /></div>
         <div className="field"><label htmlFor="ml">Anfragen frühestens … Std. vorher</label><input id="ml" type="number" name="minLeadHours" min={0} max={336} defaultValue={s.minLeadHours} /></div>
         <div className="field"><label htmlFor="mo">Max. offene Anfragen je Schüler</label><input id="mo" type="number" name="maxOpenRequests" min={1} max={50} defaultValue={s.maxOpenRequests} /></div>
+        <div className="field"><label htmlFor="tf">Testfahrt (B197)</label>
+          <select id="tf" name="testfahrtMinutes" defaultValue={String(testfahrtMinutes)}>
+            <option value="30">30 Min · 45,00 €</option>
+            <option value="45">45 Min · 68,00 €</option>
+          </select>
+        </div>
       </div>
       <FormMessage state={state} />
       <button className="btn btn-small" type="submit" disabled={pending}>Speichern</button>

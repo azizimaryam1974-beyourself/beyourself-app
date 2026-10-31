@@ -22,7 +22,8 @@ max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Noti
 - Rahmen: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**. Darin eine **Wochenvorlage** je Fahrlehrer
   (wann er fährt, Pausen); einzelne Tage/Zeiten mit einem Tipp sperren.
 - **Keine Sonntage, keine Feiertage in Hessen** (jedes Jahr automatisch berechnet, inkl. Ostern/Pfingsten/Fronleichnam).
-- „Stunde“ = **45 Min**. Raster 45 Min. **Fahrten immer 90 Min** (2 × 45); Ausnahme: die **letzte Stunde einer Phase** darf einzeln (45 Min) gebucht werden. Testfahrt und Warmstunde 30 Min.
+- „Stunde“ (Ausbildungsstunde) = **45 Min**; gezählt wird in Minuten. **Buchbar: 60, 75 oder 90 Min**, Beleuchtungsfahrt zusätzlich **135 Min** (Entscheidung 31.10., ersetzt „immer 90 Min“).
+  Angeboten werden nur Längen, nach denen der Rest der Phase genau aufgeht. Testfahrt 30 (oder 45) Min, Warmstunde 30 Min.
 - **Beleuchtungsfahrt** nur, wenn es tatsächlich dunkel ist (Sonnenuntergang in **34117 Kassel**, Rudolf-Schwander-Str. 9, je Datum berechnet).
 - Treffpunkt je Termin (Fahrschule / TÜV / vereinbart) – wichtig für Autowechsel am TÜV.
 - Ein Fahrlehrer (Maryam), Schalt- und Automatikauto immer verfügbar → keine Fahrzeugplanung nötig.
@@ -30,7 +31,7 @@ max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Noti
 
 ## Sonderfahrten (B, B197, B78)
 5 × Überland, 4 × Autobahn, 3 × Beleuchtung (je 45 Min).
-**Zuerst je einmal 90 Min Überland und 90 Min Autobahn.** Danach alle übrigen beliebig und einzeln (45 Min) buchbar.
+**Zuerst je eine Fahrt von mind. 90 Min Überland und Autobahn.** Danach alle übrigen beliebig (60/75/90, Beleuchtung auch 135).
 
 ## Ablauf je Klasse
 **B197:** 3 Std. Automatik → 10 Std. Schalter (beliebig verteilt) → Testfahrt (Fahrlehrer: bestanden / nicht bestanden
@@ -63,8 +64,8 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
 | Leistung | Dauer | Preis |
 |---|---|---|
 | Grundbetrag | – | 520 € – alle Klassen, fällig mit der Anmeldung |
-| Übungsfahrt | 45 Min | 68 € (gebucht als 90 Min = 136 €) |
-| Sonderfahrt | 45 Min | 75 € |
+| Übungsfahrt | 45 Min | 68 € → 60 Min 90,67 € · 75 Min 113,33 € · 90 Min 136,00 € |
+| Sonderfahrt | 45 Min | 75 € → 60 Min 100,00 € · 75 Min 125,00 € · 90 Min 150,00 € · 135 Min (Beleuchtung) 225,00 € |
 | Warmstunde | 30 Min | 45 € |
 | Testfahrt (B197) | 30 Min | 45 € – Admin kann auf 45 Min / 68 € umstellen |
 | Vorstellung praktische Prüfung | – | 200 € |

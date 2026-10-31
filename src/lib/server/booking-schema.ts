@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS drive_records (
   id         TEXT PRIMARY KEY,
   user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   kind       TEXT NOT NULL,
-  units      INTEGER NOT NULL CHECK (units BETWEEN 1 AND 4),
+  minutes    INTEGER NOT NULL CHECK (minutes BETWEEN 15 AND 240),
   at         INTEGER NOT NULL,
   status     TEXT NOT NULL CHECK (status IN ('planned','done','no_show','late')),
   booking_id TEXT,
@@ -151,7 +151,21 @@ const DEFAULT_TEMPLATES: Array<[string, string, string]> = [
   ["cancel", "Wetter", "Wegen der Wetterlage muss ich diesen Termin leider absagen. Den Betrag bekommst du vollständig zurück."],
 ];
 
+/** Frühe Version (31.10.) zählte in 45-Min-Einheiten → auf Minuten umstellen. */
+function migrate(db: Database.Database): void {
+  const cols = db.prepare(`PRAGMA table_info(drive_records)`).all() as Array<{ name: string }>;
+  if (cols.some((c) => c.name === "units") && !cols.some((c) => c.name === "minutes")) {
+    db.exec(`ALTER TABLE drive_records RENAME TO drive_records_old`);
+    db.exec(BOOKING_SCHEMA);
+    db.exec(`INSERT INTO drive_records (id,user_id,kind,minutes,at,status,booking_id,source,note,created_by,created_at)
+             SELECT id,user_id,kind,units*45,at,status,booking_id,source,note,created_by,created_at FROM drive_records_old`);
+    db.exec(`DROP TABLE drive_records_old`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_drive_user ON drive_records(user_id, at)`);
+  }
+}
+
 export function seedBookingDefaults(db: Database.Database): void {
+  migrate(db);
   const now = Date.now();
   const hasOffers = (db.prepare(`SELECT COUNT(*) AS n FROM offers`).get() as { n: number }).n > 0;
   if (!hasOffers) {

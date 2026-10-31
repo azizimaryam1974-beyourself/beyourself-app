@@ -48,8 +48,10 @@ export function AddRecordForm({ userId, kinds, today }: { userId: string; kinds:
           <select id="rk" name="kind">{kinds.map((k) => <option key={k.value} value={k.value}>{k.label}</option>)}</select>
         </div>
         <div className="field" style={{ margin: 0 }}>
-          <label htmlFor="ru">Stunden (45 Min)</label>
-          <select id="ru" name="units" defaultValue="2"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+          <label htmlFor="ru">Dauer</label>
+          <select id="ru" name="minutes" defaultValue="90">
+            {[30, 45, 60, 75, 90, 135, 180].map((m) => <option key={m} value={m}>{m} Min</option>)}
+          </select>
         </div>
         <div className="field" style={{ margin: 0 }}>
           <label htmlFor="rd">Datum</label>

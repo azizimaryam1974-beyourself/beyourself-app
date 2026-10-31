@@ -1,28 +1,43 @@
-import type { Counter, Phase, TrainingState } from "@/lib/training";
+import { asLessons, LESSON_MIN, type Counter, type Phase, type TrainingState } from "@/lib/training";
 
-/** Ein Segment je 45-Min-Stunde: gefahren (gold), gebucht (gestreift), offen (leer). */
+/**
+ * Ein Kästchen je Ausbildungsstunde (45 Min). Gefahren = gold, gebucht = gestreift, offen = leer.
+ * Fahrten von 60/75/90/135 Min füllen Kästchen auch anteilig.
+ */
 function Units({ c }: { c: Counter }) {
   if (c.target === null) {
     return (
       <div className="units-open">
-        <strong>{c.done}</strong> gefahren{c.planned ? ` · ${c.planned} gebucht` : ""} <span className="hint">· Anzahl legt dein Fahrlehrer fest</span>
+        <strong>{asLessons(c.done)}</strong> gefahren{c.planned ? ` · ${asLessons(c.planned)} gebucht` : ""} <span className="hint">· Anzahl legt dein Fahrlehrer fest</span>
       </div>
     );
   }
+  const L = LESSON_MIN;
   const total = Math.max(c.target, c.done + c.planned);
-  const cells = Array.from({ length: total }, (_, i) => (i < c.done ? "done" : i < c.done + c.planned ? "planned" : "open"));
+  const n = Math.ceil(total / L);
+  const cells = Array.from({ length: n }, (_, i) => {
+    const from = i * L, to = from + L;
+    const part = (a: number, b: number) => Math.max(0, Math.min(to, b) - Math.max(from, a)) / L;
+    return { done: part(0, c.done) * 100, planned: part(c.done, c.done + c.planned) * 100, extra: from >= c.target! };
+  });
+  const shown = Math.min(c.done, c.target);
   return (
-    <div className="units" role="img" aria-label={`${c.label}: ${Math.min(c.done, c.target)} von ${c.target} gefahren${c.planned ? `, ${c.planned} gebucht` : ""}`}>
-      <div className="units-bar" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
-        {cells.map((k, i) => <span key={i} className={`u ${k} ${i >= c.target! ? "extra" : ""}`} />)}
+    <div className="units" role="img" aria-label={`${c.label}: ${shown} von ${c.target} Minuten gefahren${c.planned ? `, ${c.planned} Minuten gebucht` : ""}`}>
+      <div className="units-bar" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+        {cells.map((x, i) => (
+          <span key={i} className={`u ${x.extra ? "extra" : ""}`}>
+            {x.done > 0 && <i className="f done" style={{ width: `${x.done}%` }} />}
+            {x.planned > 0 && <i className="f planned" style={{ width: `${x.planned}%` }} />}
+          </span>
+        ))}
       </div>
-      <span className="units-num">{Math.min(c.done, c.target)}/{c.target}</span>
+      <span className="units-num" title={`${shown} von ${c.target} Min`}>{asLessons(shown).replace(" Std.", "")}/{asLessons(c.target)}</span>
     </div>
   );
 }
 
 function PhaseCard({ ph, n }: { ph: Phase; n: number }) {
-  const binary = ph.id === "testfahrt" || ph.id === "reife" || ph.id === "pruefung";
+  
   return (
     <li className={`station ${ph.status}`}>
       <span className="station-dot" aria-hidden>{ph.status === "done" ? "✓" : n}</span>
@@ -34,7 +49,7 @@ function PhaseCard({ ph, n }: { ph: Phase; n: number }) {
         {ph.status !== "locked" && <p className="hint">{ph.hint}</p>}
         {ph.status !== "locked" && (
           <div className="counters">
-            {ph.counters.map((c, i) => binary ? (
+            {ph.counters.map((c, i) => c.binary ? (
               <div key={i} className={`check-item ${c.done ? "ok" : ""}`}>{c.done ? "✓" : c.planned ? "◔" : "○"} {c.label}{!c.done && c.planned ? " – gebucht" : ""}</div>
             ) : (
               <div key={i} className="counter">
@@ -68,7 +83,7 @@ export function ProgressView({ state, classLabel, compact }: { state: TrainingSt
       <ol className="road">
         {state.phases.map((ph, i) => <PhaseCard key={ph.id} ph={ph} n={i + 1} />)}
       </ol>
-      <div className="units-legend hint"><span><i className="u done" /> gefahren</span><span><i className="u planned" /> gebucht</span><span><i className="u open" /> offen</span></div>
+      <div className="units-legend hint"><span><i className="lg-done" /> gefahren</span><span><i className="lg-planned" /> gebucht</span><span><i className="lg-open" /> offen</span><span>1 Kästchen = 1 Stunde (45 Min)</span></div>
     </div>
   );
 }

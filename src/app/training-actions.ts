@@ -118,16 +118,16 @@ export async function addRecordAction(_p: ActionState, form: FormData): Promise<
   const userId = str(form, "userId");
   student(userId);
   const kind = str(form, "kind"), date = str(form, "date");
-  const units = Number(str(form, "units"));
+  const minutes = Number(str(form, "minutes"));
   if (!isDriveKind(kind)) return { error: "Bitte die Art wählen." };
   if (!isDayKey(date)) return { error: "Bitte ein Datum wählen." };
   try {
-    addRecord(db(), { userId, kind, units, at: berlinToMs(date, str(form, "time") || "12:00"), status: "done", note: str(form, "note"), createdBy: teacher.id });
+    addRecord(db(), { userId, kind, minutes, at: berlinToMs(date, str(form, "time") || "12:00"), status: "done", note: str(form, "note"), createdBy: teacher.id });
   } catch (e) {
     return { error: (e as Error).message };
   }
   refresh(userId);
-  return { ok: `${units} × ${KIND_LABEL[kind]} eingetragen.` };
+  return { ok: `${minutes} Min ${KIND_LABEL[kind]} eingetragen.` };
 }
 
 export async function recordStatusAction(form: FormData): Promise<void> {

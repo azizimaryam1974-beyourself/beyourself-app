@@ -223,6 +223,8 @@ export async function saveSettingsAction(_p: ActionState, form: FormData): Promi
     payWindowMin: Number(form.get("payWindowMin")), freeCancelHours: Number(form.get("freeCancelHours")),
     minLeadHours: Number(form.get("minLeadHours")), maxOpenRequests: Number(form.get("maxOpenRequests")),
   });
+  const tf = String(form.get("testfahrtMinutes") ?? "30") === "45" ? "45" : "30";
+  db().prepare(`INSERT INTO settings (key,value) VALUES ('testfahrt_minutes', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(tf);
   revalidatePath("/verwaltung/einstellungen");
   refresh();
   return { ok: "Gespeichert." };

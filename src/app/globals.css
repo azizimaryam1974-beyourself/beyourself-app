@@ -345,16 +345,18 @@ details.card > summary { cursor: pointer; }
 .counter-label { font-size: .85rem; font-weight: 700; margin-bottom: 4px; }
 .units { display: flex; align-items: center; gap: 10px; }
 .units-bar { flex: 1; display: grid; gap: 4px; max-width: 420px; }
-.u { display: block; height: 12px; border-radius: 4px; background: rgba(15,26,44,.08); }
-.u.done { background: var(--gold-grad); }
-.u.planned { background: repeating-linear-gradient(135deg, rgba(198,164,101,.75) 0 4px, rgba(198,164,101,.25) 4px 8px); }
+.u { display: flex; height: 12px; border-radius: 4px; background: rgba(15,26,44,.08); overflow: hidden; }
+.u .f { display: block; height: 100%; }
+.u .f.done, .lg-done { background: var(--gold-grad); }
+.u .f.planned, .lg-planned { background: repeating-linear-gradient(135deg, rgba(198,164,101,.75) 0 4px, rgba(198,164,101,.25) 4px 8px); }
+.lg-open { background: rgba(15,26,44,.08); }
 .u.extra { outline: 2px solid rgba(95,158,160,.6); outline-offset: -2px; }
-.units-num { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 44px; text-align: right; }
+.units-num { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 70px; text-align: right; white-space: nowrap; }
 .units-open { font-size: .95rem; }
 .check-item { font-weight: 600; color: var(--muted); }
 .check-item.ok { color: var(--ok); }
 .units-legend { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
-.units-legend .u { display: inline-block; width: 18px; height: 10px; vertical-align: -1px; margin-right: 4px; }
+.units-legend i { display: inline-block; width: 18px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 .progress-view.compact .station:not(.active) .counters { display: none; }
 
 /* Schülerakte (Fahrschule) */

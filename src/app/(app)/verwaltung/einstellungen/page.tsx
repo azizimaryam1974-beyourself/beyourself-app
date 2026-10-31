@@ -2,6 +2,7 @@ import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getSettings, listTemplates } from "@/lib/server/booking";
 import { mailEnabled } from "@/lib/server/mail";
+import { testfahrtMinutes } from "@/lib/server/training-repo";
 import { availableProviders } from "@/lib/server/payments/service";
 import { AdminTabs } from "../AdminTabs";
 import { SettingsForm, TemplateForm } from "./SettingsForms";
@@ -26,7 +27,7 @@ export default async function SettingsPage() {
 
       <section className="card">
         <h2>Regeln für Buchungen</h2>
-        <SettingsForm s={getSettings(d)} />
+        <SettingsForm s={getSettings(d)} testfahrtMinutes={testfahrtMinutes(d)} />
       </section>
 
       <section className="card">

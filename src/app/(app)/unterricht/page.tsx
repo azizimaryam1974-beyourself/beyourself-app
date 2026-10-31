@@ -3,7 +3,7 @@ import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { listLessons } from "@/lib/server/repo";
 import { speechConfigured, translator } from "@/lib/server/live";
-import { createLessonAction } from "../actions";
+import { createLessonAction } from "@/app/actions";
 
 export const metadata = { title: "Unterricht" };
 export const dynamic = "force-dynamic";

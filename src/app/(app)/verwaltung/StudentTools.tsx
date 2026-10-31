@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createResetLinkAction, deleteStudentAction } from "../actions";
+import { createResetLinkAction, deleteStudentAction } from "@/app/actions";
 
 /** Passwort-Link, Datenauskunft und Löschen für einen Schüler. */
 export function StudentTools({ userId, name }: { userId: string; name: string }) {

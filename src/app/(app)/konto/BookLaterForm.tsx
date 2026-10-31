@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { bookLaterAction, type FormState } from "../actions";
+import { bookLaterAction, type FormState } from "@/app/actions";
 import { LanguagePicker, type LanguageOption } from "@/components/LanguagePicker";
 
 export function BookLaterForm({ languages, price }: { languages: LanguageOption[]; price: string }) {

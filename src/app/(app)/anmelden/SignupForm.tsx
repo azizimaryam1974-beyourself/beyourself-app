@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { signupAction, type FormState } from "../actions";
+import { signupAction, type FormState } from "@/app/actions";
 import { LanguagePicker, type LanguageOption } from "@/components/LanguagePicker";
 
 export function SignupForm({ languages, price }: { languages: LanguageOption[]; price: string }) {

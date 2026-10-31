@@ -3,7 +3,7 @@ import { db } from "@/lib/server/db";
 import { listStudents } from "@/lib/server/repo";
 import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice } from "@/lib/language-package";
-import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "../actions";
+import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "@/app/actions";
 import { StudentTools } from "./StudentTools";
 
 export const metadata = { title: "Verwaltung" };

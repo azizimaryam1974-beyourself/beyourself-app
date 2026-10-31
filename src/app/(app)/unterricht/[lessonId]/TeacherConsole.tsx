@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { setLessonLiveAction } from "../../actions";
+import { setLessonLiveAction } from "@/app/actions";
 import { getSpeechToken, loadSpeechSdk } from "@/components/speech-client";
 
 type SDK = typeof import("microsoft-cognitiveservices-speech-sdk");

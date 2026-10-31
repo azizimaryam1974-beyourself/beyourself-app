@@ -31,7 +31,9 @@ export interface Listener {
   userId: string;
   /** null = hört nur das deutsche Original (z. B. Verwaltung) */
   language: TargetLanguageCode | null;
-  send(event: { type: "caption"; data: CaptionEvent } | { type: "status"; data: StatusEvent }): void;
+  /** Fahrschule sieht alle Fragen, Schüler nur freigegebene + eigene */
+  role?: "teacher" | "student";
+  send(event: { type: "caption"; data: CaptionEvent } | { type: "status"; data: StatusEvent } | { type: "qa"; data: unknown }): void;
 }
 
 export interface StoredSegment {
@@ -100,6 +102,16 @@ export class LiveHub {
     const set = new Set<TargetLanguageCode>();
     for (const l of s.listeners.values()) if (l.language) set.add(l.language);
     return [...set];
+  }
+
+  /** Jedem Zuhörer ein eigenes Ereignis schicken (z. B. Fragenliste je nach Rolle). */
+  sendEach(sessionId: string, make: (l: Listener) => { type: "qa"; data: unknown } | null): void {
+    const s = this.sessions.get(sessionId);
+    if (!s) return;
+    for (const l of s.listeners.values()) {
+      const e = make(l);
+      if (e) l.send(e);
+    }
   }
 
   setLive(sessionId: string, live: boolean): void {

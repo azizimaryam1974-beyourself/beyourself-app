@@ -6,6 +6,8 @@ import { listenerLanguage } from "@/lib/server/access";
 import { speechConfigured } from "@/lib/server/live";
 import { getLanguage } from "@/lib/languages";
 import { LiveCaptions, type Caption } from "./LiveCaptions";
+import { mayParticipate } from "@/lib/server/theory";
+import { fmtDay, fmtTime } from "@/lib/time";
 
 export const metadata = { title: "Live-Unterricht" };
 export const dynamic = "force-dynamic";
@@ -14,7 +16,8 @@ export default async function LivePage({ params }: { params: Promise<{ lessonId:
   const { lessonId } = await params;
   const user = await requireUser();
   const lesson = getLesson(db(), lessonId);
-  if (!lesson || lesson.status === "planned") notFound();
+  if (!lesson || (lesson.status === "planned" && !lesson.scheduled_at)) notFound();
+  const canAsk = user.role === "student" && mayParticipate(db(), lesson, user.id);
 
   const code = listenerLanguage(user);
   const lang = code ? getLanguage(code)! : null;
@@ -35,6 +38,9 @@ export default async function LivePage({ params }: { params: Promise<{ lessonId:
       initial={initial}
       language={lang && { code: lang.code, labelDe: lang.labelDe, nativeLabel: lang.nativeLabel, rtl: lang.rtl, ttsVoice: lang.ttsVoice }}
       canSpeak={speechConfigured()}
+      canAsk={canAsk}
+      notAllowedText={user.role === "teacher" ? "Du bist als Fahrschule angemeldet." : "Fragen können nur angemeldete Teilnehmer stellen. Melde dich unter „Theorie“ an."}
+      startsAt={lesson.scheduled_at ? `${fmtDay(lesson.scheduled_at)} um ${fmtTime(lesson.scheduled_at)} Uhr` : null}
     />
   );
 }

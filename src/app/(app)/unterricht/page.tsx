@@ -7,6 +7,10 @@ import { createLessonAction, endLessonAction } from "@/app/actions";
 import { fmtDate, fmtTime } from "@/lib/time";
 import { PageHead } from "@/components/PageHead";
 import { retentionDays } from "@/lib/server/maintenance";
+import { signupCount, upcomingLessons } from "@/lib/server/theory";
+import { deleteLessonAction } from "@/app/theory-actions";
+import { ScheduleForm } from "./ScheduleForm";
+import { dayKey, fmtDay } from "@/lib/time";
 
 export const metadata = { title: "Live-Unterricht" };
 export const dynamic = "force-dynamic";
@@ -21,7 +25,8 @@ function duration(a: string | null, b: string | null): string {
 
 export default async function TeacherHome() {
   await requireTeacher();
-  const lessons = listLessons(db(), 40);
+  const lessons = listLessons(db(), 40).filter((l) => !l.scheduled_at || l.status !== "planned");
+  const upcoming = upcomingLessons(db(), Date.now() - 4 * 3_600_000, Date.now() + 60 * 86_400_000);
   const provider = translator().name;
   const now = Date.now();
   const title = `Theorie ${new Date(now).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "short", day: "2-digit", month: "2-digit" })}, ${fmtTime(now)} Uhr`;
@@ -49,8 +54,35 @@ export default async function TeacherHome() {
           Vergisst du das Beenden, endet sie automatisch, wenn sie länger als 3 Stunden läuft und 30 Minuten nichts mehr gesprochen wurde.</p>
       </section>
 
+      <section className="card">
+        <h2>Theorie-Termine planen</h2>
+        <p className="hint">Geplante Termine sehen deine Schüler unter „Theorie“ und melden sich an (im Raum oder von zu Hause). Nur Angemeldete können in der Stunde Fragen stellen. Fahrstunden sind in dieser Zeit automatisch gesperrt.</p>
+        <ScheduleForm today={dayKey(now)} />
+        {upcoming.length > 0 && (
+          <ul className="list" style={{ marginTop: 14 }}>
+            {upcoming.map((l) => {
+              const c = signupCount(db(), l.id);
+              return (
+                <li key={l.id}>
+                  <span>
+                    <strong>{l.title}</strong>
+                    <span className="hint" style={{ display: "block" }}>{fmtDay(l.scheduled_at!)} · {fmtTime(l.scheduled_at!)} Uhr · {l.duration_min} Min · angemeldet: {c.raum} im Raum, {c.zuhause} von zu Hause</span>
+                  </span>
+                  <span className="row">
+                    <Link className="btn btn-small" href={`/unterricht/${l.id}`}>{l.status === "live" ? "Zur Stunde" : "Öffnen / starten"}</Link>
+                    {l.status === "planned" && (
+                      <form action={deleteLessonAction}><input type="hidden" name="lessonId" value={l.id} /><button className="link-btn" type="submit">löschen</button></form>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
       <form action={createLessonAction} className="card">
-        <h2>Neue Stunde</h2>
+        <h2>Spontane Stunde (ohne Termin)</h2>
         <div className="row">
           <input name="title" type="text" placeholder="z. B. Lektion 3 – Vorfahrt" defaultValue={title} style={{ flex: "1 1 260px" }} aria-label="Name der Stunde" />
           <button className="btn" type="submit">Stunde anlegen</button>
@@ -59,7 +91,7 @@ export default async function TeacherHome() {
       </form>
 
       <div className="card">
-        <h2>Stunden</h2>
+        <h2>Laufende und vergangene Stunden</h2>
         {lessons.length === 0 ? (
           <p className="hint">Noch keine Stunden.</p>
         ) : (

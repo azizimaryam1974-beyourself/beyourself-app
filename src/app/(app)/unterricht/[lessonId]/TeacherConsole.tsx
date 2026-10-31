@@ -189,7 +189,7 @@ export function TeacherConsole({ lesson, initialSent, phrases, speechLocale, spe
         </div>
         <div className="card" style={{ marginBottom: 0 }}>
           <h2>Schüler einladen</h2>
-          <p className="hint">Schüler sehen die Stunde unter „Mein Konto“, sobald sie live ist. Direktlink:</p>
+          <p className="hint">Schüler sehen die Stunde unter „Theorie“, sobald sie live ist. Den QR-Code zeigt die Beamer-Ansicht. Direktlink:</p>
           <p className="mono">{joinUrl}</p>
           <button className="btn btn-secondary btn-small" onClick={() => navigator.clipboard?.writeText(joinUrl)}>Link kopieren</button>
         </div>

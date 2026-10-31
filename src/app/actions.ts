@@ -25,6 +25,8 @@ import {
 } from "@/lib/server/repo";
 import { hub } from "@/lib/server/live";
 import { ensureProfile } from "@/lib/server/training-repo";
+import { signups } from "@/lib/server/theory";
+import { addNotification } from "@/lib/server/booking";
 import { parseSignupForm, validateSignup, type FieldErrors } from "@/lib/signup";
 import { validateSignupChoice } from "@/lib/language-package";
 import { isBookableLanguage } from "@/lib/languages";
@@ -156,8 +158,14 @@ export async function createLessonAction(form: FormData): Promise<void> {
 export async function setLessonLiveAction(lessonId: string, live: boolean): Promise<void> {
   await requireTeacher();
   if (!getLesson(db(), lessonId)) return;
+  const wasLive = getLesson(db(), lessonId)?.status === "live";
   setLessonStatus(db(), lessonId, live ? "live" : "ended");
   hub().setLive(lessonId, live);
+  // Angemeldete Schüler erfahren in der App, dass die Stunde beginnt.
+  if (live && !wasLive) {
+    const l = getLesson(db(), lessonId)!;
+    for (const s of signups(db(), lessonId)) addNotification(db(), s.userId, null, "Theorie beginnt jetzt", `„${l.title}“ hat begonnen. Unter „Theorie“ kannst du mitlesen und Fragen stellen.`);
+  }
   revalidatePath(`/unterricht/${lessonId}`);
   revalidatePath("/unterricht");
   revalidatePath("/konto");

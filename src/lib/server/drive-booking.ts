@@ -8,6 +8,7 @@ import {
 import { BookingError, getBooking, getOffer, getSettings, type Booking } from "./booking";
 import { getProfile, listRecords, testfahrtMinutes, type ProfileRow, type StoredRecord } from "./training-repo";
 import { activeHolds, clearHoldsOf, createHold, waitersFor, type Hold } from "./waitlist";
+import { theoryBusy } from "./theory";
 
 /**
  * Buchen von Fahrten direkt aus den Arbeitszeiten der Fahrschule (keine vorab angelegten Termine mehr).
@@ -133,6 +134,7 @@ export function busyBetween(db: Database.Database, from: number, to: number, for
     ...slots.map((s) => ({ start: s.starts_at, end: s.ends_at })),
     ...listBlocks(db, from, to).map((b) => ({ start: b.startsAt, end: b.endsAt })),
     ...holds.map((h) => ({ start: h.startsAt, end: h.endsAt })),
+    ...theoryBusy(db, from, to),
   ];
 }
 

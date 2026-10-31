@@ -6,6 +6,7 @@ import { speechConfigured, translator } from "@/lib/server/live";
 import { recognitionPhrases } from "@/lib/glossary";
 import { SOURCE_LANGUAGE, TARGET_LANGUAGES } from "@/lib/languages";
 import { TeacherConsole } from "./TeacherConsole";
+import { TeacherQa } from "@/components/qa/TeacherQa";
 
 export const metadata = { title: "Unterrichtskonsole" };
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export default async function ConsolePage({ params }: { params: Promise<{ lesson
   const labels = Object.fromEntries(TARGET_LANGUAGES.map((l) => [l.code, l.labelDe]));
 
   return (
+    <>
     <TeacherConsole
       lesson={{ id: lesson.id, title: lesson.title, status: lesson.status }}
       initialSent={sent}
@@ -28,5 +30,7 @@ export default async function ConsolePage({ params }: { params: Promise<{ lesson
       provider={translator().name}
       languageLabels={labels}
     />
+    <TeacherQa lessonId={lesson.id} />
+    </>
   );
 }

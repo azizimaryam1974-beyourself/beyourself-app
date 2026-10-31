@@ -184,6 +184,10 @@ export interface Lesson {
   created_at: string;
   started_at: string | null;
   ended_at: string | null;
+  /** geplanter Beginn (ms), null = spontane Stunde */
+  scheduled_at?: number | null;
+  duration_min?: number;
+  place?: string;
 }
 
 export function createLesson(db: Database.Database, title: string, createdBy: string): Lesson {

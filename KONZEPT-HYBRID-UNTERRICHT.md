@@ -1,6 +1,6 @@
 # Konzept: Hybrider Theorieunterricht (Raum + zu Hause)
 
-Stand 01.11.2026 – Idee von Maryam, ausgearbeitet von Claude. **Noch nicht gebaut.**
+Stand 01.11.2026 – Idee von Maryam, ausgearbeitet von Claude. **Teil A gebaut (01.11.2026)**, Video (B) folgt.
 
 ## Rechtlicher Rahmen (Stand 01.11.2026)
 - **Heute:** Theorieunterricht ist Präsenzpflicht. Wer von zu Hause zuschaut, bekommt die Stunde (noch) nicht als Pflichtstunde angerechnet.
@@ -28,7 +28,7 @@ Eine Stunde, zwei Gruppen:
    → Nachweis, falls Verbände/Behörde das nach der Reform verlangen.
 
 ## Reihenfolge (Vorschlag)
-- **A – sofort nützlich, auch ohne Reform:** Termine + Anmeldung, Fragen-Funktion, Beamer-Ansicht.
+- ✓ **A – sofort nützlich, auch ohne Reform:** Termine + Anmeldung, Fragen-Funktion (mit Prüfung), Hand heben, Beamer-Ansicht.
 - **B – Video** für Teilnehmer von zu Hause (technisch testen, Kosten prüfen).
 - **C – nach Beschluss der Reform:** Anwesenheit von zu Hause anrechnen, Lernstandskontrolle, Sonderfahrten-Zahlen anpassen.
 

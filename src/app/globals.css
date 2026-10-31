@@ -562,3 +562,47 @@ details.tl-row { display: block; }
 .late-cancel > summary { list-style: none; } .late-cancel > summary::-webkit-details-marker { display: none; }
 .late-box { margin-top: 10px; padding: 12px; border-radius: 12px; background: rgba(162,59,42,.06); display: grid; gap: 8px; max-width: 420px; }
 .late-box p { margin: 0; }
+
+/* Fragen im Live-Unterricht */
+.qa-panel { margin-top: 16px; padding: 16px; border-radius: var(--r-lg); background: rgba(250,247,241,.96); color: var(--text); border: 1px solid var(--glass-border); }
+.qa-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.qa-head h2 { margin: 0; }
+.qa-form { display: grid; gap: 8px; margin-bottom: 10px; }
+.qa-form textarea { width: 100%; }
+.qa-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.qa-item { padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); display: grid; gap: 4px; }
+.qa-item.on { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(198,164,101,.25); }
+.qa-item.answered { opacity: .7; }
+.qa-item.blocked { background: rgba(162,59,42,.05); border-color: rgba(162,59,42,.25); }
+.qa-who { font-weight: 800; font-size: .85rem; color: var(--copper); }
+.qa-done { color: var(--ok); font-weight: 700; }
+.qa-text { font-size: 1.02rem; }
+.qa-orig { font-size: .85rem; color: var(--muted); }
+.qa-hands { margin: 0 0 8px; }
+.qa-hands-t { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.qa-beamer-now { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px; border-radius: 12px; background: rgba(198,164,101,.18); margin-bottom: 10px; }
+.qa-blocked { margin-top: 12px; }
+.qa-done-list { margin-top: 10px; }
+
+/* Beamer-Ansicht (große Schrift, dunkel, gut lesbar aus der Entfernung) */
+.beamer { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; background: radial-gradient(1200px 600px at 80% -10%, rgba(217,154,62,.25), transparent 60%), var(--midnight); color: #f6f0e6; padding: 3vh 4vw; gap: 3vh; }
+.beamer-top { display: flex; justify-content: space-between; align-items: baseline; gap: 2vw; }
+.beamer-title { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 3rem); }
+.beamer-meta { font-size: clamp(1rem, 1.6vw, 1.6rem); color: var(--champagne); }
+.beamer-main { display: grid; place-items: center; }
+.beamer-q { max-width: 80vw; text-align: center; }
+.beamer-q-who { font-size: clamp(1.4rem, 2.4vw, 2.4rem); color: var(--champagne); margin-bottom: 2vh; font-weight: 700; }
+.beamer-q-text { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 5.5rem); line-height: 1.15; }
+.beamer-idle { display: flex; gap: 4vw; align-items: center; }
+.beamer-qr { width: min(28vw, 40vh); background: #f6f0e6; padding: 1.2vw; border-radius: 1.5vw; }
+.beamer-qr svg { display: block; width: 100%; height: auto; }
+.beamer-idle-h { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 4.2rem); }
+.beamer-idle-t { font-size: clamp(1.1rem, 2vw, 2rem); opacity: .85; margin-top: 1.5vh; max-width: 40ch; }
+.beamer-url { margin-top: 2vh; font-size: clamp(1rem, 1.6vw, 1.6rem); color: var(--champagne); }
+.beamer-captions { font-size: clamp(1.2rem, 2.2vw, 2.4rem); line-height: 1.3; min-height: 3.9em; opacity: .7; }
+.beamer-captions .last { opacity: 1; color: #fff; }
+/* Live-Seite auf dunklem Hintergrund: Knöpfe und Hinweise gut lesbar */
+.app-main .live-head .btn-secondary, .app-main .live-shell > .row .btn-secondary { color: var(--cream); border-color: rgba(233, 215, 180, 0.45); background: rgba(255, 255, 255, 0.06); }
+.app-main .live-head .hint, .app-main .live-shell > .hint { color: rgba(246, 240, 230, 0.78); }
+.app-main .captions { background: rgba(15, 26, 44, 0.72); backdrop-filter: blur(6px); }
+@media (max-width: 700px) { .captions { height: min(42vh, 420px); } }

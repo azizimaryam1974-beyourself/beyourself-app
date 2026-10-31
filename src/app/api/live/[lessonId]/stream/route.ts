@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { currentUser } from "@/lib/server/auth";
 import { lessonOr404, listenerLanguage, syncLessonLive } from "@/lib/server/access";
 import { hub } from "@/lib/server/live";
+import { db } from "@/lib/server/db";
+import { qaViewFor } from "@/lib/server/theory";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -38,8 +40,11 @@ export async function GET(req: Request, ctx: { params: Promise<{ lessonId: strin
         id: randomUUID(),
         userId: user.id,
         language,
+        role: user.role,
         send: (e) => write(`event: ${e.type}\ndata: ${JSON.stringify(e.data)}\n\n`),
       });
+      // Aktuelle Fragen sofort mitschicken
+      write(`event: qa\ndata: ${JSON.stringify(qaViewFor(db(), lessonId, { id: user.id, role: user.role }))}\n\n`);
       // Hält die Verbindung durch Proxys hindurch offen.
       const ping = setInterval(() => write(`: ping\n\n`), 20_000);
       cleanup = () => {

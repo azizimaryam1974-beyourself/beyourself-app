@@ -20,7 +20,8 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
     : user?.role === "student"
       ? [
           { href: "/termine", label: "Fahrstunden" },
-          { href: "/konto", label: "Mein Konto", match: ["/konto", "/live"] },
+          { href: "/theorie", label: "Theorie", match: ["/theorie", "/live"] },
+          { href: "/konto", label: "Mein Konto" },
         ]
       : [];
   return (

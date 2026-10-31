@@ -177,6 +177,41 @@ CREATE TABLE IF NOT EXISTS waitlist_holds (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS lesson_signups (
+  lesson_id  TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  mode       TEXT NOT NULL CHECK (mode IN ('raum','zuhause')),
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (lesson_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS lesson_questions (
+  id         TEXT PRIMARY KEY,
+  lesson_id  TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  original   TEXT NOT NULL,
+  lang       TEXT NOT NULL DEFAULT '?',
+  german     TEXT NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('visible','blocked','hidden','answered')),
+  reason     TEXT NOT NULL DEFAULT '',
+  on_beamer  INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_questions_lesson ON lesson_questions(lesson_id, created_at);
+
+CREATE TABLE IF NOT EXISTS lesson_hands (
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  raised_at INTEGER NOT NULL,
+  PRIMARY KEY (lesson_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS lesson_mutes (
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (lesson_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS payment_events (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL
@@ -238,6 +273,10 @@ export function seedBookingDefaults(db: Database.Database): void {
   addColumn(db, "bookings", "kind", "TEXT");
   addColumn(db, "bookings", "minutes", "INTEGER");
   addColumn(db, "bookings", "meeting_point", "TEXT NOT NULL DEFAULT ''");
+  // Theorie-Termine
+  addColumn(db, "lessons", "scheduled_at", "INTEGER");
+  addColumn(db, "lessons", "duration_min", "INTEGER NOT NULL DEFAULT 90");
+  addColumn(db, "lessons", "place", "TEXT NOT NULL DEFAULT ''");
   // Guthaben & Absage-Regeln
   addColumn(db, "bookings", "credit_cents", "INTEGER NOT NULL DEFAULT 0");
   addColumn(db, "bookings", "charge_cents", "INTEGER NOT NULL DEFAULT 0");

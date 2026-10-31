@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSpeechToken } from "@/components/speech-client";
 import { Speaker } from "@/components/tts";
+import { StudentQa } from "@/components/qa/StudentQa";
+import { EMPTY_QA, type QaState } from "@/components/qa/types";
 
 export interface Caption {
   seq: number;
@@ -18,11 +20,16 @@ interface Props {
   initial: Caption[];
   language: { code: string; labelDe: string; nativeLabel: string; rtl: boolean; ttsVoice: string } | null;
   canSpeak: boolean;
+  /** Darf Fragen stellen (angemeldet bzw. spontane Stunde) */
+  canAsk: boolean;
+  notAllowedText: string;
+  startsAt: string | null;
 }
 
 const SIZES = ["1.1rem", "1.35rem", "1.7rem", "2.1rem"];
 
-export function LiveCaptions({ lessonId, title, initialLive, initial, language, canSpeak }: Props) {
+export function LiveCaptions({ lessonId, title, initialLive, initial, language, canSpeak, canAsk, notAllowedText, startsAt }: Props) {
+  const [qa, setQa] = useState<QaState>(EMPTY_QA);
   const [captions, setCaptions] = useState<Caption[]>(initial);
   const [live, setLive] = useState(initialLive);
   const [connected, setConnected] = useState(false);
@@ -47,6 +54,7 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
     es.onopen = () => setConnected(true);
     es.onerror = () => setConnected(false);
     es.addEventListener("status", (e) => setLive(JSON.parse((e as MessageEvent).data).status === "live"));
+    es.addEventListener("qa", (e) => setQa(JSON.parse((e as MessageEvent).data)));
     es.addEventListener("caption", (e) => {
       const c = JSON.parse((e as MessageEvent).data) as Caption;
       setCaptions((prev) => (prev.some((p) => p.seq === c.seq) ? prev : [...prev, c].slice(-400)));
@@ -128,7 +136,7 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
 
       <div className="captions" ref={boxRef} onScroll={onScroll} aria-live="polite" aria-relevant="additions">
         {captions.length === 0 ? (
-          <div className="empty">{live ? "Warte auf den ersten Satz …" : "Die Stunde hat noch nicht begonnen."}</div>
+          <div className="empty">{live ? "Warte auf den ersten Satz …" : startsAt ? `Die Stunde beginnt ${startsAt}. Diese Seite startet dann von selbst.` : "Die Stunde hat noch nicht begonnen."}</div>
         ) : (
           captions.map((c, i) => (
             <div key={c.seq} className={`caption ${i === captions.length - 1 ? "latest" : ""}`}>
@@ -148,6 +156,7 @@ export function LiveCaptions({ lessonId, title, initialLive, initial, language, 
       {!language && (
         <p className="hint">Du siehst das deutsche Original. Mit dem Sprachpaket siehst du jeden Satz in deiner Sprache.</p>
       )}
+      <StudentQa lessonId={lessonId} qa={qa} live={live} canAsk={canAsk} notAllowedText={notAllowedText} />
     </div>
   );
 }

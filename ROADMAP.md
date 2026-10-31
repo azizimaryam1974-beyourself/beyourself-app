@@ -24,10 +24,10 @@ Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbin
 5. [ ] Test auf Handy + Laptop, dann Update auf den Server
 
 ## Baustein 2 – Handy-App mit Expo (heute)
-1. [ ] Server: Login-Schnittstelle für die App (Token statt Cookie), Live-Stream mit Token
-2. [ ] Expo-App für **iPhone** (Ordner `mobile/`): Login · Mein Konto/Sprachpaket · Live-Untertitel · Vorlesen ·
+1. [x] Server: Token-Login, /api/app/me, /lessons, /tts, Live-Stream mit Token – 31.10.2026
+2. [x] Expo-App für **iPhone** (Ordner `mobile/`, SDK 58): Login · Mein Konto/Sprachpaket · Live-Untertitel · Vorlesen ·
        Schrift größer/kleiner · Arabisch/Farsi von rechts nach links
-3. [ ] Gleiches Design wie die Webseite
+3. [x] Gleiches Design wie die Webseite
 4. [ ] Auf Maryams Handy in **Expo Go** öffnen (QR-Code)
 5. [ ] Später: echte App im App Store / Google Play (EAS Build, Apple/Google-Konten nötig)
 

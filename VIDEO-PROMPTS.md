@@ -69,7 +69,8 @@ No other motion in the scene.
 
 ## 2 · Klasse B – zur **linken Bildseite** → `turn-b.mp4` ✓ erledigt
 
-Vorhandenes Video (31.10.) ab Sekunde 2,5 geschnitten – passt.
+Vorhandenes Video (31.10.) ab Sekunde 3,0 geschnitten – davor blinkt das Auto im Clip auf der
+falschen Seite. Besser wäre ein neuer Clip mit demselben Auto wie im Loop (Prompt wie Nr. 3, nur „LEFT EDGE“).
 
 ## 3 · Klasse B197 – zur **rechten Bildseite** → `turn-b197.mp4` (5 s)
 

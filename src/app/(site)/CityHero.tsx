@@ -47,8 +47,12 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
     const W = el.clientWidth, H = el.clientHeight;
     const s = Math.max(W / 2000, H / 1125);
     const w = 2000 * s, h = 1125 * s;
-    const fx = W < 920 ? 0.58 : 0.5;
-    setStage({ width: w, height: h, left: (W - w) * fx, top: (H - h) * 0.6 });
+    // Über dem Loop-Video: genau wie das Video zentriert (sonst sitzt der Blinker
+    // auf dem Handy neben dem Auto). Nur beim Standbild gilt die eigene Ausrichtung.
+    const overVideo = el.classList.contains("has-loop");
+    const fx = overVideo ? 0.5 : W < 920 ? 0.58 : 0.5;
+    const fy = overVideo ? 0.5 : 0.6;
+    setStage({ width: w, height: h, left: (W - w) * fx, top: (H - h) * fy });
   }, []);
   useEffect(() => {
     layout();
@@ -63,27 +67,59 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
     for (const s of signs) router.prefetch(`/klasse/${s.slug}`);
   }, [heroLoop, router, signs]);
 
+  // Alles, was nach dem Klick noch "nachlaufen" könnte (Timer, Video-Ereignisse),
+  // wird hier gesammelt und beim Verlassen der Seite sauber beendet. Sonst springt
+  // die Seite nach "Zurück zur Kreuzung" wieder auf die Klassen-Seite.
+  const timers = useRef<number[]>([]);
+  const done = useRef(false);
+  const later = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)); };
+  const stopAll = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    const v = turnRef.current;
+    if (v) { v.onended = null; v.onerror = null; v.pause(); }
+  }, []);
+  const reset = useCallback(() => {
+    stopAll();
+    done.current = false;
+    setTurning(null); setViaVideo(false); setPlaying(false);
+  }, [stopAll]);
+  useEffect(() => {
+    // Zurück-Taste des Browsers (Seite aus dem Zwischenspeicher): Kreuzung neu aufbauen
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted) reset(); };
+    window.addEventListener("pageshow", onShow);
+    return () => { window.removeEventListener("pageshow", onShow); stopAll(); done.current = true; };
+  }, [reset, stopAll]);
+
   async function choose(s: SignItem) {
     if (turning) return;
+    done.current = false;
     setTurning(s);
-    const go = () => router.push(`/klasse/${s.slug}`);
+    const go = () => {
+      if (done.current) return; // genau einmal
+      done.current = true;
+      stopAll();
+      router.push(`/klasse/${s.slug}`);
+    };
     if (reduced.current) return go();
     const v = turnRef.current;
     if (v && (await exists(turnVideo[s.slug]))) {
-      // Echter Abbiege-Clip: erst blinkt das Auto im Standbild (auf der richtigen
-      // Seite – das kann der KI-Generator nicht zuverlässig), dann läuft das Video.
+      if (done.current) return;
       setViaVideo(true);
       v.src = turnVideo[s.slug];
       v.load();
       v.onended = go;
-      v.onerror = () => setTimeout(go, 400);
-      // Links/rechts: erst blinken. B78 (geradeaus): Lichthupe ist im Video selbst.
-      if (s.turn !== "straight") await new Promise((r) => setTimeout(r, 950));
+      v.onerror = () => later(go, 300);
+      // Links/rechts: kurz blinken (über dem stehenden Auto), dann läuft der Clip.
+      if (s.turn !== "straight") await new Promise((r) => later(() => r(null), 950));
+      if (done.current) return;
       setPlaying(true);
-      try { await v.play(); } catch { setTimeout(go, 400); }
-      setTimeout(go, 7000); // Sicherheitsnetz
+      try { await v.play(); } catch { later(go, 300); return; }
+      // Sicherheitsnetz nur bis kurz nach Clip-Ende – und es wird beim Verlassen gelöscht.
+      const ms = Number.isFinite(v.duration) && v.duration > 0 ? v.duration * 1000 + 800 : 6000;
+      later(go, ms);
     } else {
-      setTimeout(go, 2600); // Ersatz-Animation: blinken (0,9 s) + Kameraschwenk
+      later(go, 2600); // Ersatz-Animation: blinken (0,9 s) + Kameraschwenk
     }
   }
 

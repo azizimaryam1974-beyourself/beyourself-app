@@ -54,7 +54,7 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
     layout();
     window.addEventListener("resize", layout);
     return () => window.removeEventListener("resize", layout);
-  }, [layout, hasPoster]);
+  }, [layout, hasPoster, hasLoop]);
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -77,7 +77,8 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
       v.load();
       v.onended = go;
       v.onerror = () => setTimeout(go, 400);
-      if (hasPoster && !hasLoop) await new Promise((r) => setTimeout(r, 950));
+      // Links/rechts: erst blinken. B78 (geradeaus): Lichthupe ist im Video selbst.
+      if (s.turn !== "straight") await new Promise((r) => setTimeout(r, 950));
       setPlaying(true);
       try { await v.play(); } catch { setTimeout(go, 400); }
       setTimeout(go, 7000); // Sicherheitsnetz
@@ -93,11 +94,11 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
           <video className="city-video" src={heroLoop} poster={heroPoster} autoPlay muted loop playsInline preload="auto" />
         )}
         <video ref={turnRef} className="city-turn" muted playsInline preload="none" />
-        {!hasLoop && hasPoster && (
-          <div className="city-stage" style={stage}>
+        {(hasLoop || hasPoster) && (
+          <div className={`city-stage ${hasLoop ? "overlay-only" : ""}`} style={stage}>
             <div className="city-kb">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="city-still" src={heroPoster} alt="" />
+              {!hasLoop && <img className="city-still" src={heroPoster} alt="" />}
               <span className="blinker bl-left" />
               <span className="blinker bl-right" />
               <span className="headlights" />

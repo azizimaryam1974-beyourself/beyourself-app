@@ -322,3 +322,11 @@
 .city.via-video.playing .city-veil { background: linear-gradient(0deg, rgba(15, 26, 44, 0.5) 0%, transparent 30%); }
 .hero:has(.city.via-video)::after { display: none; }
 .hero:has(.city.via-video.playing) .signpost { opacity: 0; transition: opacity 0.4s ease; }
+
+/* Über dem laufenden Loop-Video: nur Blinker/Scheinwerfer, keine Kamerafahrt */
+.city-stage.overlay-only { z-index: 1; }
+.city-stage.overlay-only .city-kb { animation: none; }
+.city-video { z-index: 0; }
+.city-turn { z-index: 2; }
+.city-veil { z-index: 3; }
+.city.turning.turn-straight.via-video .headlights { animation: none; }

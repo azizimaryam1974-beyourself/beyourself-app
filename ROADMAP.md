@@ -18,7 +18,7 @@ Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbin
        Über uns · Kontakt (Karte, Telefon, WhatsApp, info@) · Anmeldung
 3a. [x] Stadt-Szene: Straßenschilder als Navigation (Klasse B ←, Klasse B197 →, Klasse B78 ↑) – kein BE/Anhänger, Abbiegen → Klassen-Seite
 3b. [ ] **Videos von Maryam** per KI-Generator (Prompts: VIDEO-PROMPTS.md) → in public/video/
-       ✓ hero-poster.jpg, bg-b.mp4, bg-b197.mp4 (31.10.) · turn-b.mp4 (31.10.) · offen: hero-loop, turn-b197, turn-b78, bg-b78
+       ✓ hero-poster.jpg, bg-b.mp4, bg-b197.mp4 (31.10.) · turn-b, turn-b197, turn-b78, hero-loop (31.10.) · offen: bg-b78
 3c. [ ] Echte Fotos, Telefon, Adresse, Bürozeiten
 4. [x] App-Bereiche (Konto, Live, Unterricht, Verwaltung) im neuen Design
 5. [ ] Test auf Handy + Laptop, dann Update auf den Server

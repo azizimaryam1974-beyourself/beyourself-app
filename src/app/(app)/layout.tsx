@@ -4,7 +4,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="app-main">
-        <SiteHeader />
+        <SiteHeader tone="dark" />
         <main className="wrap" style={{ paddingTop: 12 }}>{children}</main>
       </div>
       <SiteFooter />

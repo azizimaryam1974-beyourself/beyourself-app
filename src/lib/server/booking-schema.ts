@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
+import { CATALOG, CATALOG_IDS } from "../catalog";
 
 /**
  * Online-Buchung: Angebote (mit Preis), freigegebene Termine, Buchungen/Bestellungen,
@@ -230,6 +231,24 @@ export function seedBookingDefaults(db: Database.Database): void {
       const ins = db.prepare(`INSERT OR IGNORE INTO offers (id,kind,title,description,duration_min,price_cents,needs_approval,active,sort,created_at) VALUES (?,?,?,?,?,?,0,?,?,?)`);
       OFFERS_V2.forEach(([id, kind, title, desc, dur, price, active], i) => ins.run(id, kind, title, desc, dur, price, active, i - 20, Date.now()));
       db.prepare(`INSERT INTO settings (key,value) VALUES ('offers_v2','1')`).run();
+    })();
+  }
+  // v3 (31.10.2026): feste Preisliste mit Beschreibungen; alte Beispiel-Angebote löschen.
+  if (!db.prepare(`SELECT 1 FROM settings WHERE key = 'offers_v3'`).get()) {
+    db.transaction(() => {
+      const keep = new Set(CATALOG_IDS);
+      const all = db.prepare(`SELECT id FROM offers`).all() as Array<{ id: string }>;
+      for (const { id } of all) {
+        if (keep.has(id)) continue;
+        const used = db.prepare(`SELECT 1 FROM bookings WHERE offer_id = ? UNION SELECT 1 FROM slots WHERE offer_id = ?`).get(id, id);
+        if (used) db.prepare(`UPDATE offers SET active = 0, sort = 999 WHERE id = ?`).run(id);
+        else db.prepare(`DELETE FROM offers WHERE id = ?`).run(id);
+      }
+      for (const c of CATALOG) c.ids.forEach((id, i) => {
+        db.prepare(`UPDATE offers SET title = ?, description = ? WHERE id = ?`)
+          .run(c.ids.length > 1 ? `${c.title} – ${i === 0 ? "Fahrschule" : "TÜV-Gebühr"}` : c.title, i === 0 ? c.defaults.description : "", id);
+      });
+      db.prepare(`INSERT INTO settings (key,value) VALUES ('offers_v3','1')`).run();
     })();
   }
 }

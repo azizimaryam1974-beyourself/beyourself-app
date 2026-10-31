@@ -12,10 +12,10 @@ import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, isDayKey } from "@/lib/time";
 import type { DayRange } from "@/lib/calendar";
 
-export interface ActionState { ok?: string; error?: string }
+export interface ActionState { ok?: string; error?: string; warn?: string }
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 const toMin = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; };
-const refresh = () => { revalidatePath("/verwaltung/kalender"); revalidatePath("/verwaltung/arbeitszeiten"); revalidatePath("/termine"); };
+const refresh = () => { revalidatePath("/verwaltung/kalender"); revalidatePath("/verwaltung", "layout"); revalidatePath("/termine"); };
 
 async function teacherId(): Promise<string> {
   await requireTeacher();
@@ -40,7 +40,13 @@ export async function saveWorkHoursAction(_p: ActionState, form: FormData): Prom
   }
   saveTemplate(db(), tid, days);
   refresh();
-  return { ok: "Arbeitszeiten gespeichert. Schüler sehen ab sofort die neuen freien Zeiten." };
+  const names = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+  const outside = days.flatMap((r, wd) => r.filter((x) => x.from < 540 || x.to > 1380).map(() => names[wd]));
+  const lateWinter = days.flatMap((r, wd) => r.filter((x) => x.to > 1260).map(() => names[wd]));
+  const warn = outside.length || lateWinter.length
+    ? `Achtung: Dein Arbeitsrahmen ist 9–21 Uhr (Oktober–April) bzw. 9–23 Uhr (Mai–September). ${[...new Set([...outside, ...lateWinter])].join(", ")}: Zeiten außerhalb davon werden Schülern nicht angeboten. Soll der Rahmen anders sein, sag Bescheid.`
+    : undefined;
+  return { ok: "Gespeichert. Schüler sehen ab sofort die neuen freien Zeiten.", warn };
 }
 
 /** Sperrzeit: von Datum/Uhrzeit bis Datum/Uhrzeit (z. B. Urlaub, Arzttermin). */

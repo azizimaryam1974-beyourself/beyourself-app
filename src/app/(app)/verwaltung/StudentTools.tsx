@@ -11,7 +11,7 @@ export function StudentTools({ userId, name }: { userId: string; name: string })
 
   return (
     <details open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
-      <summary className="hint" style={{ cursor: "pointer" }}>Mehr …</summary>
+      <summary className="btn btn-secondary btn-small">Passwort-Link, Datenauskunft, Konto löschen</summary>
       <div style={{ display: "grid", gap: 10, marginTop: 8, minWidth: 240 }}>
         <form action={action}>
           <input type="hidden" name="userId" value={userId} />

@@ -142,9 +142,22 @@ p { margin: 0 0 1em; }
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
 /* ---------- App-Bereich (Konto, Unterricht, Verwaltung …) ---------- */
-.app-main { padding: 28px 0 80px; min-height: 70vh; background:
-  radial-gradient(900px 500px at 100% -10%, rgba(168, 200, 219, 0.35), transparent 60%),
-  radial-gradient(700px 400px at -10% 30%, rgba(233, 215, 180, 0.5), transparent 60%); }
+.app-main { position: relative; isolation: isolate; padding: 28px 0 80px; min-height: 70vh; color: var(--cream); background: var(--midnight);
+  --surface: rgba(250, 247, 241, 0.95); --surface-card: rgba(250, 247, 241, 0.95); }
+/* Gleicher Look wie die Startseite: nächtliche Stadt, Dunkelblau, warmes Licht */
+.app-main::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 85% 0%, rgba(217, 154, 62, 0.22), transparent 60%),
+    radial-gradient(700px 420px at 0% 40%, rgba(95, 158, 160, 0.16), transparent 60%),
+    linear-gradient(180deg, rgba(15, 26, 44, 0.80), rgba(15, 26, 44, 0.93) 55%, rgba(15, 26, 44, 0.97)),
+    url(/video/hero-poster.jpg) center / cover no-repeat, var(--midnight); }
+.app-main h1 { color: #f6f0e6; }
+.app-main .card, .app-main .tile-link, .app-main .student-card, .app-main details.card { color: var(--text); }
+.app-main .card h1 { color: var(--text); }
+.app-main .page-intro, .app-main main > .hint { color: rgba(246, 240, 230, 0.82); }
+.app-main .back-link { color: var(--champagne); }
+.app-main main > p a, .app-main .page-intro a { color: var(--champagne); }
+.app-main .search-row input { background: rgba(250, 247, 241, 0.95); }
 .card {
   background: var(--surface); border: 1px solid var(--glass-border); border-radius: var(--r-lg);
   padding: 24px; margin-bottom: 18px; box-shadow: var(--shadow-glass);
@@ -487,3 +500,54 @@ details.tl-row { display: block; }
   font: 700 .82rem var(--font-body); font-variant-numeric: tabular-nums; color: var(--text); cursor: pointer; display: inline-grid; place-items: center; }
 .hour-chip.struck { text-decoration: line-through; color: var(--danger); border-color: rgba(162,59,42,.45); background: rgba(162,59,42,.07); }
 .hour-chip.busy { background: rgba(15,26,44,.08); border-color: transparent; color: var(--muted); cursor: default; }
+.nav a.nav-on { background: var(--midnight); color: #f6f0e6; }
+.site-header.dark .nav a.nav-on { background: var(--gold-grad); color: var(--ink); }
+.nav .nav-quiet { opacity: .7; font-weight: 500; }
+
+/* Seitenkopf, Einstellungen, Preise */
+.page-head { margin-bottom: 22px; }
+.page-head-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.page-head h1 { margin: 0; }
+.page-intro { max-width: 62ch; margin: 8px 0 0; font-size: 1.05rem; }
+.back-link { display: inline-block; margin-bottom: 8px; font-weight: 700; text-decoration: none; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.tile-link { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; padding: 22px; border-radius: var(--r-lg); text-decoration: none; color: var(--text);
+  background: var(--surface-card); border: 1px solid var(--glass-border); box-shadow: var(--shadow-glass); transition: transform .2s var(--ease); min-height: 96px; }
+.tile-link:hover { transform: translateY(-2px); }
+.tile-icon { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-size: 1.5rem; font-weight: 800; background: var(--gold-grad); color: var(--ink); }
+.tile-link strong { display: block; font-size: 1.15rem; }
+.tile-text { display: block; color: var(--muted); margin-top: 2px; }
+.tile-go { font-size: 1.4rem; color: var(--gold-deep); }
+.price-list { display: grid; gap: 4px; }
+.price-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.price-top h2 { margin-bottom: 4px; }
+.price-top .hint { margin: 0; max-width: 52ch; }
+.price-big { font-family: var(--font-display); font-size: 2rem; line-height: 1; text-align: right; white-space: nowrap; }
+.price-big span { display: block; font-family: var(--font-body); font-size: .85rem; color: var(--muted); margin-top: 6px; }
+.price-parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 14px 0 4px; }
+.price-parts > div { display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(15,26,44,.05); }
+.price-parts .sum { background: rgba(198,164,101,.18); }
+.incl-head { margin: 14px 0 6px; font-size: .95rem; }
+.incl { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.incl li::marker { color: var(--gold-deep); }
+.test-len { margin-top: 12px; }
+.test-len .chip { cursor: pointer; }
+.edit-box { margin-top: 14px; }
+.edit-box > summary { list-style: none; display: inline-flex; }
+.edit-box > summary::-webkit-details-marker { display: none; }
+.edit-box[open] > summary { margin-bottom: 12px; }
+.price-form { display: grid; gap: 12px; padding: 14px; border-radius: 14px; background: rgba(15,26,44,.04); }
+.add-more > summary { list-style: none; display: inline-flex; margin-top: 8px; }
+.add-more > summary::-webkit-details-marker { display: none; }
+@media (max-width: 560px) { .price-big { text-align: left; } }
+.search-row { display: flex; gap: 8px; margin-bottom: 16px; max-width: 520px; }
+.search-row input { flex: 1; }
+.student-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.student-card { display: grid; gap: 6px; padding: 18px; border-radius: var(--r-lg); text-decoration: none; color: var(--text);
+  background: var(--surface-card); border: 1px solid var(--glass-border); box-shadow: var(--shadow-glass); transition: transform .2s var(--ease); }
+.student-card:hover { transform: translateY(-2px); }
+.sc-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.sc-name { font-size: 1.15rem; }
+.sc-phase { font-weight: 700; color: var(--copper); }
+.student-card .mini-bar { max-width: none; height: 8px; }
+.sc-foot { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 4px; }

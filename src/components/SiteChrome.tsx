@@ -2,42 +2,51 @@ import Link from "next/link";
 import { currentUser } from "@/lib/server/auth";
 import { logoutAction } from "@/app/actions";
 import { Brand } from "./Brand";
+import { NavLinks, type NavItem } from "./NavLinks";
+import { db } from "@/lib/server/db";
+import { listBookingsByStatus } from "@/lib/server/booking";
 
 export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }) {
   const user = await currentUser();
+  // Eingeloggt: nur das eigene Arbeits-Menü. Besucher: das Menü der Webseite.
+  const teacherOpen = user?.role === "teacher" ? listBookingsByStatus(db(), ["requested"]).length : 0;
+  const items: NavItem[] = user?.role === "teacher"
+    ? [
+        { href: "/verwaltung/kalender", label: "Kalender", badge: teacherOpen },
+        { href: "/verwaltung", label: "Schüler" },
+        { href: "/unterricht", label: "Live-Unterricht" },
+        { href: "/verwaltung/einstellungen", label: "Einstellungen" },
+      ]
+    : user?.role === "student"
+      ? [
+          { href: "/termine", label: "Fahrstunden" },
+          { href: "/konto", label: "Mein Konto", match: ["/konto", "/live"] },
+        ]
+      : [];
   return (
     <header className={`site-header ${tone === "dark" ? "dark" : ""}`}>
       <div className="wrap">
         <div className="bar">
-          <Link href="/" aria-label="Startseite" style={{ textDecoration: "none" }}>
+          <Link href="/" aria-label="Zur Startseite der Webseite" style={{ textDecoration: "none" }}>
             <Brand sub={false} id={tone} />
           </Link>
           <nav className="nav" aria-label="Hauptmenü">
-            <span className="nav-links">
-              <Link href="/#klassen">Klassen</Link>
-              <Link href="/#sprachen">Sprachen</Link>
-              <Link href="/#ueber-uns">Über uns</Link>
-              <Link href="/#kontakt">Kontakt</Link>
-            </span>
-            {user?.role === "teacher" && (
-              <>
-                <Link href="/verwaltung/kalender">Kalender</Link>
-                <Link href="/unterricht">Unterricht</Link>
-                <Link href="/verwaltung">Verwaltung</Link>
-              </>
-            )}
-            {user?.role === "student" && (
-              <>
-                <Link href="/termine">Termine</Link>
-                <Link href="/konto">Mein Konto</Link>
-              </>
-            )}
             {user ? (
-              <form action={logoutAction}>
-                <button type="submit">Abmelden</button>
-              </form>
+              <>
+                <NavLinks items={items} />
+                <Link href="/" className="nav-quiet">Webseite</Link>
+                <form action={logoutAction}>
+                  <button type="submit" className="nav-quiet">Abmelden</button>
+                </form>
+              </>
             ) : (
               <>
+                <span className="nav-links">
+                  <Link href="/#klassen">Klassen</Link>
+                  <Link href="/#sprachen">Sprachen</Link>
+                  <Link href="/#ueber-uns">Über uns</Link>
+                  <Link href="/#kontakt">Kontakt</Link>
+                </span>
                 <Link href="/login">Login</Link>
                 <Link href="/anmelden" className="btn btn-gold btn-small" style={{ marginLeft: 4 }}>Anmelden</Link>
               </>

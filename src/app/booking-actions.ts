@@ -210,7 +210,7 @@ export async function saveOfferAction(_p: ActionState, form: FormData): Promise<
       needsApproval: form.get("approval") === "on", active: form.get("active") === "on",
     });
     refresh();
-    revalidatePath("/verwaltung/angebote");
+    revalidatePath("/verwaltung", "layout");
     return { ok: `„${o.title}“ gespeichert.${o.active && o.priceCents === 0 ? " Hinweis: ohne Preis ist es nicht buchbar." : ""}` };
   } catch (e) {
     return { error: bookingErr(e) };
@@ -225,7 +225,7 @@ export async function saveSettingsAction(_p: ActionState, form: FormData): Promi
   });
   const tf = String(form.get("testfahrtMinutes") ?? "30") === "45" ? "45" : "30";
   db().prepare(`INSERT INTO settings (key,value) VALUES ('testfahrt_minutes', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(tf);
-  revalidatePath("/verwaltung/einstellungen");
+  revalidatePath("/verwaltung", "layout");
   refresh();
   return { ok: "Gespeichert." };
 }
@@ -234,7 +234,7 @@ export async function saveTemplateAction(_p: ActionState, form: FormData): Promi
   await requireTeacher();
   try {
     saveTemplate(db(), { id: str(form, "id") || undefined, kind: str(form, "kind") as TemplateKind, label: str(form, "label"), body: str(form, "body") });
-    revalidatePath("/verwaltung/einstellungen");
+    revalidatePath("/verwaltung", "layout");
     refresh();
     return { ok: "Vorlage gespeichert." };
   } catch (e) {
@@ -245,6 +245,6 @@ export async function saveTemplateAction(_p: ActionState, form: FormData): Promi
 export async function deleteTemplateAction(form: FormData): Promise<void> {
   await requireTeacher();
   deleteTemplate(db(), str(form, "id"));
-  revalidatePath("/verwaltung/einstellungen");
+  revalidatePath("/verwaltung", "layout");
   refresh();
 }

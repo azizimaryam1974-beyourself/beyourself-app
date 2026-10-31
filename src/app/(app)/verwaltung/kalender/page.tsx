@@ -11,7 +11,7 @@ import { closedReason, frameFor, sunsetMs, workIntervals, type Interval } from "
 import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime, isDayKey, mondayOf } from "@/lib/time";
 import { Countdown } from "@/components/booking/Countdown";
-import { AdminTabs } from "../AdminTabs";
+import { PageHead } from "@/components/PageHead";
 import { DecisionForm } from "./DecisionForm";
 import { CancelForm } from "./CancelForm";
 
@@ -100,8 +100,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <h1>Kalender</h1>
-      <AdminTabs active="/verwaltung/kalender" />
+      <PageHead title="Kalender" action={<Link className="btn btn-glass btn-small" href="/verwaltung/einstellungen/arbeitszeiten">Normale Woche & Urlaub</Link>} />
 
       {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
       {providers.length === 0 && (
@@ -264,7 +263,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         </div>
         <p className="hint" style={{ marginTop: 12 }}>
           <strong>Tipp:</strong> Eine freie Stunde antippen streicht sie durch (✕) – nochmal antippen gibt sie wieder frei. Über „Tag anpassen“ machst du früher Feierabend
-          oder legst für ein Datum eigene Zeiten fest. Die normale Woche stellst du unter <Link href="/verwaltung/arbeitszeiten">Arbeitszeiten</Link> ein.
+          oder legst für ein Datum eigene Zeiten fest. Deine normale Woche stellst du unter <Link href="/verwaltung/einstellungen/arbeitszeiten">Einstellungen → Arbeitszeiten</Link> ein.
         </p>
       </section>
 

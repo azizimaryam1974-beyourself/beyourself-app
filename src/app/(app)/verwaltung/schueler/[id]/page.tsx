@@ -8,7 +8,11 @@ import { examReadyAction, recordStatusAction, saveDocsAction, setClassAction, te
 import { CLASS_LABEL, KIND_LABEL, TRAINING_CLASSES, type DriveKind } from "@/lib/training";
 import { dayKey, fmtDate } from "@/lib/time";
 import { ProgressView } from "@/components/training/ProgressView";
-import { AdminTabs } from "../../AdminTabs";
+import { StudentTools } from "../../StudentTools";
+import { currentPackage } from "@/lib/server/repo";
+import { bookableLanguages, getLanguage } from "@/lib/languages";
+import { formatPrice } from "@/lib/language-package";
+import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "@/app/actions";
 import { AddRecordForm, TargetsForm } from "./Forms";
 
 export const dynamic = "force-dynamic";
@@ -31,10 +35,12 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
   if (!user || user.role !== "student") notFound();
 
   const t = trainingStateFor(d, id);
+  const cur = currentPackage(d, id);
+  const pkg = cur && cur.status !== "cancelled" ? cur : null;
 
   return (
     <>
-      <p><Link href="/verwaltung">← Alle Schüler</Link></p>
+      <Link className="back-link" href="/verwaltung">← Alle Schüler</Link>
       <div className="student-head">
         <div>
           <h1 style={{ marginBottom: 4 }}>{user.name}</h1>
@@ -52,7 +58,6 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
           <button className="btn btn-secondary btn-small" type="submit">{t ? "Klasse ändern" : "Festlegen"}</button>
         </form>
       </div>
-      <AdminTabs active="/verwaltung" />
 
       {!t ? (
         <div className="card"><p>Für diesen Schüler ist noch keine Klasse festgelegt (Anmeldung vor dem 01.11.2026). Bitte oben auswählen.</p></div>
@@ -158,6 +163,47 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
           )}
         </section>
       )}
+
+      <section className="card">
+        <h2>Sprachpaket</h2>
+        {pkg ? (
+          <div className="akte-form">
+            <div className="row" style={{ justifyContent: "space-between" }}>
+              <span><strong>{getLanguage(pkg.language)?.labelDe}</strong> · {formatPrice(pkg.priceCents)}</span>
+              <span className={`badge ${pkg.status === "paid" ? "badge-ok" : "badge-warn"}`}>{pkg.status === "paid" ? "bezahlt" : "noch nicht bezahlt"}</span>
+            </div>
+            <div className="row">
+              {pkg.status === "booked" && (
+                <form action={setPackageStatusAction}><input type="hidden" name="packageId" value={pkg.id} /><input type="hidden" name="status" value="paid" />
+                  <button className="btn btn-small" type="submit">Bar/EC bezahlt</button></form>
+              )}
+              <form action={setPackageLanguageAction} className="row">
+                <input type="hidden" name="packageId" value={pkg.id} />
+                <select name="language" defaultValue={pkg.language} aria-label="Sprache ändern" style={{ width: "auto" }}>
+                  {bookableLanguages().map((l) => <option key={l.code} value={l.code}>{l.labelDe}</option>)}
+                </select>
+                <button className="btn btn-secondary btn-small" type="submit">Sprache ändern</button>
+              </form>
+              <form action={setPackageStatusAction}><input type="hidden" name="packageId" value={pkg.id} /><input type="hidden" name="status" value="cancelled" />
+                <button className="link-btn" type="submit">Paket stornieren</button></form>
+            </div>
+          </div>
+        ) : (
+          <form action={teacherBookAction} className="row">
+            <input type="hidden" name="userId" value={id} />
+            <span className="hint">Kein Sprachpaket.</span>
+            <select name="language" aria-label="Sprache" style={{ width: "auto" }}>
+              {bookableLanguages().map((l) => <option key={l.code} value={l.code}>{l.labelDe}</option>)}
+            </select>
+            <button className="btn btn-secondary btn-small" type="submit">Für Schüler buchen</button>
+          </form>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Konto</h2>
+        <StudentTools userId={id} name={user.name} />
+      </section>
     </>
   );
 }

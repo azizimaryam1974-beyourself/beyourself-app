@@ -10,7 +10,7 @@ dann jeden Clip **aus diesem Bild** erzeugen („Image to Video“ / „Start-Fr
 
 1. **Standbild** (Prompt 0) erzeugen → als `hero-poster.jpg` speichern.
 2. **Loop** (Prompt 1) mit dem Standbild als **Start-Frame** (wenn möglich auch als End-Frame → nahtlose Schleife).
-3. **Abbiege-Clips** (Prompt 2–4) wieder mit dem Standbild als Start-Frame.
+3. **Abbiege-Clips** (Prompt 2–4: B links, B197 rechts, B78 auf die Kamera zu) wieder mit dem Standbild als Start-Frame.
 4. **Hintergründe der Klassen-Seiten** (Prompt 5–7) sind eigene Szenen, kein Start-Frame nötig.
 
 **Technische Einstellungen für alle Clips**
@@ -40,48 +40,61 @@ midnight blue, anthracite, small touches of muted teal and copper. Serene, luxur
 quiet mood. No text, no logos, no readable signs. 16:9.
 ```
 
-## 1 · Loop der Kreuzung → `hero-loop.mp4` (6–7 Sekunden)
+## Runway-Regeln (Image to Video)
 
-Start-Frame: Standbild. Wenn möglich End-Frame = Standbild (nahtlose Schleife).
+- **Start-Frame:** immer dein Kreuzungs-Bild (Original-PNG 2560 × 1440).
+- **Nur die Bewegung beschreiben** – was im Bild zu sehen ist, weiß Runway schon.
+- Jede Kamerabewegung mit **Tempo-Wort** (slow, smooth, steady …), sonst wird es beliebig.
+- Sagen, **was still bleiben soll** – sonst bewegt sich alles Mögliche.
+- Dauer **5 s**, Format **1280 × 720 (16:9)**. Pro Prompt 2–3 Varianten erzeugen, die beste nehmen.
+  Claude kürzt die Clips danach auf die richtige Länge.
 
-```
-Locked-off static camera, no camera movement. Calm evening at a wet New York intersection.
-The pedestrian signal changes from red hand to the white walking figure. The dark sedan
-stays stopped at the stop line. The waiting pedestrians calmly cross the street from left
-to right in front of the car at a natural, unhurried pace. Soft steam rises slowly from a
-manhole. Warm golden reflections shimmer gently on the wet asphalt, distant headlights
-glide softly in the background. Slow, realistic, peaceful motion, cinematic lighting,
-no sudden movements. The scene ends as it began, calm and still.
-```
+**Achtung Richtung:** Das Auto schaut im Bild **zu uns**. Damit es keine Verwechslung gibt,
+sprechen die Prompts von „left/right **side of the frame**“ (Bildseite) – also so, wie
+du es auf dem Bildschirm siehst. Klasse B → biegt zur **linken Bildseite**, B197 → zur
+**rechten Bildseite**, B78 → kommt **auf die Kamera zu**.
 
-## 2 · Klasse B – Auto biegt **links** ab → `turn-b.mp4` (3–4 Sekunden)
-
-```
-The pedestrians have finished crossing. The dark sedan drives off smoothly and turns
-LEFT into a quiet side street lined with brownstones and warm lantern light.
-The camera follows with a slow, smooth dolly forward and a gentle pan to the left,
-staying low over the wet reflective road. Warm golden light trails, calm and elegant.
-Ends looking down the quiet side street.
-```
-
-## 3 · B197 Automatik – Auto biegt **rechts** ab → `turn-b197.mp4` (3–4 Sekunden)
+## 1 · Loop der Kreuzung → `hero-loop.mp4` (5 s)
 
 ```
-The pedestrians have finished crossing. The dark sedan glides away almost silently and
-turns RIGHT onto a wide modern avenue with tall illuminated glass towers.
-The camera follows with a slow, smooth dolly forward and a gentle pan to the right over
-the wet reflective road. Soft teal and champagne reflections, effortless and smooth.
-Ends looking down the modern avenue.
+The camera holds completely still. The pedestrian signal changes from the red hand to the
+white walking figure. The pedestrians on the left walk calmly across the street in front of
+the waiting sedan. The sedan stays stopped with its headlights on. Light mist drifts slowly,
+reflections shimmer gently on the wet asphalt, distant lights twinkle softly.
+No other motion in the scene.
 ```
 
-## 4 · BE Anhänger – Auto fährt **geradeaus** → `turn-be.mp4` (3–4 Sekunden)
+## 2 · Klasse B – blinkt, biegt zur **linken Bildseite** ab → `turn-b.mp4` (5 s)
 
 ```
-The pedestrians have finished crossing. A dark SUV towing a small closed trailer drives
-STRAIGHT ahead across the intersection, away from the camera, toward an illuminated
-bridge in the distance. The camera slowly pushes forward behind it, low over the wet
-reflective road with warm golden streetlight reflections. Calm, steady, cinematic.
-Ends with the bridge lights in the distance.
+The dark sedan's turn signal on the left side of the frame blinks amber three times.
+Then the sedan pulls forward and turns smoothly toward the left side of the frame into the
+cross street. The camera follows the car in one continuous cinematic move: a smooth,
+accelerating orbit and pan to the left with a slight bank, as if the camera turns the corner
+together with the car. Golden reflections on the wet asphalt stretch and glide with the
+motion. The pedestrians stay still on the sidewalk.
+```
+
+## 3 · Klasse B197 – blinkt, biegt zur **rechten Bildseite** ab → `turn-b197.mp4` (5 s)
+
+```
+The dark sedan's turn signal on the right side of the frame blinks amber three times.
+Then the sedan pulls forward and turns smoothly toward the right side of the frame into the
+avenue with the glass towers. The camera follows the car in one continuous cinematic move:
+a smooth, accelerating orbit and pan to the right with a slight bank, as if the camera turns
+the corner together with the car. Golden reflections on the wet asphalt stretch and glide
+with the motion. The pedestrians stay still on the sidewalk.
+```
+
+## 4 · Klasse B78 – kommt **auf die Kamera zu** → `turn-b78.mp4` (5 s)
+
+```
+Both headlights of the dark sedan flash once. The sedan accelerates steadily straight toward
+the camera along the center lane, growing larger in the frame with a strong 3D sense of
+depth. The camera holds low and steady at road level with a slow push-in. At the end the
+car's front fills the frame and glides past just beside the lens, its headlights blooming
+into a warm golden lens flare. Reflections on the wet asphalt stream toward the camera.
+The pedestrians stay still.
 ```
 
 ## 5 · Hintergrund Klassen-Seite B → `bg-b.mp4` (6–8 Sekunden, Schleife)
@@ -101,13 +114,15 @@ reflecting soft teal and champagne light, a few cars glide by smoothly leaving g
 light trails. Clean, modern, calm, cinematic. No text, no logos.
 ```
 
-## 7 · Hintergrund Klassen-Seite BE → `bg-be.mp4` (6–8 Sekunden, Schleife)
+## 7 · Hintergrund Klassen-Seite B78 → `bg-b78.mp4` (5–8 s, Schleife)
+
+Text to Video (kein Start-Frame):
 
 ```
-Static camera. A riverside road leading to an illuminated suspension bridge at dusk, wet
-asphalt with warm amber reflections, a car with a small trailer drives slowly along the
-road. Wide, open, calm, cinematic, midnight blue sky with a hint of warm sunset. No text,
-no logos.
+Static camera at road level. A long, straight, wet avenue at night with warm streetlights
+converging into the distance. An elegant dark car glides slowly toward the camera from far
+away with soft headlights. Light mist drifts, golden reflections shimmer on the asphalt.
+Calm, serene, cinematic, champagne gold and midnight blue tones. No text, no logos.
 ```
 
 ---

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TurnDirection } from "@/lib/classes";
 
 export interface SignItem { slug: string; sign: string; turn: TurnDirection }
@@ -33,7 +33,26 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
   const [hasPoster, setHasPoster] = useState(false);
   const [turning, setTurning] = useState<SignItem | null>(null);
   const turnRef = useRef<HTMLVideoElement>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState<React.CSSProperties>({});
   const reduced = useRef(false);
+
+  // Bühne exakt wie "object-fit: cover" berechnen, damit Blinker/Scheinwerfer
+  // genau auf dem Auto im Standbild sitzen (Bild 2000 × 1125).
+  const layout = useCallback(() => {
+    const el = cityRef.current;
+    if (!el) return;
+    const W = el.clientWidth, H = el.clientHeight;
+    const s = Math.max(W / 2000, H / 1125);
+    const w = 2000 * s, h = 1125 * s;
+    const fx = W < 920 ? 0.58 : 0.5;
+    setStage({ width: w, height: h, left: (W - w) * fx, top: (H - h) * 0.6 });
+  }, []);
+  useEffect(() => {
+    layout();
+    window.addEventListener("resize", layout);
+    return () => window.removeEventListener("resize", layout);
+  }, [layout, hasPoster]);
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -55,20 +74,27 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
       try { await v.play(); } catch { setTimeout(go, 400); }
       setTimeout(go, 6000); // Sicherheitsnetz
     } else {
-      setTimeout(go, 1500); // Ersatz-Animation
+      setTimeout(go, 2600); // Ersatz-Animation: blinken (0,9 s) + Kameraschwenk
     }
   }
 
   return (
     <>
-      <div className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop || hasPoster ? "with-video" : ""}`} aria-hidden>
+      <div ref={cityRef} className={`city ${turning ? `turning turn-${turning.turn}` : ""} ${hasLoop || hasPoster ? "with-video" : ""} ${hasLoop ? "has-loop" : ""}`} aria-hidden>
         {hasLoop && (
           <video className="city-video" src={heroLoop} poster={heroPoster} autoPlay muted loop playsInline preload="auto" />
         )}
         <video ref={turnRef} className="city-turn" muted playsInline preload="none" />
         {!hasLoop && hasPoster && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className="city-still" src={heroPoster} alt="" />
+          <div className="city-stage" style={stage}>
+            <div className="city-kb">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="city-still" src={heroPoster} alt="" />
+              <span className="blinker bl-left" />
+              <span className="blinker bl-right" />
+              <span className="headlights" />
+            </div>
+          </div>
         )}
         {!hasLoop && !hasPoster && (
           <div className="city-fallback">

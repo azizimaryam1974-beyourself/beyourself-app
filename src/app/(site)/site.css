@@ -203,7 +203,8 @@
 .hero:has(.city.turning) .hero-copy,
 .hero:has(.city.turning) .site-header { opacity: 0; transform: translateY(-10px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .hero:has(.city.turning)::after { content: ""; position: absolute; inset: 0; background: var(--midnight); animation: fadeout 1.5s 0.2s ease forwards; opacity: 0; pointer-events: none; z-index: 5; }
-.hero:has(.city.turning.with-video)::after { animation-delay: 2.6s; }
+.hero:has(.city.turning.with-video)::after { animation-delay: 2s; animation-duration: 0.6s; }
+.hero:has(.city.turning.has-loop)::after { display: none; } /* echter Abbiege-Clip: kein Abblenden */
 @keyframes fadeout { to { opacity: 1; } }
 
 /* Straßenschilder */
@@ -238,7 +239,8 @@
 }
 
 /* ================= Klassen-Seite ================= */
-.class-page { position: relative; isolation: isolate; min-height: 100svh; color: var(--cream); padding-bottom: 90px; overflow: hidden; animation: arrive 0.9s ease both; }
+.class-page { position: relative; isolation: isolate; min-height: 100svh; color: var(--cream); padding-bottom: 90px; overflow: hidden; background: var(--midnight); }
+.class-page > * { animation: arrive 0.9s ease both; }
 @keyframes arrive { from { opacity: 0; } to { opacity: 1; } }
 .class-bg { position: absolute; inset: 0; z-index: -1; }
 .class-bg video { width: 100%; height: 100%; object-fit: cover; filter: blur(2.5px) saturate(1.1); transform: scale(1.03); }
@@ -280,13 +282,30 @@
 .other-streets { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 48px; color: rgba(246, 240, 230, 0.75); }
 .tile-dark .demo { margin-top: 26px; }
 
-/* Standbild als Hintergrund (bis der Loop da ist): langsame Kamerafahrt */
-.city-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%;
-  animation: kenburns 24s ease-in-out infinite alternate; transform-origin: 50% 60%; transition: transform 1.5s var(--ease), filter 1.5s var(--ease); }
-@keyframes kenburns { from { transform: scale(1.02) translate3d(0, 0, 0); } to { transform: scale(1.12) translate3d(-1.5%, -1%, 0); } }
-.city.turning.turn-left .city-still { animation: none; transform: perspective(900px) translateX(14%) rotateY(12deg) scale(1.3); filter: brightness(0.6); }
-.city.turning.turn-right .city-still { animation: none; transform: perspective(900px) translateX(-14%) rotateY(-12deg) scale(1.3); filter: brightness(0.6); }
-.city.turning.turn-straight .city-still { animation: none; transform: scale(1.6); filter: brightness(0.6); }
+/* Standbild als Bühne (bis der Loop da ist): langsame Kamerafahrt + filmischer Abbiege-Move */
+.city-stage { position: absolute; transform-origin: 50% 56%; will-change: transform;
+  transition: transform 1.6s cubic-bezier(0.6, 0, 0.3, 1) 0.9s, filter 1.6s ease 0.9s; }
+.city-kb { position: absolute; inset: 0; transform-origin: 49.7% 56%; animation: kenburns 24s ease-in-out infinite alternate; }
+.city-still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+@keyframes kenburns { from { transform: scale(1.04); } to { transform: scale(1.12) translate3d(-1%, -0.6%, 0); } }
+.blinker, .headlights { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; mix-blend-mode: screen; }
+.blinker { width: 2.6%; height: 2.6%; top: 54.4%; background: radial-gradient(closest-side, #ffe2a0, rgba(232, 160, 60, 0.85) 45%, transparent 70%); filter: blur(0.5px); }
+.bl-left { left: 45.4%; }
+.bl-right { left: 51.4%; }
+.headlights { left: 44%; width: 11.5%; top: 52%; height: 8%; background: radial-gradient(closest-side, rgba(255, 250, 235, 0.95), rgba(241, 214, 160, 0.4) 50%, transparent 72%); }
+@keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+/* Klasse B: Blinker links (0–0,9 s), dann dreht die Kamera mit dem Auto nach links */
+.city.turning.turn-left .city-stage { transform: perspective(1000px) rotateY(-22deg) translate3d(14%, 1%, 120px) scale(1.55); filter: brightness(0.5) blur(1.5px); }
+.city.turning.turn-left .bl-left { animation: blink 0.3s steps(1) 0s 3; }
+/* Klasse B197: Blinker rechts, Schwenk nach rechts */
+.city.turning.turn-right .city-stage { transform: perspective(1000px) rotateY(22deg) translate3d(-14%, 1%, 120px) scale(1.55); filter: brightness(0.5) blur(1.5px); }
+.city.turning.turn-right .bl-right { animation: blink 0.3s steps(1) 0s 3; }
+/* Klasse B78: Lichthupe, dann kommt das Auto auf die Kamera zu */
+.city.turning.turn-straight .city-stage { transform: perspective(900px) translate3d(0, 0, 560px); filter: brightness(1.1);
+  transition: transform 1.9s cubic-bezier(0.55, 0, 0.2, 1) 0.5s, filter 1.9s ease 0.5s; }
+.city.turning.turn-straight .headlights { animation: flash 0.25s ease 0s 2, beam 2s ease 0.5s forwards; }
+@keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+@keyframes beam { from { opacity: 0.6; transform: scale(1); } to { opacity: 1; transform: scale(3.2); } }
 .city.with-video .city-veil { background:
   linear-gradient(90deg, rgba(15, 26, 44, 0.86) 0%, rgba(15, 26, 44, 0.5) 42%, rgba(15, 26, 44, 0.12) 75%, rgba(15, 26, 44, 0.25) 100%),
   linear-gradient(0deg, rgba(15, 26, 44, 0.85) 0%, rgba(15, 26, 44, 0) 40%),

@@ -13,7 +13,7 @@ import { LiveHub } from "../src/lib/live-hub";
 import { MockTranslator } from "../src/lib/translation/mock";
 
 const base: SignupInput = {
-  name: "Ayşe Yılmaz", email: "ayse@example.de", phone: "", password: "geheim12345",
+  name: "Ayşe Yılmaz", email: "ayse@example.de", phone: "", password: "geheim12345", licenseClass: "b197",
   wantsPackage: true, language: "tr", acceptPrivacy: true, acceptPackageTerms: true,
 };
 

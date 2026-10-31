@@ -83,6 +83,41 @@ CREATE TABLE IF NOT EXISTS settings (
   value TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS training_profiles (
+  user_id          TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  license_class    TEXT NOT NULL CHECK (license_class IN ('b','b197','b78','umschreibung')),
+  practice_target  INTEGER,
+  repeat_target    INTEGER NOT NULL DEFAULT 3,
+  extra_manual     INTEGER NOT NULL DEFAULT 0,
+  testfahrt_passed_at INTEGER,
+  exam_ready_at    INTEGER,
+  theory_passed_at INTEGER,
+  sehtest_at       INTEGER,
+  erste_hilfe_at   INTEGER,
+  antrag_at        INTEGER,
+  pruefauftrag_at  INTEGER,
+  manual_approval  INTEGER NOT NULL DEFAULT 0,
+  blocked          INTEGER NOT NULL DEFAULT 0,
+  max_per_week     INTEGER NOT NULL DEFAULT 2,
+  teacher_note     TEXT NOT NULL DEFAULT '',
+  updated_at       INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS drive_records (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind       TEXT NOT NULL,
+  units      INTEGER NOT NULL CHECK (units BETWEEN 1 AND 4),
+  at         INTEGER NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('planned','done','no_show','late')),
+  booking_id TEXT,
+  source     TEXT NOT NULL DEFAULT 'manual',
+  note       TEXT NOT NULL DEFAULT '',
+  created_by TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_drive_user ON drive_records(user_id, at);
+
 CREATE TABLE IF NOT EXISTS payment_events (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL

@@ -316,3 +316,56 @@ details.card > summary { cursor: pointer; }
   .admin-tabs { border-radius: 18px; }
 }
 .prose h1 { font-size: clamp(1.6rem, 6vw, 2.6rem); hyphens: auto; overflow-wrap: break-word; }
+
+/* ================= Ausbildungsstand ================= */
+.progress-top { display: flex; gap: 18px; align-items: center; margin-bottom: 18px; }
+.ring { width: 84px; height: 84px; flex: none; }
+.ring-bg { fill: none; stroke: rgba(15,26,44,.08); stroke-width: 8; }
+.ring-fg { fill: none; stroke: url(#none); stroke: var(--gold); stroke-width: 8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1s var(--ease); }
+.ring text { font: 800 17px var(--font-body); fill: var(--midnight); }
+.progress-next { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.2; }
+.road { list-style: none; margin: 0; padding: 0; position: relative; }
+.road::before { content: ""; position: absolute; left: 17px; top: 18px; bottom: 18px; width: 3px; border-radius: 3px;
+  background: repeating-linear-gradient(180deg, var(--gold) 0 10px, transparent 10px 18px); opacity: .55; }
+.station { position: relative; display: grid; grid-template-columns: 38px 1fr; gap: 14px; padding: 8px 0; }
+.station-dot { position: relative; z-index: 1; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+  background: #fff; border: 2px solid var(--line); color: var(--muted); }
+.station.done .station-dot { background: var(--gold-grad); border-color: var(--gold); color: var(--ink); }
+.station.active .station-dot { background: var(--midnight); border-color: var(--midnight); color: #f6f0e6; box-shadow: 0 0 0 6px rgba(198,164,101,.25); }
+.station-body { padding: 6px 0 4px; min-width: 0; }
+.station.active .station-body { background: rgba(255,255,255,.75); border: 1px solid rgba(198,164,101,.5); border-radius: 16px; padding: 12px 14px; }
+.station.locked .station-body h3 { color: var(--muted); }
+.station-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.station-head h3 { margin: 0; font-size: 1.02rem; }
+.station-status { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.station.active .station-status { color: var(--copper); }
+.station.done .station-status { color: var(--ok); }
+.station-body .hint { margin: 4px 0 8px; }
+.counters { display: grid; gap: 10px; }
+.counter-label { font-size: .85rem; font-weight: 700; margin-bottom: 4px; }
+.units { display: flex; align-items: center; gap: 10px; }
+.units-bar { flex: 1; display: grid; gap: 4px; max-width: 420px; }
+.u { display: block; height: 12px; border-radius: 4px; background: rgba(15,26,44,.08); }
+.u.done { background: var(--gold-grad); }
+.u.planned { background: repeating-linear-gradient(135deg, rgba(198,164,101,.75) 0 4px, rgba(198,164,101,.25) 4px 8px); }
+.u.extra { outline: 2px solid rgba(95,158,160,.6); outline-offset: -2px; }
+.units-num { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 44px; text-align: right; }
+.units-open { font-size: .95rem; }
+.check-item { font-weight: 600; color: var(--muted); }
+.check-item.ok { color: var(--ok); }
+.units-legend { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+.units-legend .u { display: inline-block; width: 18px; height: 10px; vertical-align: -1px; margin-right: 4px; }
+.progress-view.compact .station:not(.active) .counters { display: none; }
+
+/* Schülerakte (Fahrschule) */
+.student-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+.akte-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .akte-grid { grid-template-columns: 1fr; } }
+.akte-form { display: grid; gap: 10px; }
+.akte-form .row > * { flex: 1 1 140px; }
+.doc-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px 14px; }
+.rec-list li { gap: 8px; }
+.rec-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.phase-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: rgba(198,164,101,.2); }
+.mini-bar { height: 6px; border-radius: 3px; background: rgba(15,26,44,.08); overflow: hidden; margin-top: 4px; max-width: 140px; }
+.mini-bar > span { display: block; height: 100%; background: var(--gold-grad); }

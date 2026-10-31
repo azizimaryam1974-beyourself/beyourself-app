@@ -22,7 +22,7 @@ max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Noti
 - Rahmen: **Okt–Apr 9–21 Uhr**, **Mai–Sep 9–23 Uhr**. Darin eine **Wochenvorlage** je Fahrlehrer
   (wann er fährt, Pausen); einzelne Tage/Zeiten mit einem Tipp sperren.
 - **Keine Sonntage, keine Feiertage in Hessen** (jedes Jahr automatisch berechnet, inkl. Ostern/Pfingsten/Fronleichnam).
-- Raster **45 Min**. **Übungsfahrten immer 90 Min** (2 × 45). Testfahrt und Warmstunde 30 Min.
+- „Stunde“ = **45 Min**. Raster 45 Min. **Fahrten immer 90 Min** (2 × 45); Ausnahme: die **letzte Stunde einer Phase** darf einzeln (45 Min) gebucht werden. Testfahrt und Warmstunde 30 Min.
 - **Beleuchtungsfahrt** nur, wenn es tatsächlich dunkel ist (Sonnenuntergang in **34117 Kassel**, Rudolf-Schwander-Str. 9, je Datum berechnet).
 - Treffpunkt je Termin (Fahrschule / TÜV / vereinbart) – wichtig für Autowechsel am TÜV.
 - Ein Fahrlehrer (Maryam), Schalt- und Automatikauto immer verfügbar → keine Fahrzeugplanung nötig.
@@ -56,8 +56,8 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
   die sie gerade buchen dürfen.
 - Wird ein Termin frei: **nur Platz 1** bekommt die Nachricht, der Termin ist **30 Min für alle anderen unsichtbar**.
 - Bucht Platz 1 nicht: Termin wird für alle sichtbar, **alle übrigen** auf der Warteliste bekommen gleichzeitig eine Nachricht.
-- Nachts (22–7 Uhr) keine Nachrichten: die 30 Minuten beginnen dann um 7 Uhr. ❓
-- Beginnt der Termin in weniger als 3 Std., entfällt die Exklusivzeit (sonst verfällt er). ❓
+- Nachts (22–7 Uhr) keine Nachrichten: die 30 Minuten beginnen dann um 7 Uhr. ✓
+- Exklusivzeit für Platz 1 gilt **immer**, auch kurz vor Beginn (endet spätestens mit Terminbeginn). ✓
 
 ## Preise (inkl. MwSt.)
 | Leistung | Dauer | Preis |
@@ -78,7 +78,7 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
   der eigenen Fahrschule (eigene Stripe-Konten, Verträge, Datenschutz je Schule).
 
 ## Reihenfolge beim Bauen
-1. Ausbildungsstand + Regeln je Klasse, Fortschrittsgrafik, Fahrlehrer-Ansicht je Schüler
+1. ✓ Ausbildungsstand + Regeln je Klasse, Fortschrittsgrafik, Schülerakte (31.10.2026)
 2. Kalender neu: Rahmen, Wochenvorlage, Hessen-Feiertage, Dunkelheit, 90-Min-Buchung, automatische Bestätigung
 3. Guthaben, Absage-Regeln, nicht erschienen/zu spät, Warteliste
 4. Prüfungsphase (Einladung durch die Fahrschule), Grundbetrag, TÜV-Gebühren getrennt
@@ -87,8 +87,7 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
 7. Später: mehrere Fahrschulen
 
 ## ❓ Noch offen
-0. ✓ Warteliste entschieden. Offen nur: Nachtruhe 22–7 Uhr, keine Exklusivzeit unter 3 Std. vor Beginn?
-00. „Stunde“ = 45 Min? Dann passen 3 Std. Automatik und 3 Wiederholungen nicht in 90-Min-Blöcke.
+0. ✓ Warteliste, Nachtruhe, 45-Min-Stunde entschieden.
 1. Absagefrist: „24 Std. vorher, spätestens 21 Uhr am Vortag“ richtig verstanden?
 2. ✓ Späte Absage 70 %, nicht erschienen / > 15 Min zu spät 75 %.
 3. Termin über Warteliste neu besetzt → Schüler bekommt alles als Guthaben (kein Abzug)?

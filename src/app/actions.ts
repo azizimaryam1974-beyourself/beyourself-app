@@ -24,6 +24,7 @@ import {
   setPackageStatus,
 } from "@/lib/server/repo";
 import { hub } from "@/lib/server/live";
+import { ensureProfile } from "@/lib/server/training-repo";
 import { parseSignupForm, validateSignup, type FieldErrors } from "@/lib/signup";
 import { validateSignupChoice } from "@/lib/language-package";
 import { isBookableLanguage } from "@/lib/languages";
@@ -42,6 +43,7 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
     name: input.name,
     email: input.email,
     phone: input.phone,
+    licenseClass: input.licenseClass,
     wantsPackage: input.wantsPackage ? "yes" : "no",
     language: input.language ?? "",
   };
@@ -57,6 +59,7 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
   // Konto + Paket in einer Transaktion: entweder beides oder nichts.
   const user = d.transaction(() => {
     const u = createUser(d, { ...result.value, passwordHash, role: "student" });
+    ensureProfile(d, u.id, result.value.licenseClass);
     if (result.value.language) bookPackage(d, u.id, result.value.language);
     return u;
   })();

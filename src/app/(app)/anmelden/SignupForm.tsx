@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signupAction, type FormState } from "@/app/actions";
 import { LanguagePicker, type LanguageOption } from "@/components/LanguagePicker";
+import { CLASS_LABEL, TRAINING_CLASSES } from "@/lib/training";
+
+const CLASS_HINT: Record<string, string> = {
+  b: "Schaltwagen",
+  b197: "Prüfung auf Automatik, darfst aber auch Schaltwagen fahren",
+  b78: "nur Automatik",
+  umschreibung: "ausländischen Führerschein umschreiben",
+};
 
 export function SignupForm({ languages, price }: { languages: LanguageOption[]; price: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(signupAction, {});
@@ -36,6 +44,19 @@ export function SignupForm({ languages, price }: { languages: LanguageOption[]; 
           <input id="password" name="password" type="password" autoComplete="new-password" required minLength={10} />
           {fe.password && <div className="error">{fe.password}</div>}
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Führerscheinklasse</h2>
+        <div className="choice-group">
+          {TRAINING_CLASSES.map((c) => (
+            <label key={c} className="choice">
+              <input type="radio" name="licenseClass" value={c} defaultChecked={v.licenseClass === c} required />
+              <span><strong>{CLASS_LABEL[c]}</strong><span className="hint" style={{ display: "block" }}>{CLASS_HINT[c]}</span></span>
+            </label>
+          ))}
+        </div>
+        {fe.licenseClass && <div className="error">{fe.licenseClass}</div>}
       </div>
 
       <div className="card">

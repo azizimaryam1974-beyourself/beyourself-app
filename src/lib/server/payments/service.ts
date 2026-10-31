@@ -43,6 +43,15 @@ export function notifyStudent(b: Booking, title: string, body: string): void {
   }
 }
 
+/** Nachricht an einen Schüler ohne Buchungsbezug (z. B. Ausbildungsstand). */
+export function notifyUser(user: { id: string; email: string; name: string }, title: string, body: string, link = "/konto"): void {
+  addNotification(db(), user.id, null, title, body);
+  if (!user.email.endsWith("@invalid")) {
+    sendMail(user.email, `${title} – Fahrschule beyourself`,
+      `Hallo ${user.name.split(" ")[0]},\n\n${body}\n\n${appUrl()}${link}\n\nViele Grüße\nFahrschule beyourself`);
+  }
+}
+
 /** Nachricht an alle Lehrkräfte (Konto) + E-Mail an die Fahrschul-Adresse. */
 export function notifySchool(b: Booking | null, title: string, body: string): void {
   const teachers = db().prepare(`SELECT id FROM users WHERE role = 'teacher'`).all() as Array<{ id: string }>;

@@ -6,6 +6,9 @@ import { formatPrice } from "@/lib/language-package";
 import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "@/app/actions";
 import { StudentTools } from "./StudentTools";
 import { AdminTabs } from "./AdminTabs";
+import Link from "next/link";
+import { trainingStateFor } from "@/lib/server/training-repo";
+import { CLASS_LABEL } from "@/lib/training";
 
 export const metadata = { title: "Verwaltung" };
 export const dynamic = "force-dynamic";
@@ -32,19 +35,29 @@ export default async function AdminPage() {
       </div>
 
       <div className="card">
-        <h2>Schüler und Sprachpakete</h2>
+        <h2>Schüler</h2>
+        <p className="hint">Auf den Namen tippen für die Schülerakte: Ausbildungsstand, Stunden, Testfahrt, Prüfungsreife, Unterlagen.</p>
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Name</th><th>Kontakt</th><th>Sprachpaket</th><th>Status</th><th></th></tr>
+              <tr><th>Name</th><th>Ausbildung</th><th>Kontakt</th><th>Sprachpaket</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
-              {students.length === 0 && <tr><td colSpan={5} className="hint">Noch keine Anmeldungen.</td></tr>}
+              {students.length === 0 && <tr><td colSpan={6} className="hint">Noch keine Anmeldungen.</td></tr>}
               {students.map((s) => {
                 const pkg = s.pkg && s.pkg.status !== "cancelled" ? s.pkg : null;
+                const t = trainingStateFor(db(), s.id);
                 return (
                   <tr key={s.id}>
-                    <td><strong>{s.name}</strong><div className="hint">seit {new Date(s.created_at).toLocaleDateString("de-DE")}</div></td>
+                    <td><Link href={`/verwaltung/schueler/${s.id}`}><strong>{s.name}</strong></Link><div className="hint">seit {new Date(s.created_at).toLocaleDateString("de-DE")}</div></td>
+                    <td>
+                      {t ? (
+                        <Link href={`/verwaltung/schueler/${s.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                          <div><strong>{CLASS_LABEL[t.profile.licenseClass]}</strong> <span className="phase-pill">{t.state.current?.title ?? "fertig"}</span></div>
+                          <div className="mini-bar" aria-label={`${t.state.percent} %`}><span style={{ width: `${t.state.percent}%` }} /></div>
+                        </Link>
+                      ) : <Link className="badge badge-warn" href={`/verwaltung/schueler/${s.id}`}>Klasse festlegen</Link>}
+                    </td>
                     <td>{s.email}{s.phone && <div className="hint">{s.phone}</div>}</td>
                     <td>
                       {pkg ? (

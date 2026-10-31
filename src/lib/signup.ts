@@ -1,11 +1,13 @@
 import { validateSignupChoice } from "./language-package";
 import type { TargetLanguageCode } from "./languages";
+import { TRAINING_CLASSES, type TrainingClass } from "./training";
 
 export interface SignupInput {
   name: string;
   email: string;
   phone: string;
   password: string;
+  licenseClass: string;
   wantsPackage: boolean;
   language: string | null;
   acceptPrivacy: boolean;
@@ -18,6 +20,7 @@ export interface SignupValid {
   email: string;
   phone: string | null;
   password: string;
+  licenseClass: TrainingClass;
   language: TargetLanguageCode | null;
 }
 
@@ -32,6 +35,7 @@ export function parseSignupForm(form: FormData): SignupInput {
     email: s("email").toLowerCase(),
     phone: s("phone"),
     password: String(form.get("password") ?? ""),
+    licenseClass: s("licenseClass"),
     wantsPackage: form.get("wantsPackage") === "yes",
     language: s("language") || null,
     acceptPrivacy: form.get("acceptPrivacy") === "on",
@@ -44,6 +48,7 @@ export function validateSignup(input: SignupInput): { ok: true; value: SignupVal
   if (input.name.length < 2) errors.name = "Bitte gib deinen Namen ein.";
   if (!EMAIL_RE.test(input.email)) errors.email = "Bitte gib eine gültige E-Mail-Adresse ein.";
   if (input.password.length < 10) errors.password = "Das Passwort braucht mindestens 10 Zeichen.";
+  if (!(TRAINING_CLASSES as string[]).includes(input.licenseClass)) errors.licenseClass = "Bitte wähle deine Führerscheinklasse.";
   if (!input.acceptPrivacy) errors.acceptPrivacy = "Bitte bestätige die Datenschutzhinweise.";
 
   const choice = validateSignupChoice({ wantsPackage: input.wantsPackage, language: input.language });
@@ -60,6 +65,7 @@ export function validateSignup(input: SignupInput): { ok: true; value: SignupVal
       email: input.email,
       phone: input.phone || null,
       password: input.password,
+      licenseClass: input.licenseClass as TrainingClass,
       language: choice.ok && choice.value ? choice.value.language : null,
     },
   };

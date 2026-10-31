@@ -9,6 +9,9 @@ import { BookLaterForm } from "./BookLaterForm";
 import { orderProductAction } from "@/app/booking-actions";
 import { getOffer, isBookable, listBookingsForUser } from "@/lib/server/booking";
 import { fmtSlot } from "@/lib/time";
+import { autoCompletePast, trainingStateFor } from "@/lib/server/training-repo";
+import { ProgressView } from "@/components/training/ProgressView";
+import { CLASS_LABEL } from "@/lib/training";
 
 export const metadata = { title: "Mein Konto" };
 export const dynamic = "force-dynamic";
@@ -30,6 +33,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const live = lessons.filter((l) => l.status === "live");
   const past = lessons.filter((l) => l.status === "ended").slice(0, 8);
   const price = formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS);
+  autoCompletePast(db());
+  const training = trainingStateFor(db(), user.id);
   const langOffer = getOffer(db(), "sprachpaket");
   const canPayOnline = pkg?.status === "booked" && !!langOffer && isBookable(langOffer);
   const now = Date.now();
@@ -47,6 +52,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           online bezahlen oder bar/EC in der Fahrschule.
         </div>
       )}
+
+      <section className="card">
+        <h2>Dein Weg zum Führerschein</h2>
+        {training ? <ProgressView state={training.state} classLabel={CLASS_LABEL[training.profile.licenseClass]} />
+          : <p className="hint">Deine Fahrschule legt deine Führerscheinklasse fest – danach siehst du hier deinen Fortschritt.</p>}
+      </section>
 
       <div className="card card-accent">
         <div className="row" style={{ justifyContent: "space-between" }}>

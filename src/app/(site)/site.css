@@ -168,3 +168,114 @@
 .contact-card dt { font-weight: 700; color: var(--muted); font-size: 0.92rem; }
 .contact-card dd { margin: 0; }
 .contact-card a { color: var(--midnight); font-weight: 600; }
+
+/* ================= Stadt-Szene (Hintergrund-Video + Straßenschilder) ================= */
+.hero { min-height: min(100svh, 980px); }
+.hero-grid { grid-template-columns: 1fr; }
+.city { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.city-video, .city-turn { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.city-turn { opacity: 0; transition: opacity 0.35s ease; }
+.city.turning .city-turn { opacity: 1; }
+/* Lesbarkeit: links dunkler, Licht bleibt rechts sichtbar */
+.city-veil { position: absolute; inset: 0; background:
+  linear-gradient(90deg, rgba(15, 26, 44, 0.88) 0%, rgba(15, 26, 44, 0.55) 45%, rgba(15, 26, 44, 0.15) 100%),
+  linear-gradient(0deg, rgba(15, 26, 44, 0.7) 0%, transparent 35%); transition: background 0.8s ease; }
+.city.with-video ~ .hero-light, .city.with-video ~ .hero-haze { opacity: 0.35; }
+
+/* Ersatz-Animation, solange keine Videos da sind: warme Lichter auf nasser Straße */
+.city-fallback { position: absolute; inset: 0; transition: transform 1.5s var(--ease), filter 1.5s var(--ease); }
+.city-fallback .glow { position: absolute; border-radius: 50%; filter: blur(30px); mix-blend-mode: screen; animation: breathe 7s ease-in-out infinite alternate; }
+.city-fallback .g1 { width: 26vw; height: 26vw; right: 12%; top: 18%; background: radial-gradient(closest-side, rgba(241, 214, 160, 0.55), transparent); }
+.city-fallback .g2 { width: 14vw; height: 14vw; right: 32%; top: 38%; background: radial-gradient(closest-side, rgba(217, 154, 62, 0.5), transparent); animation-delay: -2s; }
+.city-fallback .g3 { width: 18vw; height: 18vw; right: 4%; top: 46%; background: radial-gradient(closest-side, rgba(168, 200, 219, 0.35), transparent); animation-delay: -4s; }
+.city-fallback .wet { position: absolute; left: 0; right: 0; bottom: 0; height: 38%;
+  background: repeating-linear-gradient(90deg, rgba(241, 214, 160, 0.05) 0 2px, transparent 2px 22px),
+              linear-gradient(180deg, transparent, rgba(241, 214, 160, 0.12) 40%, rgba(15, 26, 44, 0));
+  filter: blur(2px); animation: shimmer 6s linear infinite; }
+@keyframes breathe { from { opacity: 0.55; transform: scale(0.95); } to { opacity: 1; transform: scale(1.08); } }
+@keyframes shimmer { from { background-position: 0 0, 0 0; } to { background-position: 220px 0, 0 0; } }
+
+/* Abbiegen (Ersatz): Kamera schwenkt in die gewählte Richtung, Szene wird dunkel */
+.city.turning .city-veil { background: rgba(15, 26, 44, 0.2); }
+.city.turning.turn-left .city-fallback { transform: perspective(900px) translateX(18%) rotateY(14deg) scale(1.2); filter: brightness(0.6); }
+.city.turning.turn-right .city-fallback { transform: perspective(900px) translateX(-18%) rotateY(-14deg) scale(1.2); filter: brightness(0.6); }
+.city.turning.turn-straight .city-fallback { transform: scale(1.5); filter: brightness(0.6); }
+.hero:has(.city.turning) .hero-copy,
+.hero:has(.city.turning) .site-header { opacity: 0; transform: translateY(-10px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.hero:has(.city.turning)::after { content: ""; position: absolute; inset: 0; background: var(--midnight); animation: fadeout 1.5s 0.2s ease forwards; opacity: 0; pointer-events: none; z-index: 5; }
+.hero:has(.city.turning.with-video)::after { animation-delay: 2.6s; }
+@keyframes fadeout { to { opacity: 1; } }
+
+/* Straßenschilder */
+.signpost { position: absolute; right: max(6vw, calc((100vw - 1160px) / 2 + 20px)); top: 30%; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 3; }
+.signpost .pole { position: absolute; top: -40px; bottom: -120px; width: 6px; left: 50%; transform: translateX(-50%); border-radius: 3px;
+  background: linear-gradient(90deg, #2a3240, #6b7280 45%, #2a3240); box-shadow: 0 0 0 1px rgba(0,0,0,.2); z-index: -1; }
+.street-sign {
+  position: relative; display: inline-flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 54px; min-width: 240px; white-space: nowrap;
+  padding: 10px 26px; border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.02em; color: #f7f3ea;
+  background: linear-gradient(180deg, #24604f, #1a4a3e);
+  box-shadow: inset 0 0 0 3px #1a4a3e, inset 0 0 0 5px rgba(247, 243, 234, 0.85), 0 18px 30px -16px rgba(0, 0, 0, 0.8);
+  border-radius: 6px; transition: transform 0.35s var(--ease), filter 0.35s var(--ease);
+}
+.street-sign.dir-left { transform: translateX(-28px); flex-direction: row-reverse; }
+.street-sign.dir-right { transform: translateX(28px); }
+.street-sign:hover:not(:disabled) { filter: brightness(1.15); }
+.street-sign.dir-left:hover:not(:disabled) { transform: translateX(-38px); }
+.street-sign.dir-right:hover:not(:disabled) { transform: translateX(38px); }
+.street-sign.dir-straight:hover:not(:disabled) { transform: translateY(-4px); }
+.street-sign:focus-visible { outline: 3px solid var(--champagne); outline-offset: 4px; }
+.street-sign.picked { filter: brightness(1.25) drop-shadow(0 0 18px rgba(241, 214, 160, 0.7)); }
+.street-sign:disabled:not(.picked) { opacity: 0.35; }
+.sign-arrow { font-size: 1.3rem; opacity: 0.9; }
+.sign-hint { margin-top: 16px; font-size: 0.9rem; color: rgba(246, 240, 230, 0.75); background: rgba(15, 26, 44, 0.45); padding: 6px 14px; border-radius: 999px; backdrop-filter: blur(8px); }
+
+@media (max-width: 920px) {
+  .hero { padding-bottom: 330px; }
+  .signpost { right: auto; left: 50%; top: auto; bottom: 40px; transform: translateX(-50%); }
+  .street-sign { min-width: 220px; font-size: 1.05rem; }
+  .street-sign.dir-left { transform: translateX(-18px); }
+  .street-sign.dir-right { transform: translateX(18px); }
+}
+
+/* ================= Klassen-Seite ================= */
+.class-page { position: relative; isolation: isolate; min-height: 100svh; color: var(--cream); padding-bottom: 90px; overflow: hidden; animation: arrive 0.9s ease both; }
+@keyframes arrive { from { opacity: 0; } to { opacity: 1; } }
+.class-bg { position: absolute; inset: 0; z-index: -1; }
+.class-bg video { width: 100%; height: 100%; object-fit: cover; filter: blur(5px) saturate(1.05); transform: scale(1.04); }
+/* "matt": leichter Weichzeichner + Abdunkeln, Bild bleibt erkennbar */
+.class-bg-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15, 26, 44, 0.55), rgba(15, 26, 44, 0.75)); backdrop-filter: blur(1px); }
+.class-bg-fallback { position: absolute; inset: 0; background:
+  radial-gradient(50% 40% at 80% 20%, rgba(241, 214, 160, 0.45), transparent 70%),
+  radial-gradient(40% 40% at 15% 85%, rgba(95, 158, 160, 0.4), transparent 70%),
+  linear-gradient(170deg, #1b2b45, var(--midnight)); }
+.tone-left .class-bg-fallback { background:
+  radial-gradient(45% 35% at 20% 25%, rgba(241, 214, 160, 0.45), transparent 70%),
+  radial-gradient(40% 40% at 85% 85%, rgba(157, 180, 159, 0.35), transparent 70%),
+  linear-gradient(170deg, #1b2b45, var(--midnight)); }
+.tone-straight .class-bg-fallback { background:
+  radial-gradient(60% 30% at 50% 15%, rgba(217, 154, 62, 0.4), transparent 70%),
+  radial-gradient(50% 40% at 50% 100%, rgba(168, 200, 219, 0.3), transparent 70%),
+  linear-gradient(180deg, #1b2b45, var(--midnight)); }
+.class-content { padding-top: clamp(30px, 6vw, 70px); }
+.back-link { color: var(--champagne); text-decoration: none; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.class-hero { margin: 28px 0 42px; }
+.class-title { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.6rem, 6.5vw, 5.4rem); line-height: 1; letter-spacing: -0.02em; margin: 22px 0 18px; color: #fbf4e6; max-width: 16ch; }
+.class-lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: rgba(246, 240, 230, 0.85); max-width: 52ch; }
+.street-sign.as-label { cursor: default; min-width: 0; font-size: 1rem; min-height: 44px; }
+.street-sign.as-link { min-width: 0; min-height: 42px; font-size: 0.95rem; text-decoration: none; }
+.class-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .class-grid { grid-template-columns: 1fr; } }
+.glass-panel { border-radius: var(--r-xl); padding: clamp(24px, 3vw, 34px);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(233, 215, 180, 0.28); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 30px 60px -30px rgba(0, 0, 0, 0.7); }
+.glass-panel p { color: rgba(246, 240, 230, 0.88); }
+.glass-panel.small { border-radius: var(--r-lg); padding: 20px 22px; }
+.glass-panel.small h3 { margin: 0 0 4px; }
+.glass-panel.small p { margin: 0; font-size: 0.95rem; }
+.glass-panel.gold { background: var(--gold-grad); color: var(--ink); border-color: transparent; }
+.glass-panel.gold p { color: #2b2418; }
+.included { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.other-streets { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 48px; color: rgba(246, 240, 230, 0.75); }
+.tile-dark .demo { margin-top: 26px; }

@@ -3,6 +3,8 @@ import { SiteHeader } from "@/components/SiteChrome";
 import { bookableLanguages } from "@/lib/languages";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { LiveDemo, type DemoLine } from "./LiveDemo";
+import { CityHero } from "./CityHero";
+import { EXTRA_CLASSES, LICENSE_CLASSES, VIDEO } from "@/lib/classes";
 import { Parallax } from "./Parallax";
 
 export const dynamic = "force-dynamic";
@@ -18,12 +20,7 @@ const DEMO: Record<string, string> = {
   fa: "در چهارراه‌های بدون علامت، حق تقدم با سمت راست است.",
 };
 
-const CLASSES = [
-  { k: "B", name: "Pkw", text: "Der klassische Führerschein für Auto bis 3,5 t. Mit Schaltwagen oder Automatik." },
-  { k: "B197", name: "Automatik mit Schaltberechtigung", text: "Ausbildung überwiegend auf Automatik – und trotzdem darfst du später Schaltwagen fahren." },
-  { k: "BE", name: "Anhänger", text: "Für Wohnwagen, Pferdeanhänger und alles, was mehr als 750 kg zieht." },
-  { k: "Umschreibung", name: "Ausländischer Führerschein", text: "Du hast schon einen Führerschein aus dem Ausland? Wir bereiten dich gezielt auf die Prüfungen in Deutschland vor." },
-];
+const CLASSES = [...LICENSE_CLASSES.map((c) => ({ k: c.k, slug: c.slug, name: c.name, text: c.short })), ...EXTRA_CLASSES.map((c) => ({ k: c.k, slug: c.slug, name: c.name, text: c.short }))];
 
 export default function Home() {
   const langs = bookableLanguages();
@@ -34,7 +31,7 @@ export default function Home() {
     <>
       <Parallax />
       {/* ---------------- Kopfbereich ---------------- */}
-      <section className="hero">
+      <section className="hero" id="top">
         <div className="hero-light" aria-hidden />
         <div className="hero-haze" aria-hidden />
         <svg className="hero-road" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -56,6 +53,12 @@ export default function Home() {
           <path className="road-teal" d="M-60 930 C 300 925, 600 905, 860 855 S 1180 740, 1320 560 S 1440 240, 1540 180" />
         </svg>
 
+        <CityHero
+          signs={LICENSE_CLASSES.map((c) => ({ slug: c.slug, sign: c.sign, turn: c.turn }))}
+          heroLoop={VIDEO.heroLoop}
+          heroPoster={VIDEO.heroPoster}
+          turnVideo={Object.fromEntries(LICENSE_CLASSES.map((c) => [c.slug, VIDEO.turn(c.slug)]))}
+        />
         <SiteHeader tone="dark" />
 
         <div className="wrap hero-grid">
@@ -70,7 +73,6 @@ export default function Home() {
               <a href="#klassen" className="btn btn-glass">Klassen ansehen</a>
             </div>
           </div>
-          <LiveDemo lines={demo} />
         </div>
       </section>
 
@@ -83,9 +85,7 @@ export default function Home() {
               <h3>Theorie in deiner Sprache</h3>
               <p>Die Lehrerin spricht Deutsch, du liest jeden Satz sofort übersetzt mit – oder hörst ihn über Kopfhörer.
                 Fachbegriffe wie „rechts vor links“ stimmen, weil wir sie für jede Sprache festgelegt haben.</p>
-              <div className="chips">
-                {langs.map((l) => <span key={l.code} lang={l.code} dir={l.rtl ? "rtl" : "ltr"}>{l.nativeLabel}</span>)}
-              </div>
+              <LiveDemo lines={demo} />
             </article>
             <article className="tile tile-price">
               <span className="tile-price-num">{price}</span>
@@ -123,7 +123,9 @@ export default function Home() {
                   <h3>{c.name}</h3>
                   <p>{c.text}</p>
                 </div>
-                <a className="class-link" href="#kontakt" aria-label={`Preis für ${c.name} anfragen`}>Preis anfragen</a>
+                {c.slug === "umschreibung"
+                  ? <a className="class-link" href="#kontakt">Beratung anfragen</a>
+                  : <Link className="class-link" href={`/klasse/${c.slug}`}>Mehr erfahren</Link>}
               </article>
             ))}
           </div>

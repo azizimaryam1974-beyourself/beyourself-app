@@ -11,17 +11,20 @@ Sicherheit & Datenschutz: siehe [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md) (verbin
 - [x] Code auf GitHub, tägliche Sicherung auf dem Server
 
 ## Baustein 1 – Neue Webseite (heute)
-1. [ ] Design-Vorgaben von Maryam (Prompt) übernehmen
-2. [ ] Design-Entwurf: Farben, Schrift, Logo-Wirkung, Startseite als Vorschau zeigen → Freigabe
+1. [x] Design-Vorgaben von Maryam (Prompt) übernehmen
+2. [x] Design-Entwurf gezeigt (Glassmorphism × Dark Luxury)
 3. [ ] Öffentliche Seiten bauen (modern, mobil zuerst, barrierearm):
        Startseite · Führerscheinklassen & Preise · Sprachpaket/Live-Übersetzung ·
        Über uns · Kontakt (Karte, Telefon, WhatsApp, info@) · Anmeldung
-4. [ ] App-Bereiche (Konto, Live, Unterricht, Verwaltung) im neuen Design
+3a. [x] Stadt-Szene: Straßenschilder als Navigation (B ←, B197 →, BE ↑), Abbiegen → Klassen-Seite
+3b. [ ] **Videos von Maryam** per KI-Generator (Prompts: VIDEO-PROMPTS.md) → in public/video/
+3c. [ ] Echte Fotos, Telefon, Adresse, Bürozeiten
+4. [x] App-Bereiche (Konto, Live, Unterricht, Verwaltung) im neuen Design
 5. [ ] Test auf Handy + Laptop, dann Update auf den Server
 
 ## Baustein 2 – Handy-App mit Expo (heute)
 1. [ ] Server: Login-Schnittstelle für die App (Token statt Cookie), Live-Stream mit Token
-2. [ ] Expo-App (Ordner `mobile/`): Login · Mein Konto/Sprachpaket · Live-Untertitel · Vorlesen ·
+2. [ ] Expo-App für **iPhone** (Ordner `mobile/`): Login · Mein Konto/Sprachpaket · Live-Untertitel · Vorlesen ·
        Schrift größer/kleiner · Arabisch/Farsi von rechts nach links
 3. [ ] Gleiches Design wie die Webseite
 4. [ ] Auf Maryams Handy in **Expo Go** öffnen (QR-Code)

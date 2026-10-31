@@ -64,6 +64,7 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 - [x] Server 82.165.0.233 (IONOS VPS 1-2-60), DNS @/www → Server, App online – 31.10.2026
 - [x] Erstes App-Passwort der Lehrkraft (war im Terminal sichtbar) neu gesetzt – 31.10.2026
 - [x] Erster Live-Test mit Englisch erfolgreich; Französisch ergänzt – 31.10.2026
+- [x] Update mit Französisch + neuem Vorlesen (iPhone-tauglich) auf dem Server – 31.10.2026
 - [x] Azure-Abonnement, Speech + Translator (F0, Germany West Central) – 31.10.2026
 - [x] Code auf GitHub, `.env` und Datenbank ausgeschlossen – 31.10.2026
 - [x] Claude-Übersetzung mit Azure als Reserve – 31.10.2026

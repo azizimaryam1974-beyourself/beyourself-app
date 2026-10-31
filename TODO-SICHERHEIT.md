@@ -21,7 +21,9 @@ Der neue Schlüssel läuft ggf. ab (Console zeigt das Datum) → rechtzeitig ern
 - [ ] **Impressum** mit echten Angaben füllen (`/impressum`).
 - [ ] **Sprachpaket-Bedingungen + Widerrufsbelehrung + Muster-Widerrufsformular** (`/sprachpaket`).
 - [ ] **Löschfrist bestätigen**: voreingestellt 180 Tage nach der Stunde (auch so in der Datenschutzerklärung).
-- [ ] Aufbewahrung der Paketbuchungen mit Steuerberater klären (bleiben bei Kontolöschung anonym erhalten).
+- [ ] Aufbewahrung der Paketbuchungen: Maryam sagt **3 Jahre** (31.10.2026).
+      Vom Steuerberater bestätigen lassen – Rechnungen/Buchungsbelege haben steuerlich
+      meist **8 Jahre** Aufbewahrungspflicht. Danach automatisches Löschen einbauen.
 - [ ] Hinweis an Schüler: Übersetzung ist maschinell, maßgeblich ist der deutsche Unterricht
       (steht in den Bedingungen – bei Anmeldung sichtbar machen).
 - [ ] Weitere Lehrkräfte (falls später): über Verarbeitung ihrer Stimme informieren.

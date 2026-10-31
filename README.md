@@ -107,6 +107,10 @@ ohne HTTPS erlauben Browser kein Mikrofon.
 Updates: `git pull && docker compose up -d --build`
 Sicherung: `deploy/backup.sh` per Cron täglich (legt `backups/` an, hält 30 Tage).
 
+## Fahrplan
+
+Aktueller Plan: **[ROADMAP.md](ROADMAP.md)**
+
 ## Vor dem Livegang
 
 **Verbindliche Liste: [TODO-SICHERHEIT.md](TODO-SICHERHEIT.md)** (Sicherheit & Datenschutz).

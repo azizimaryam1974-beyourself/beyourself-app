@@ -51,10 +51,13 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
   Wird er neu besetzt, entsteht kein Ausfall → ❓ volles Guthaben.
 - **Nicht erschienen oder > 15 Min zu spät:** Fahrlehrer muss nicht warten, Stunde fällt aus, ¾ des Preises werden berechnet.
 
-## Warteliste
-Schüler tragen sich für Tag + Zeitraum ein (nur für Fahrten, die sie gerade buchen dürfen).
-Wird etwas frei: Nachricht an Platz 1, nach 30 Min ohne Reaktion an Platz 2 usw.
-Gleichzeitig ist der Termin für alle im Kalender buchbar – wer zuerst bucht, bekommt ihn.
+## Warteliste (Entscheidung 31.10.2026)
+- Schüler tragen sich für Tag + Zeitraum ein – **höchstens 1 Eintrag pro Kalenderwoche** – und nur für Fahrten,
+  die sie gerade buchen dürfen.
+- Wird ein Termin frei: **nur Platz 1** bekommt die Nachricht, der Termin ist **30 Min für alle anderen unsichtbar**.
+- Bucht Platz 1 nicht: Termin wird für alle sichtbar, **alle übrigen** auf der Warteliste bekommen gleichzeitig eine Nachricht.
+- Nachts (22–7 Uhr) keine Nachrichten: die 30 Minuten beginnen dann um 7 Uhr. ❓
+- Beginnt der Termin in weniger als 3 Std., entfällt die Exklusivzeit (sonst verfällt er). ❓
 
 ## Preise (inkl. MwSt.)
 | Leistung | Dauer | Preis |
@@ -84,7 +87,8 @@ Gleichzeitig ist der Termin für alle im Kalender buchbar – wer zuerst bucht, 
 7. Später: mehrere Fahrschulen
 
 ## ❓ Noch offen
-0. Warteliste: Variante A (Vorsprung) oder B (30 Min exklusiv)?
+0. ✓ Warteliste entschieden. Offen nur: Nachtruhe 22–7 Uhr, keine Exklusivzeit unter 3 Std. vor Beginn?
+00. „Stunde“ = 45 Min? Dann passen 3 Std. Automatik und 3 Wiederholungen nicht in 90-Min-Blöcke.
 1. Absagefrist: „24 Std. vorher, spätestens 21 Uhr am Vortag“ richtig verstanden?
 2. ✓ Späte Absage 70 %, nicht erschienen / > 15 Min zu spät 75 %.
 3. Termin über Warteliste neu besetzt → Schüler bekommt alles als Guthaben (kein Abzug)?

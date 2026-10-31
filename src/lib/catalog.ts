@@ -13,17 +13,29 @@ export interface CatalogItem {
   defaults: { price: number[]; description: string };
 }
 
+/** Alte Fassung (31.10.) – wird ersetzt, solange die Fahrschule sie nicht selbst geändert hat. */
+export const GRUND_DESC_V3 = [
+  "Anmeldung, Ausbildungsvertrag und Verwaltung",
+  "Hilfe beim Antrag bei der Führerscheinstelle",
+  "Kompletter Theorieunterricht – so oft du möchtest",
+  "Lernmaterial und Lern-App für die Theorieprüfung",
+  "Dein Ausbildungsstand und Online-Buchung in der App",
+].join("\n");
+
+const GRUND_DESC = [
+  "Inklusive Theorie-App zum Lernen für die Theorieprüfung (Handy und Computer)",
+  "Inklusive Lernmaterial",
+  "Inklusive kompletter Theorieunterricht – so oft du möchtest",
+  "Inklusive Anmeldung, Ausbildungsvertrag und Verwaltung",
+  "Inklusive Hilfe beim Antrag bei der Führerscheinstelle",
+  "Inklusive App der Fahrschule: Ausbildungsstand, Online-Buchung, Nachrichten",
+].join("\n");
+
 export const CATALOG: CatalogItem[] = [
   {
     ids: ["fee-grundbetrag"], title: "Grundbetrag", unit: "einmalig",
-    who: "Für alle Klassen gleich, fällig mit der Anmeldung.",
-    defaults: { price: [52000], description: [
-      "Anmeldung, Ausbildungsvertrag und Verwaltung",
-      "Hilfe beim Antrag bei der Führerscheinstelle",
-      "Kompletter Theorieunterricht – so oft du möchtest",
-      "Lernmaterial und Lern-App für die Theorieprüfung",
-      "Dein Ausbildungsstand und Online-Buchung in der App",
-    ].join("\n") },
+    who: "Einmalig, für alle Klassen gleich – inklusive Theorie-App, Theorieunterricht, Lernmaterial und Verwaltung.",
+    defaults: { price: [52000], description: GRUND_DESC },
   },
   {
     ids: ["drive-uebung"], title: "Übungsfahrt", unit: "je 45 Minuten",

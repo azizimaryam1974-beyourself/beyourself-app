@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
-import { CATALOG, CATALOG_IDS } from "../catalog";
+import { CATALOG, CATALOG_IDS, GRUND_DESC_V3 } from "../catalog";
 
 /**
  * Online-Buchung: Angebote (mit Preis), freigegebene Termine, Buchungen/Bestellungen,
@@ -251,4 +251,7 @@ export function seedBookingDefaults(db: Database.Database): void {
       db.prepare(`INSERT INTO settings (key,value) VALUES ('offers_v3','1')`).run();
     })();
   }
+  // v4: Grundbetrag-Text „inklusive Theorie-App …“ – nur wenn noch der alte Standardtext drinsteht.
+  db.prepare(`UPDATE offers SET description = ? WHERE id = 'fee-grundbetrag' AND description = ?`)
+    .run(CATALOG.find((c) => c.ids[0] === "fee-grundbetrag")!.defaults.description, GRUND_DESC_V3);
 }

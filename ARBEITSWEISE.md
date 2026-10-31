@@ -23,7 +23,7 @@ max. Termine pro Woche · Sperre/„nur mit meiner Freigabe“ (manuell) · Noti
   (wann er fährt, Pausen); einzelne Tage/Zeiten mit einem Tipp sperren.
 - **Keine Sonntage, keine Feiertage in Hessen** (jedes Jahr automatisch berechnet, inkl. Ostern/Pfingsten/Fronleichnam).
 - Raster **45 Min**. **Übungsfahrten immer 90 Min** (2 × 45). Testfahrt und Warmstunde 30 Min.
-- **Beleuchtungsfahrt** nur, wenn es tatsächlich dunkel ist (Sonnenuntergang am Standort, je Datum berechnet).
+- **Beleuchtungsfahrt** nur, wenn es tatsächlich dunkel ist (Sonnenuntergang in **34117 Kassel**, Rudolf-Schwander-Str. 9, je Datum berechnet).
 - Treffpunkt je Termin (Fahrschule / TÜV / vereinbart) – wichtig für Autowechsel am TÜV.
 - Ein Fahrlehrer (Maryam), Schalt- und Automatikauto immer verfügbar → keine Fahrzeugplanung nötig.
 - Übersichtliches Design: Tages-/Wochenansicht, Farben je Art, frei/gebucht auf einen Blick.
@@ -47,7 +47,7 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
 - Bezahlt wird vorab. Rückgaben gehen als **Guthaben** aufs Konto (für die nächste Fahrt), nicht als Geld. ❓ siehe unten
 - **Kostenlos absagen** (100 % Guthaben) bis **24 Std. vor Beginn, spätestens 21 Uhr am Vortag** (das Frühere gilt). ❓ bestätigen
 - Wer **weniger als 24 Std. vorher bucht** („Last-Minute“), kann nicht mehr absagen.
-- **Späte Absage:** 70 % ❓ (oder 75 %) werden berechnet, Rest als Guthaben. Termin geht sofort an Warteliste + Kalender.
+- **Späte Absage:** **70 %** werden berechnet (Entscheidung 31.10.), Rest als Guthaben. Termin geht sofort an Warteliste + Kalender.
   Wird er neu besetzt, entsteht kein Ausfall → ❓ volles Guthaben.
 - **Nicht erschienen oder > 15 Min zu spät:** Fahrlehrer muss nicht warten, Stunde fällt aus, ¾ des Preises werden berechnet.
 
@@ -59,15 +59,15 @@ Gleichzeitig ist der Termin für alle im Kalender buchbar – wer zuerst bucht, 
 ## Preise (inkl. MwSt.)
 | Leistung | Dauer | Preis |
 |---|---|---|
-| Grundbetrag | – | 520 € ❓ für alle Klassen gleich? |
+| Grundbetrag | – | 520 € – alle Klassen, fällig mit der Anmeldung |
 | Übungsfahrt | 45 Min | 68 € (gebucht als 90 Min = 136 €) |
 | Sonderfahrt | 45 Min | 75 € |
 | Warmstunde | 30 Min | 45 € |
 | Testfahrt (B197) | 30 Min | 45 € – Admin kann auf 45 Min / 68 € umstellen |
 | Vorstellung praktische Prüfung | – | 200 € |
 | Vorstellung Theorieprüfung | – | 70 € |
-| TÜV-Gebühr Theorie (separat ausgewiesen) | – | 24,99 € |
-| TÜV-Gebühr Praxis (separat ausgewiesen) | – | 129,83 € |
+| TÜV-Gebühr Theorie (Fahrschule kassiert, zahlt an TÜV; separat ausweisen) | – | 24,99 € |
+| TÜV-Gebühr Praxis (Fahrschule kassiert, zahlt an TÜV; separat ausweisen) | – | 129,83 € |
 
 ## Rollen & mehrere Fahrschulen
 - Inhaber lädt weitere Personen ein (Fahrlehrer, Admin, Büro); **jedes Recht einzeln** (z. B. Termine ja, Zahlungen nein).
@@ -84,11 +84,12 @@ Gleichzeitig ist der Termin für alle im Kalender buchbar – wer zuerst bucht, 
 7. Später: mehrere Fahrschulen
 
 ## ❓ Noch offen
+0. Warteliste: Variante A (Vorsprung) oder B (30 Min exklusiv)?
 1. Absagefrist: „24 Std. vorher, spätestens 21 Uhr am Vortag“ richtig verstanden?
-2. Späte Absage 70 % oder 75 % (wie bei „nicht erschienen“)?
+2. ✓ Späte Absage 70 %, nicht erschienen / > 15 Min zu spät 75 %.
 3. Termin über Warteliste neu besetzt → Schüler bekommt alles als Guthaben (kein Abzug)?
 4. Guthaben am Ende der Ausbildung: auszahlen auf Wunsch? (rechtlich prüfen)
-5. TÜV-Gebühren: über die App mitkassieren (als durchlaufender Posten) oder zahlt der Schüler direkt beim TÜV?
-6. Grundbetrag 520 € für alle Klassen, auch Umschreibung? Einmal vorab bezahlen, bevor gebucht werden kann?
-7. Standort (Ort) der Fahrschule für die Dunkelheits-Berechnung.
+5. ✓ TÜV-Gebühren kassiert die Fahrschule und zahlt an den TÜV (Steuerberater: durchlaufender Posten?).
+6. ✓ Grundbetrag 520 € für alle Klassen, mit der Anmeldung.
+7. ✓ Kassel.
 8. Rechtlich prüfen lassen: Ausfallregeln (¾ Entgelt), Guthaben statt Rückzahlung, Attest-Klausel.

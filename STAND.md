@@ -34,6 +34,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 | Beleuchtungsfahrt | Sommer-Zeiten (Sonnenuntergang ~21:40) – ob 15 Min Puffer passt |
 | Daten-Umstellung (alte Angebote löschen) | Nur mit Kopie simuliert – auf dem echten Server beobachten |
 | Schritt 4: Grundbetrag + Prüfungen (01.11.) | Mit Testkonto durchgespielt (Anmeldung → Grundbetrag → Einladung Praxis → bestätigt). Echt testen: mit einem Schüler, der schon im System ist („Schon bezahlt / erlassen“) |
+| Übersicht (Dashboard, 01.11.) | Wetter (DWD über Bright Sky) konnte hier nicht abgerufen werden – auf dem Server prüfen. Zahlen mit echten Fahrten im Februar prüfen |
 | Expo-App (iPhone) | **Noch nie** auf Maryams Handy geöffnet; kennt Kalender/Theorie/Fragen noch nicht |
 
 ## 3. Entscheidungen von Maryam (Kurzfassung – Details in ARBEITSWEISE.md)

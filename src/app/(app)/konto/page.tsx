@@ -26,7 +26,7 @@ const STATUS_TEXT = {
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ gebucht?: string; willkommen?: string }> }) {
   const user = await requireUser();
-  if (user.role === "teacher") redirect("/unterricht");
+  if (user.role === "teacher") redirect("/verwaltung/uebersicht");
   const { gebucht, willkommen } = await searchParams;
   const grund = ensureGrundbetrag(db(), user.id);
   const invited = listExams(db(), user.id).filter((e) => e.status === "invited");

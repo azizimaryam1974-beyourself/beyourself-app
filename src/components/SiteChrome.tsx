@@ -12,6 +12,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
   const teacherOpen = user?.role === "teacher" ? listBookingsByStatus(db(), ["requested"]).length : 0;
   const items: NavItem[] = user?.role === "teacher"
     ? [
+        { href: "/verwaltung/uebersicht", label: "Übersicht" },
         { href: "/verwaltung/kalender", label: "Kalender", badge: teacherOpen },
         { href: "/verwaltung", label: "Schüler" },
         { href: "/unterricht", label: "Live-Unterricht" },

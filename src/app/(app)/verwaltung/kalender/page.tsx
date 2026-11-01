@@ -6,6 +6,7 @@ import { dayRanges, freeIntervals, listBlocks, mainTeacherId, STRIKE_NOTE, syncF
 import { availableProviders, runBookingJobs } from "@/lib/server/payments/service";
 import { markPaidCashAction } from "@/app/booking-actions";
 import { deleteBlockAction, toggleHourAction } from "@/app/calendar-actions";
+import { BlockForm } from "../einstellungen/arbeitszeiten/Forms";
 import { DayTools } from "./DayTools";
 import { closedReason, frameFor, sunsetMs, workIntervals, type Interval } from "@/lib/calendar";
 import { formatPrice } from "@/lib/language-package";
@@ -152,10 +153,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             <Link className="btn btn-secondary btn-small" href={`/verwaltung/kalender?w=${addDays(monday, 7)}`} aria-label="Nächste Woche">→</Link>
           </div>
         </div>
+        <details className="cal-private">
+          <summary className="btn btn-small">+ Privater Termin</summary>
+          <BlockForm today={today} privateMode />
+        </details>
         <div className="cal-legend hint">
           <span><i className="lg lg-work" /> Arbeitszeit (frei)</span><span><i className="lg k-uebung" /> Übungsfahrt</span>
           <span><i className="lg k-sonder" /> Sonderfahrt</span><span><i className="lg k-pruef" /> Test/Warmstunde</span>
-          <span><i className="lg lg-block" /> gesperrt</span><span>☾ Sonnenuntergang</span>
+          <span><i className="lg lg-block" /> privat / gesperrt</span><span>☾ Sonnenuntergang</span>
           <span>· {items.length} Fahrten, {formatPrice(weekTotal)} bezahlt</span>
         </div>
 

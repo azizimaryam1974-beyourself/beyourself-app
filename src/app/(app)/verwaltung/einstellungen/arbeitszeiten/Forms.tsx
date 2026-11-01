@@ -41,7 +41,7 @@ export function WorkHoursForm({ template }: { template: Array<Array<{ from: numb
   );
 }
 
-export function BlockForm({ today }: { today: string }) {
+export function BlockForm({ today, privateMode = false }: { today: string; privateMode?: boolean }) {
   const [state, action, pending] = useActionState(addBlockAction, {} as ActionState);
   return (
     <form action={action} className="akte-form">
@@ -53,9 +53,10 @@ export function BlockForm({ today }: { today: string }) {
         <div className="field" style={{ margin: 0 }}><label htmlFor="bt">Bis (Tag)</label><input id="bt" type="date" name="toDay" min={today} /></div>
         <div className="field" style={{ margin: 0 }}><label htmlFor="btt">bis Uhrzeit <span className="hint">(leer = Tagesende)</span></label><input id="btt" type="time" step={900} name="toTime" /></div>
       </div>
-      <input type="text" name="note" maxLength={200} placeholder="Grund (nur für dich), z. B. Urlaub, Arzt, Prüfungen beim TÜV" aria-label="Grund" />
+      <input type="text" name="note" maxLength={200} required={privateMode}
+        placeholder={privateMode ? "Was? z. B. Zahnarzt, Elternabend – sehen nur Sie, Schüler sehen nur „belegt“" : "Grund (nur für dich), z. B. Urlaub, Arzt, Prüfungen beim TÜV"} aria-label="Grund" />
       <FormMessage state={state} />
-      <button className="btn btn-secondary btn-small" type="submit" disabled={pending}>Zeit sperren</button>
+      <button className="btn btn-secondary btn-small" type="submit" disabled={pending}>{privateMode ? "Privaten Termin eintragen" : "Zeit sperren"}</button>
     </form>
   );
 }

@@ -795,3 +795,17 @@ details.tl-row { display: block; }
   /* oben bleibt auf dem Handy nur das Logo */
   .site-header .nav.nav-user { display: none; }
 }
+.wh-range { grid-template-columns: 1fr auto 1fr auto; }
+.wh-del { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.wh-del:hover { background: rgba(229, 56, 59, 0.1); color: #b42318; border-color: rgba(229, 56, 59, 0.4); }
+/* Leiste unten in den Farben der Seite: dunkles Mitternachtsblau-Glas, Gold für den aktiven Punkt */
+@media (max-width: 860px) {
+  .bnav { background: rgba(15, 26, 44, 0.62); border-color: rgba(233, 215, 180, 0.28);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 16px 36px -12px rgba(0, 0, 0, 0.75); }
+  .bnav a, .bnav button { color: rgba(246, 240, 230, 0.88); }
+  .bnav .on { background: var(--gold-grad); color: var(--ink); }
+  .bnav-ico i { border-color: #16243a; }
+  .bnav-more { background: rgba(22, 36, 58, 0.94); border-color: rgba(233, 215, 180, 0.28); }
+  .bnav-more a, .bnav-more button { color: var(--cream); }
+  .bnav-more a:hover, .bnav-more button:hover { background: rgba(233, 215, 180, 0.12); }
+}

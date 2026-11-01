@@ -66,7 +66,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
             {" · "}seit {fmtDate(Date.parse(user.created_at))}
           </p>
         </div>
-        <form action={setClassAction} className="row">
+        <form action={setClassAction} className="row" key={`cls-${t?.profile.licenseClass ?? "none"}`}>
           <input type="hidden" name="userId" value={id} />
           <select name="licenseClass" defaultValue={t?.profile.licenseClass ?? ""} aria-label="Klasse" style={{ width: "auto" }}>
             {!t && <option value="" disabled>Klasse wählen …</option>}
@@ -113,7 +113,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
 
             <section className="card">
               <h2>Stunden & Regeln</h2>
-              <TargetsForm userId={id} isB197={t.profile.licenseClass === "b197"} practiceTarget={t.profile.practiceTarget}
+              <TargetsForm key={`tg-${t.profile.practiceTarget}-${t.profile.repeatTarget}-${t.profile.maxPerWeek}-${t.profile.manualApproval}-${t.profile.blocked}`} userId={id} isB197={t.profile.licenseClass === "b197"} practiceTarget={t.profile.practiceTarget}
                 repeatTarget={t.profile.repeatTarget} maxPerWeek={t.profile.maxPerWeek} manualApproval={t.profile.manualApproval} blocked={t.profile.blocked} />
             </section>
 
@@ -137,7 +137,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
 
             <section className="card">
               <h2>Unterlagen & Notiz</h2>
-              <form action={saveDocsAction} className="akte-form">
+              <form action={saveDocsAction} className="akte-form" key={`docs-${[t.profile.sehtestAt, t.profile.ersteHilfeAt, t.profile.antragAt, t.profile.pruefauftragAt, t.profile.theoryPassedAt, t.profile.teacherNote].join("|")}`}>
                 <input type="hidden" name="userId" value={id} />
                 <div className="doc-checks">
                   {([["sehtestAt", "Sehtest"], ["ersteHilfeAt", "Erste-Hilfe-Kurs"], ["antragAt", "Antrag gestellt"], ["pruefauftragAt", "Prüfauftrag liegt vor"], ["theoryPassedAt", "Theorieprüfung bestanden"]] as const).map(([k, label]) => (

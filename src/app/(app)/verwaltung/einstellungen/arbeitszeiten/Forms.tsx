@@ -9,32 +9,36 @@ const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${St
 
 export function WorkHoursForm({ template }: { template: Array<Array<{ from: number; to: number }>> }) {
   const [state, action, pending] = useActionState(saveWorkHoursAction, {} as ActionState);
-  const [rows, setRows] = useState(() => template.map((d) => Math.max(1, d.length)));
+  type R = { from: string; to: string };
+  const [days, setDays] = useState<R[][]>(() => template.map((d) => d.map((r) => ({ from: hhmm(r.from), to: hhmm(r.to) }))));
+  const set = (wd: number, fn: (rs: R[]) => R[]) => setDays((all) => all.map((rs, j) => (j === wd ? fn(rs) : rs)));
   return (
     <form action={action}>
       <div className="wh-grid">
         {DAYS.map((name, wd) => (
           <fieldset key={wd} className="wh-day">
             <legend>{name}</legend>
-            {Array.from({ length: rows[wd] }, (_, i) => {
-              const r = template[wd][i];
-              return (
-                <div key={i} className="wh-range">
-                  <input type="time" step={900} name={`d${wd}f${i}`} defaultValue={r ? hhmm(r.from) : ""} aria-label={`${name} von`} />
-                  <span>–</span>
-                  <input type="time" step={900} name={`d${wd}t${i}`} defaultValue={r ? hhmm(r.to) : ""} aria-label={`${name} bis`} />
-                </div>
-              );
-            })}
+            {days[wd].map((r, i) => (
+              <div key={i} className="wh-range">
+                <input type="time" step={900} name={`d${wd}f${i}`} value={r.from} onChange={(e) => set(wd, (rs) => rs.map((x, k) => (k === i ? { ...x, from: e.target.value } : x)))} aria-label={`${name} von`} />
+                <span>–</span>
+                <input type="time" step={900} name={`d${wd}t${i}`} value={r.to} onChange={(e) => set(wd, (rs) => rs.map((x, k) => (k === i ? { ...x, to: e.target.value } : x)))} aria-label={`${name} bis`} />
+                <button type="button" className="wh-del" onClick={() => set(wd, (rs) => rs.filter((_, k) => k !== i))} aria-label={`${name}: diesen Zeitraum löschen`} title="Zeitraum löschen">✕</button>
+              </div>
+            ))}
+            {days[wd].length === 0 && <p className="hint" style={{ margin: "4px 0" }}>frei – an diesem Tag keine Fahrten</p>}
             <div className="row">
-              {rows[wd] < 3 && <button type="button" className="link-btn" onClick={() => setRows((x) => x.map((n, j) => (j === wd ? n + 1 : n)))}>+ Zeitraum (z. B. nach der Pause)</button>}
+              {days[wd].length < 3 && (
+                <button type="button" className="link-btn" onClick={() => set(wd, (rs) => [...rs, { from: rs.length ? "" : "09:00", to: rs.length ? "" : "17:00" }])}>
+                  + Zeitraum{days[wd].length ? " (z. B. nach der Pause)" : ""}
+                </button>
+              )}
             </div>
-            {template[wd].length === 0 && rows[wd] === 1 && <p className="hint" style={{ margin: 0 }}>frei – leer lassen</p>}
           </fieldset>
         ))}
       </div>
-      <p className="hint">Leere Felder = an diesem Tag keine Fahrten. Pausen entstehen durch zwei Zeiträume (z. B. 09:00–13:00 und 14:00–19:00).
-        Außerhalb des Rahmens (Okt–Apr 9–21 Uhr, Mai–Sep 9–23 Uhr), an Sonntagen und Feiertagen in Hessen wird automatisch nichts angeboten.</p>
+      <p className="hint">Mit ✕ löschst du einen Zeitraum. Ein Tag ohne Zeitraum = an diesem Tag keine Fahrten. Pausen entstehen durch zwei Zeiträume (z. B. 09:00–13:00 und 14:00–19:00).
+        Außerhalb des Rahmens (Okt–Apr 9–21 Uhr, Mai–Sep 9–23 Uhr), an Sonntagen und Feiertagen in Hessen wird automatisch nichts angeboten. Erst „Speichern“ übernimmt die Änderung.</p>
       <FormMessage state={state} />
       <button className="btn btn-gold" type="submit" disabled={pending}>Arbeitszeiten speichern</button>
     </form>

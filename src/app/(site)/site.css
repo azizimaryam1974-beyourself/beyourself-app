@@ -360,3 +360,79 @@
 .class-bg-veil { background: linear-gradient(90deg, rgba(15, 26, 44, 0.8) 0%, rgba(15, 26, 44, 0.5) 60%, rgba(15, 26, 44, 0.38) 100%), linear-gradient(180deg, rgba(15, 26, 44, 0.4), rgba(15, 26, 44, 0.65)); }
 /* Mit echtem Video blinkt der Clip selbst – kein zusätzlicher Blinker darüber */
 .city.via-video .blinker { animation: none !important; opacity: 0 !important; }
+
+/* ================= Durchgehend dunkel + kompakt + Wellen (01.11.) ================= */
+.flow { position: relative; isolation: isolate; color: var(--cream);
+  background: linear-gradient(180deg, #121d30 0%, var(--midnight) 30%, #101b2d 70%, var(--midnight) 100%); }
+.wave-stick { position: sticky; top: 0; height: 100vh; height: 100svh; margin-bottom: -100vh; margin-bottom: -100svh; z-index: -1; pointer-events: none; }
+.wave-canvas { display: block; width: 100%; height: 100%; }
+.flow .section { padding: clamp(44px, 6vw, 76px) 0; background: transparent; }
+.flow .section + .section { padding-top: clamp(8px, 2vw, 24px); }
+.flow .section-title { color: #fbf4e6; font-size: clamp(1.75rem, 3.2vw, 2.6rem); margin-bottom: 0.45em; max-width: 26ch; }
+.flow .lead { color: rgba(246, 240, 230, 0.72); font-size: 1.02rem; }
+.flow p { color: rgba(246, 240, 230, 0.8); }
+
+/* Kacheln: dichter, kleiner, gleiche dunkle Familie mit Farbakzent */
+.flow .bento { margin-top: 22px; gap: 14px; grid-auto-rows: minmax(132px, auto); }
+.flow .tile { padding: 20px 22px; border-radius: 22px; border: 1px solid rgba(233, 215, 180, 0.16); box-shadow: 0 20px 40px -28px rgba(0, 0, 0, 0.9);
+  transition: transform 0.3s var(--ease), border-color 0.3s var(--ease); }
+.flow .tile:hover { transform: translateY(-3px); border-color: rgba(233, 215, 180, 0.45); }
+.flow .tile h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.flow .tile p { font-size: 0.95rem; line-height: 1.5; }
+.flow .tile-dark { padding: clamp(22px, 3vw, 32px); background:
+    radial-gradient(80% 70% at 100% 0%, rgba(217, 154, 62, 0.2), transparent 60%),
+    radial-gradient(60% 60% at 0% 100%, rgba(95, 158, 160, 0.24), transparent 65%),
+    linear-gradient(160deg, #1b2a44, #111c2f); }
+.flow .tile-dark h3 { font-size: clamp(1.45rem, 2.4vw, 1.95rem); margin-bottom: 10px; }
+.flow .tile-dark .demo { margin-top: 18px; padding: 18px; }
+.flow .demo-out { min-height: 4.6em; padding-top: 12px; }
+.flow .demo-text { font-size: clamp(1.1rem, 1.7vw, 1.3rem); }
+.flow .tile-price { color: var(--ink); }
+.flow .tile-price p { color: #2b2418; }
+.flow .tile-price-num { font-size: 3rem; margin-bottom: 8px; }
+.flow .tile-sage { background: linear-gradient(160deg, rgba(157, 180, 159, 0.28), rgba(95, 158, 160, 0.14)), #142235; color: var(--cream); }
+.flow .tile-sky { background: linear-gradient(160deg, rgba(168, 200, 219, 0.26), rgba(168, 200, 219, 0.08)), #142235; color: var(--cream); }
+.flow .tile-glass { background: linear-gradient(160deg, rgba(233, 215, 180, 0.14), rgba(233, 215, 180, 0.04)), #142235; color: var(--cream); }
+
+/* Klassen: 2 × 2 kompakte Karten statt langer Zeilen */
+.flow .split-head { margin-bottom: 18px; gap: 8px 24px; }
+.flow .classes { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.flow .class-card { grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap: 4px 18px; padding: 18px 20px; border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)), #132036;
+  border: 1px solid rgba(233, 215, 180, 0.16); box-shadow: 0 20px 40px -28px rgba(0, 0, 0, 0.9); }
+.flow .class-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+.flow .class-k { grid-row: span 2; align-self: center; color: var(--champagne); font-size: clamp(1.6rem, 2.4vw, 2.1rem); min-width: 2.6ch; }
+.flow .class-k-long { font-size: 1.1rem; writing-mode: horizontal-tb; }
+.flow .class-card h3 { color: #fbf4e6; font-size: 1.02rem; }
+.flow .class-card p { color: rgba(246, 240, 230, 0.68); font-size: 0.92rem; line-height: 1.45; }
+.flow .class-link { grid-column: 2; justify-self: start; margin-top: 8px; padding: 6px 14px; font-size: 0.88rem; color: var(--champagne); border-color: rgba(233, 215, 180, 0.35); }
+.flow .class-link:hover { background: var(--gold-grad); color: var(--ink); border-color: transparent; }
+@media (max-width: 760px) { .flow .classes { grid-template-columns: 1fr; } }
+
+/* Ablauf */
+.flow .steps { margin-top: 20px; gap: 14px; }
+.flow .steps li { padding: 18px 20px; border-radius: 20px; background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), #132036; border-color: rgba(233, 215, 180, 0.16); }
+.flow .steps li::before { font-size: 2rem; margin-bottom: 8px; }
+.flow .steps h3 { font-size: 1.02rem; margin-bottom: 4px; }
+.flow .steps p { font-size: 0.93rem; }
+.flow .lang-ribbon { margin-top: 26px; font-size: clamp(1.15rem, 2.2vw, 1.6rem); gap: 10px 24px; }
+
+/* Über uns: Foto kleiner, Text daneben */
+.flow .about { grid-template-columns: minmax(200px, 320px) 1fr; gap: clamp(24px, 4vw, 48px); }
+.flow .about-photo { aspect-ratio: 4 / 3.4; border-radius: 22px; }
+@media (max-width: 860px) { .flow .about { grid-template-columns: 1fr; } .flow .about-photo { aspect-ratio: 16 / 9; max-height: 240px; } }
+
+/* Kontakt */
+.flow .contact { gap: 24px; align-items: center; }
+.flow .contact-card { padding: 20px 22px; gap: 10px; border-radius: 22px; color: var(--cream);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)), #132036; border: 1px solid rgba(233, 215, 180, 0.16); }
+.flow .contact-card dt { color: rgba(246, 240, 230, 0.55); }
+.flow .contact-card a { color: var(--champagne); }
+@media (min-width: 921px) { .hero { padding-bottom: clamp(50px, 7vw, 100px); } }
+@media (max-width: 760px) {
+  .flow .class-card { grid-template-columns: 1fr; grid-template-rows: none; padding: 16px 18px; }
+  .flow .class-k { grid-row: auto; font-size: 1.5rem; }
+  .flow .class-k-long { font-size: 1.15rem; }
+  .flow .class-link { grid-column: 1; }
+  .flow .tile { padding: 16px 18px; }
+}

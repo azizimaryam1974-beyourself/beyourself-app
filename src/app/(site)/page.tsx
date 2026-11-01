@@ -4,6 +4,7 @@ import { bookableLanguages } from "@/lib/languages";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { LiveDemo, type DemoLine } from "./LiveDemo";
 import { CityHero } from "./CityHero";
+import { WaveField } from "./WaveField";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -82,8 +83,10 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="flow">
+      <WaveField />
       {/* ---------------- Bento ---------------- */}
-      <section className="section cream" aria-labelledby="warum">
+      <section className="section" aria-labelledby="warum">
         <div className="wrap">
           <h2 id="warum" className="section-title">Alles, was du für deinen Führerschein brauchst. Nichts, was dich aufhält.</h2>
           <div className="bento">
@@ -115,7 +118,7 @@ export default function Home() {
       </section>
 
       {/* ---------------- Klassen ---------------- */}
-      <section id="klassen" className="section cream-2" aria-labelledby="klassen-h">
+      <section id="klassen" className="section" aria-labelledby="klassen-h">
         <div className="wrap">
           <div className="split-head">
             <h2 id="klassen-h" className="section-title">Führerscheinklassen</h2>
@@ -139,7 +142,7 @@ export default function Home() {
       </section>
 
       {/* ---------------- Sprachen / Ablauf ---------------- */}
-      <section id="sprachen" className="section dark-band" aria-labelledby="sprachen-h">
+      <section id="sprachen" className="section" aria-labelledby="sprachen-h">
         <div className="wrap">
           <h2 id="sprachen-h" className="section-title light">So liest du den Unterricht in deiner Sprache</h2>
           <ol className="steps">
@@ -163,7 +166,7 @@ export default function Home() {
       </section>
 
       {/* ---------------- Über uns ---------------- */}
-      <section id="ueber-uns" className="section cream" aria-labelledby="ueber-h">
+      <section id="ueber-uns" className="section" aria-labelledby="ueber-h">
         <div className="wrap about">
           <div className="about-photo" role="img" aria-label="Platz für ein Foto der Fahrschule">
             <span>Foto folgt</span>
@@ -179,14 +182,14 @@ export default function Home() {
       </section>
 
       {/* ---------------- Kontakt ---------------- */}
-      <section id="kontakt" className="section sage-band" aria-labelledby="kontakt-h">
+      <section id="kontakt" className="section" aria-labelledby="kontakt-h">
         <div className="wrap contact">
           <div>
             <h2 id="kontakt-h" className="section-title">Lass uns reden</h2>
             <p className="lead">Fragen zu Klassen, Preisen oder dem Sprachpaket? Schreib uns – wir melden uns schnell.</p>
             <div className="row">
-              <a className="btn" href="mailto:info@fahrschule-beyourself.de">E-Mail schreiben</a>
-              <Link className="btn btn-secondary" href="/anmelden">Direkt anmelden</Link>
+              <a className="btn btn-gold" href="mailto:info@fahrschule-beyourself.de">E-Mail schreiben</a>
+              <Link className="btn btn-glass" href="/anmelden">Direkt anmelden</Link>
             </div>
           </div>
           <dl className="contact-card">
@@ -197,6 +200,7 @@ export default function Home() {
           </dl>
         </div>
       </section>
+      </div>
     </>
   );
 }

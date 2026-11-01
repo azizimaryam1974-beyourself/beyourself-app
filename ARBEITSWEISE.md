@@ -43,6 +43,14 @@ Prüfungsreife (Nachricht an Schüler) → Prüfungsphase.
 
 **Prüfungsphase (alle):** Voraussetzungen Theorie bestanden + Prüfauftrag liegt vor. Schüler zahlt Warmstunde + Prüfungsgebühr.
 Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. Schüler bestätigt → verbindlich.
+**So gebaut (01.11.2026):** Einladung in der Schülerakte (Theorie- oder Praxisprüfung). Schüler bestätigt verbindlich durch Bezahlen
+(3 Tage Zeit, spätestens 24 Std. vor Beginn), sonst verfällt die Einladung. Posten getrennt: Theorie = 70 € + TÜV 24,99 €;
+Praxis = Warmstunde 45 € + 200 € + TÜV 129,83 €. Warmstunde (Standard 30 Min vor Prüfung) + 60 Min Prüfung blockieren den Kalender.
+Schüler kann vor dem Bezahlen ablehnen (Fahrschule bekommt Nachricht), danach nicht mehr selbst absagen. Fahrschule sagt ab/verschiebt
+→ alles als Guthaben, wird beim neuen Termin verrechnet. Ergebnis: bestanden / nicht bestanden / nicht erschienen (Gebühren verfallen).
+Theorie bestanden → automatisch abgehakt; Praxis bestanden → Ausbildung fertig.
+**Grundbetrag:** offene Rechnung mit der Anmeldung (14 Tage Zeit, danach neu), Fahrstunden erst nach Zahlung buchbar.
+Fahrschule kann „Bar/EC bezahlt“ oder „schon bezahlt (vor der App) / erlassen“ markieren. ❓ Theorieunterricht vorher schon erlaubt (ja, nicht gesperrt).
 
 ## Absagen, Ausfall, Guthaben
 - Bezahlt wird vorab. Rückgaben gehen als **Guthaben** aufs Konto (für die nächste Fahrt), nicht als Geld. ❓ siehe unten
@@ -82,7 +90,7 @@ Termin legt **nur die Fahrschule** fest (nach TÜV-Bestätigung) und lädt ein. 
 1. ✓ Ausbildungsstand + Regeln je Klasse, Fortschrittsgrafik, Schülerakte (31.10.2026)
 2. ✓ Kalender neu: Rahmen, Wochenvorlage, Hessen-Feiertage, Dunkelheit, Buchung 60/75/90/135, automatische Bestätigung (31.10.2026)
 3. ✓ Guthaben, Absage-Regeln, nicht erschienen/zu spät, Warteliste (01.11.2026)
-4. Prüfungsphase (Einladung durch die Fahrschule), Grundbetrag, TÜV-Gebühren getrennt
+4. ✓ Prüfungsphase (Einladung durch die Fahrschule), Grundbetrag, TÜV-Gebühren getrennt (01.11.2026)
 5. Rollen & Rechte
 6. Alles in der Handy-App + Push-Nachrichten
 7. Später: mehrere Fahrschulen

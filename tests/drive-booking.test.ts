@@ -17,6 +17,7 @@ function setup(cls: "b197" | "b" = "b197") {
   const a = createUser(db, { email: "a@x.de", name: "Anna", passwordHash: "x", role: "student" });
   const b = createUser(db, { email: "b@x.de", name: "Ben", passwordHash: "x", role: "student" });
   ensureProfile(db, a.id, cls); ensureProfile(db, b.id, cls);
+  updateProfile(db, a.id, { grundWaived: true }); updateProfile(db, b.id, { grundWaived: true });
   saveSettings(db, { minLeadHours: 12 });
   // Di: 9–12 Uhr
   saveTemplate(db, teacher.id, [[], [{ from: 540, to: 720 }], [], [], [], []]);

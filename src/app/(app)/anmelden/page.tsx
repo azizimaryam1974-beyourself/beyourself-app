@@ -3,6 +3,8 @@ import { currentUser } from "@/lib/server/auth";
 import { bookableLanguages } from "@/lib/languages";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { SignupForm } from "./SignupForm";
+import { db } from "@/lib/server/db";
+import { getOffer } from "@/lib/server/booking";
 
 export const metadata = { title: "Anmelden" };
 export const dynamic = "force-dynamic";
@@ -13,8 +15,8 @@ export default async function SignupPage() {
   return (
     <div className="narrow" style={{ margin: "0 auto" }}>
       <h1>Anmeldung</h1>
-      <p className="hint">Lege dein Konto für den Theorieunterricht an.</p>
-      <SignupForm languages={languages} price={formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS)} />
+      <p className="hint">Lege dein Konto an – für Theorieunterricht, Fahrstunden und deinen Ausbildungsstand.</p>
+      <SignupForm languages={languages} price={formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS)} grundPrice={formatPrice(getOffer(db(), "fee-grundbetrag")?.priceCents || 52000).replace(",00", "")} />
     </div>
   );
 }

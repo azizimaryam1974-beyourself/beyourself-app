@@ -13,6 +13,8 @@ import { creditRefills } from "../cancel";
 import { releaseToWaitlist } from "../drive-booking";
 import { dueHoldNotifications, purgeOldWaitlist, takeExpiredHolds, waitersFor } from "../waitlist";
 import { getUser } from "../repo";
+import { confirmExamPaid, EXAM_LABEL, examsDueForReminder, expireExams, getExam } from "../exams";
+import { fmtDay } from "@/lib/time";
 
 export type Provider = "stripe" | "paypal" | "test" | "guthaben";
 
@@ -116,6 +118,16 @@ export async function startPayment(bookingId: string, userId: string, provider: 
 export async function finalizePayment(bookingId: string, provider: Provider | "bar", paymentRef: string, amountCents: number | null): Promise<MarkPaidResult> {
   const res = markPaid(db(), bookingId, { provider, paymentRef, amountCents });
   if (res.ok) {
+    if (!res.already && res.booking.examId) {
+      const b = res.booking;
+      const e = confirmExamPaid(db(), b.id);
+      if (e) {
+        const warm = e.warmAt ? ` Warmstunde ab ${fmtTime(e.warmAt)} Uhr (Treffpunkt: ${b.meetingPoint || "Fahrschule"}).` : "";
+        notifyStudent(b, `${EXAM_LABEL[e.type]} bestätigt`, `Danke! Deine Zahlung über ${formatPrice(b.priceCents)} ist angekommen. Deine ${EXAM_LABEL[e.type]} am ${fmtDay(e.startsAt)} um ${fmtTime(e.startsAt)} Uhr (${e.place}) ist verbindlich.${warm}\n\nBitte bring deinen Personalausweis oder Reisepass mit. Viel Erfolg!`);
+        notifySchool(b, `Prüfung bestätigt: ${b.userName}`, `${b.userName} hat die ${EXAM_LABEL[e.type]} am ${fmtDay(e.startsAt)} ${fmtTime(e.startsAt)} Uhr bestätigt und ${formatPrice(b.priceCents)} bezahlt (${provider}).`);
+      }
+      return res;
+    }
     if (!res.already) {
       const b = res.booking;
       const w = when(b);
@@ -180,6 +192,10 @@ export async function runBookingJobs(now = Date.now()): Promise<void> {
   for (const b of dueForReminder(db(), 10 * 60_000, now)) {
     notifyStudent(b, "Noch 10 Minuten zum Bezahlen", `Bitte bezahle deinen Termin „${b.title}“ (${when(b)}) bis ${fmtTime(b.payDeadline!)} Uhr – sonst wird er wieder für andere freigegeben.`);
   }
+  for (const b of examsDueForReminder(db(), now)) {
+    const e = b.examId ? getExam(db(), b.examId) : undefined;
+    if (e) notifyStudent(b, `Bitte ${EXAM_LABEL[e.type]} bestätigen`, `Deine Einladung zur ${EXAM_LABEL[e.type]} am ${fmtDay(e.startsAt)} um ${fmtTime(e.startsAt)} Uhr gilt erst, wenn du bezahlt hast – bis ${fmtDay(b.payDeadline!)}, ${fmtTime(b.payDeadline!)} Uhr. Danach verfällt der Termin.`);
+  }
   for (const b of expireDue(db(), now)) {
     if (b.provider === "stripe" && b.providerRef) await stripe.expireCheckout(b.providerRef);
     releaseHold(db(), b.id, now);
@@ -188,6 +204,11 @@ export async function runBookingJobs(now = Date.now()): Promise<void> {
       notifyStudent(b, "Zahlungsfrist abgelaufen", `Für „${b.title}“ (${when(b)}) ist keine Zahlung eingegangen. Der Termin ist wieder frei für andere. Du kannst ihn gern erneut anfragen, falls er noch frei ist.`);
       notifySchool(b, `Frist abgelaufen: ${b.userName}`, `${b.userName} hat ${b.title} (${when(b)}) nicht bezahlt. Der Termin ist wieder frei.`);
     }
+  }
+  for (const e of expireExams(db(), now)) {
+    const u = getUser(db(), e.userId);
+    if (u) notifyUser(u, `${EXAM_LABEL[e.type]}: Frist abgelaufen`, `Für deine ${EXAM_LABEL[e.type]} am ${fmtDay(e.startsAt)} ist keine Zahlung eingegangen. Die Einladung ist verfallen – bitte melde dich bei der Fahrschule.`, "/termine");
+    notifySchool(null, `Prüfung nicht bestätigt: ${u?.name ?? ""}`, `${u?.name ?? "Ein Schüler"} hat die ${EXAM_LABEL[e.type]} am ${fmtDay(e.startsAt)} ${fmtTime(e.startsAt)} Uhr nicht rechtzeitig bezahlt. Bitte beim TÜV absagen oder neu einladen.`);
   }
   runWaitlistJobs(now);
 }

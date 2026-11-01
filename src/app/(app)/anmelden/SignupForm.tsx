@@ -13,7 +13,7 @@ const CLASS_HINT: Record<string, string> = {
   umschreibung: "ausländischen Führerschein umschreiben",
 };
 
-export function SignupForm({ languages, price }: { languages: LanguageOption[]; price: string }) {
+export function SignupForm({ languages, price, grundPrice }: { languages: LanguageOption[]; price: string; grundPrice: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(signupAction, {});
   const v = state.values ?? {};
   const fe = state.fieldErrors ?? {};
@@ -106,8 +106,11 @@ export function SignupForm({ languages, price }: { languages: LanguageOption[]; 
           </label>
           {fe.acceptPrivacy && <div className="error">{fe.acceptPrivacy}</div>}
         </div>
+        <p className="hint">Mit der Anmeldung wird der <strong>Grundbetrag von {grundPrice}</strong> fällig (einmalig, inklusive Theorie-App,
+          Theorieunterricht und Lernmaterial). Bezahlen kannst du danach online in deinem Konto oder bar/EC in der Fahrschule.
+          Prüfungsgebühren und TÜV-Gebühren kommen erst zur Prüfung dazu.</p>
         <button className="btn btn-block" type="submit" disabled={pending}>
-          {pending ? "Wird gesendet …" : wants === "yes" ? `Anmelden und Sprachpaket zahlungspflichtig buchen (${price})` : "Kostenlos anmelden"}
+          {pending ? "Wird gesendet …" : wants === "yes" ? `Zahlungspflichtig anmelden (${grundPrice} + Sprachpaket ${price})` : `Zahlungspflichtig anmelden (${grundPrice})`}
         </button>
       </div>
     </form>

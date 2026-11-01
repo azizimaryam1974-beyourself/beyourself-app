@@ -42,6 +42,7 @@ export function cancelDriveByStudent(db: Database.Database, userId: string, book
   return db.transaction(() => {
     const b = getBooking(db, bookingId);
     if (!b || b.userId !== userId) throw new BookingError("Buchung nicht gefunden.");
+    if (b.examId) throw new BookingError("Prüfungstermine legt die Fahrschule fest. Bitte melde dich dort, wenn etwas nicht passt.");
     const info = cancelInfo(b, getSettings(db), now);
     if (info.mode === "lastminute") throw new BookingError("Das ist ein Last-Minute-Termin (weniger als 24 Stunden vorher gebucht) – er kann nicht mehr abgesagt werden.");
     if (info.mode === "past") throw new BookingError("Diese Fahrt kann nicht mehr abgesagt werden.");

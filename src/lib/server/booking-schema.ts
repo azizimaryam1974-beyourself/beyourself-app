@@ -212,6 +212,21 @@ CREATE TABLE IF NOT EXISTS lesson_mutes (
   PRIMARY KEY (lesson_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS exams (
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type        TEXT NOT NULL CHECK (type IN ('theorie','praxis')),
+  starts_at   INTEGER NOT NULL,
+  place       TEXT NOT NULL DEFAULT '',
+  warm_at     INTEGER,
+  status      TEXT NOT NULL CHECK (status IN ('invited','confirmed','declined','expired','cancelled','passed','failed','no_show')),
+  booking_id  TEXT,
+  message     TEXT NOT NULL DEFAULT '',
+  created_at  INTEGER NOT NULL,
+  decided_at  INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_exams_user ON exams(user_id, starts_at);
+
 CREATE TABLE IF NOT EXISTS payment_events (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL
@@ -281,6 +296,11 @@ export function seedBookingDefaults(db: Database.Database): void {
   addColumn(db, "bookings", "credit_cents", "INTEGER NOT NULL DEFAULT 0");
   addColumn(db, "bookings", "charge_cents", "INTEGER NOT NULL DEFAULT 0");
   addColumn(db, "bookings", "refill_credited", "INTEGER NOT NULL DEFAULT 0");
+  // Schritt 4: Prüfungen, Grundbetrag, getrennte Posten (Fahrschule / TÜV)
+  addColumn(db, "bookings", "exam_id", "TEXT");
+  addColumn(db, "bookings", "lines", "TEXT NOT NULL DEFAULT ''");
+  addColumn(db, "training_profiles", "grund_waived", "INTEGER NOT NULL DEFAULT 0");
+  addColumn(db, "training_profiles", "passed_at", "INTEGER");
   const now = Date.now();
   const hasOffers = (db.prepare(`SELECT COUNT(*) AS n FROM offers`).get() as { n: number }).n > 0;
   if (!hasOffers) {

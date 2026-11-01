@@ -16,6 +16,11 @@ import { bookableLanguages, getLanguage } from "@/lib/languages";
 import { formatPrice } from "@/lib/language-package";
 import { setPackageLanguageAction, setPackageStatusAction, teacherBookAction } from "@/app/actions";
 import { AddRecordForm, TargetsForm } from "./Forms";
+import { ExamInviteForm } from "./ExamForm";
+import { EXAM_LABEL, EXAM_PLACES, EXAM_STATUS_LABEL, ensureGrundbetrag, examMissing, listExams, type ExamType } from "@/lib/server/exams";
+import { cancelExamAction, examResultAction, grundbetragAction } from "@/app/exam-actions";
+import { getOffer } from "@/lib/server/booking";
+import { fmtDay, fmtTime } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Schülerakte" };
@@ -37,6 +42,16 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
   if (!user || user.role !== "student") notFound();
 
   const t = trainingStateFor(d, id);
+  const now = Date.now();
+  const grundOpen = t ? ensureGrundbetrag(d, id, now) : null;
+  const grundPaid = d.prepare(`SELECT paid_at, provider FROM bookings WHERE user_id = ? AND offer_id = 'fee-grundbetrag' AND status = 'paid' ORDER BY paid_at DESC`).get(id) as { paid_at: number; provider: string } | undefined;
+  const exams = listExams(d, id);
+  const price = (oid: string) => getOffer(d, oid)?.priceCents ?? 0;
+  const priceText: Record<ExamType, string> = {
+    theorie: `${formatPrice(price("fee-theorie"))} + TÜV ${formatPrice(price("fee-tuev-theorie"))}`,
+    praxis: `Warmstunde ${formatPrice(price("drive-warmstunde"))} + ${formatPrice(price("fee-pruefung"))} + TÜV ${formatPrice(price("fee-tuev-praxis"))}`,
+  };
+  const canInvite = (type: ExamType) => !exams.some((e) => e.type === type && (e.status === "invited" || e.status === "confirmed" || e.status === "passed"));
   const cur = currentPackage(d, id);
   const pkg = cur && cur.status !== "cancelled" ? cur : null;
 
@@ -136,6 +151,85 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
             </section>
           </div>
         </div>
+      )}
+
+      {t && (
+        <section className="card">
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <h2 style={{ margin: 0 }}>Grundbetrag</h2>
+            {t.profile.grundWaived ? <span className="badge badge-ok">anders geregelt</span>
+              : grundPaid ? <span className="badge badge-ok">bezahlt am {fmtDate(grundPaid.paid_at)}{grundPaid.provider === "bar" ? " (bar/EC)" : ""}</span>
+              : <span className="badge badge-warn">offen</span>}
+          </div>
+          {!t.profile.grundWaived && !grundPaid && grundOpen && (
+            <div className="row" style={{ marginTop: 12 }}>
+              <span className="hint">{formatPrice(grundOpen.priceCents)} – Fahrstunden sind erst nach Zahlung buchbar.</span>
+              <form action={grundbetragAction}><input type="hidden" name="userId" value={id} /><button className="btn btn-small" name="do" value="cash" type="submit">Bar/EC bezahlt</button></form>
+              <form action={grundbetragAction}><input type="hidden" name="userId" value={id} /><button className="btn btn-secondary btn-small" name="do" value="waive" type="submit">Schon bezahlt (vor der App) / erlassen</button></form>
+            </div>
+          )}
+          {t.profile.grundWaived && (
+            <form action={grundbetragAction} style={{ marginTop: 8 }}><input type="hidden" name="userId" value={id} />
+              <button className="link-btn" name="do" value="unwaive" type="submit">zurücknehmen (Grundbetrag wieder offen)</button></form>
+          )}
+        </section>
+      )}
+
+      {t && (
+        <section className="card" id="pruefungen">
+          <h2>Prüfungen</h2>
+          {exams.length > 0 && (
+            <ul className="list" style={{ marginBottom: 16 }}>
+              {exams.map((e) => (
+                <li key={e.id}>
+                  <div>
+                    <strong>{EXAM_LABEL[e.type]}</strong> · {fmtDay(e.startsAt)} {fmtTime(e.startsAt)} Uhr · {e.place}
+                    {e.warmAt && <span className="hint"> · Warmstunde {fmtTime(e.warmAt)}</span>}
+                  </div>
+                  <span className="rec-actions">
+                    <span className={`badge ${e.status === "passed" || e.status === "confirmed" ? "badge-ok" : e.status === "invited" ? "badge-warn" : "badge-muted"}`}>{EXAM_STATUS_LABEL[e.status]}</span>
+                    {e.status === "confirmed" && now >= e.startsAt && (
+                      <form action={examResultAction} className="rec-actions">
+                        <input type="hidden" name="examId" value={e.id} />
+                        <button className="btn btn-small" name="result" value="passed" type="submit">Bestanden</button>
+                        <button className="btn btn-secondary btn-small" name="result" value="failed" type="submit">Nicht bestanden</button>
+                        <button className="link-btn" name="result" value="no_show" type="submit">nicht erschienen</button>
+                      </form>
+                    )}
+                    {(e.status === "invited" || (e.status === "confirmed" && now < e.startsAt)) && (
+                      <form action={cancelExamAction}>
+                        <input type="hidden" name="examId" value={e.id} />
+                        <button className="link-btn" type="submit">{e.status === "confirmed" ? "absagen / verschieben (Betrag → Guthaben)" : "Einladung zurückziehen"}</button>
+                      </form>
+                    )}
+                    {(e.status === "passed" || e.status === "failed" || e.status === "no_show") && (
+                      <form action={examResultAction} className="rec-actions">
+                        <input type="hidden" name="examId" value={e.id} />
+                        {e.status !== "passed" && <button className="link-btn" name="result" value="passed" type="submit">→ bestanden</button>}
+                        {e.status !== "failed" && <button className="link-btn" name="result" value="failed" type="submit">→ nicht bestanden</button>}
+                      </form>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="exam-forms">
+            {(["theorie", "praxis"] as const).map((type) => {
+              const missing = examMissing(d, id, type);
+              const done = missing.some((m) => m.startsWith("("));
+              if (done || !canInvite(type)) return null;
+              return (
+                <details key={type} className="exam-invite">
+                  <summary className="btn btn-secondary btn-small">Einladung: {EXAM_LABEL[type]} …</summary>
+                  <ExamInviteForm userId={id} type={type} missing={missing} today={dayKey(now)} places={[...EXAM_PLACES]} priceText={priceText[type]} />
+                </details>
+              );
+            })}
+          </div>
+          <p className="hint">Den Termin trägst du ein, sobald der TÜV ihn bestätigt hat. Der Schüler bekommt eine Nachricht und bestätigt verbindlich durch Bezahlen.
+            Fahrschule und TÜV stehen getrennt auf der Zahlung. Verschiebst du, geht Bezahltes als Guthaben zurück und wird beim neuen Termin verrechnet.</p>
+        </section>
       )}
 
       {t && (

@@ -12,6 +12,8 @@ import { fmtSlot } from "@/lib/time";
 import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
 import { ProgressView } from "@/components/training/ProgressView";
 import { CLASS_LABEL } from "@/lib/training";
+import { ensureGrundbetrag, EXAM_LABEL, listExams } from "@/lib/server/exams";
+import { fmtDay, fmtTime } from "@/lib/time";
 
 export const metadata = { title: "Mein Konto" };
 export const dynamic = "force-dynamic";
@@ -22,10 +24,12 @@ const STATUS_TEXT = {
   cancelled: { label: "Storniert", cls: "badge-muted" },
 } as const;
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ gebucht?: string }> }) {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ gebucht?: string; willkommen?: string }> }) {
   const user = await requireUser();
   if (user.role === "teacher") redirect("/unterricht");
-  const { gebucht } = await searchParams;
+  const { gebucht, willkommen } = await searchParams;
+  const grund = ensureGrundbetrag(db(), user.id);
+  const invited = listExams(db(), user.id).filter((e) => e.status === "invited");
   const pkg = currentPackage(db(), user.id);
   const access = hasTranslationAccess(pkg);
   const lang = pkg ? getLanguage(pkg.language) : undefined;
@@ -50,6 +54,31 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <div className="alert alert-ok">
           Dein Sprachpaket ist gebucht. Die Live-Übersetzung ist ab sofort freigeschaltet. Die {price} kannst du unten
           online bezahlen oder bar/EC in der Fahrschule.
+        </div>
+      )}
+
+      {willkommen && <div className="alert alert-ok">Willkommen bei beyourself! Schön, dass du da bist.</div>}
+      {invited.map((e) => (
+        <div key={e.id} className="card card-accent">
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Einladung: {EXAM_LABEL[e.type]}</h2>
+              <p className="hint" style={{ margin: "6px 0 0" }}>{fmtDay(e.startsAt)} · {fmtTime(e.startsAt)} Uhr · {e.place} – bitte verbindlich bestätigen.</p>
+            </div>
+            <Link className="btn btn-gold" href="/termine#offen">Ansehen & bestätigen</Link>
+          </div>
+        </div>
+      ))}
+      {grund && grund.status === "awaiting_payment" && (
+        <div className="card card-accent">
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Grundbetrag: {formatPrice(grund.priceCents)}</h2>
+              <p className="hint" style={{ margin: "6px 0 0" }}>Einmalig, inklusive Theorie-App, Theorieunterricht und Lernmaterial. Danach kannst du Fahrstunden buchen.
+                Online bezahlen oder bar/EC in der Fahrschule.</p>
+            </div>
+            <Link className="btn btn-gold" href="/termine#offen">Jetzt bezahlen</Link>
+          </div>
         </div>
       )}
 

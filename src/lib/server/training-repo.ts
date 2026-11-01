@@ -10,6 +10,8 @@ export interface ProfileRow extends TrainingProfile {
   userId: string;
   sehtestAt: number | null; ersteHilfeAt: number | null; antragAt: number | null;
   manualApproval: boolean; blocked: boolean; maxPerWeek: number; teacherNote: string;
+  /** Grundbetrag schon anders geregelt (vor der App bezahlt / erlassen) */
+  grundWaived: boolean;
 }
 export interface StoredRecord extends DriveRecord { id: string; userId: string; at: number; source: string; note: string; bookingId: string | null }
 
@@ -23,6 +25,7 @@ function mapProfile(r: Row): ProfileRow {
     examReadyAt: n(r.exam_ready_at), theoryPassedAt: n(r.theory_passed_at), pruefauftragAt: n(r.pruefauftrag_at),
     sehtestAt: n(r.sehtest_at), ersteHilfeAt: n(r.erste_hilfe_at), antragAt: n(r.antrag_at),
     manualApproval: !!r.manual_approval, blocked: !!r.blocked, maxPerWeek: Number(r.max_per_week), teacherNote: r.teacher_note as string,
+    grundWaived: !!r.grund_waived, passedAt: n(r.passed_at),
   };
 }
 
@@ -50,12 +53,14 @@ export interface ProfilePatch {
   testfahrtPassedAt?: number | null; examReadyAt?: number | null; theoryPassedAt?: number | null; pruefauftragAt?: number | null;
   sehtestAt?: number | null; ersteHilfeAt?: number | null; antragAt?: number | null;
   manualApproval?: boolean; blocked?: boolean; maxPerWeek?: number; teacherNote?: string;
+  grundWaived?: boolean; passedAt?: number | null;
 }
 const COLS: Record<keyof ProfilePatch, string> = {
   licenseClass: "license_class", practiceTarget: "practice_target", repeatTarget: "repeat_target", extraManual: "extra_manual",
   testfahrtPassedAt: "testfahrt_passed_at", examReadyAt: "exam_ready_at", theoryPassedAt: "theory_passed_at", pruefauftragAt: "pruefauftrag_at",
   sehtestAt: "sehtest_at", ersteHilfeAt: "erste_hilfe_at", antragAt: "antrag_at",
   manualApproval: "manual_approval", blocked: "blocked", maxPerWeek: "max_per_week", teacherNote: "teacher_note",
+  grundWaived: "grund_waived", passedAt: "passed_at",
 };
 
 export function updateProfile(db: Database.Database, userId: string, patch: ProfilePatch): ProfileRow {
@@ -116,4 +121,11 @@ export function trainingStateFor(db: Database.Database, userId: string): { profi
   if (!profile) return null;
   const records = listRecords(db, userId);
   return { profile, records, state: computeTraining(profile, records, { testfahrtMinutes: testfahrtMinutes(db) }) };
+}
+
+/** Grundbetrag bezahlt (oder von der Fahrschule als „anders geregelt“ markiert)? */
+export function grundbetragPaid(db: Database.Database, userId: string): boolean {
+  const p = getProfile(db, userId);
+  if (p?.grundWaived) return true;
+  return !!db.prepare(`SELECT 1 FROM bookings WHERE user_id = ? AND offer_id = 'fee-grundbetrag' AND status = 'paid'`).get(userId);
 }

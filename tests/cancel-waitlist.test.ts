@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { openDatabase } from "../src/lib/server/db";
 import { createUser } from "../src/lib/server/repo";
 import { BookingError, expireDue, getBooking, getSettings, markPaid, saveSettings } from "../src/lib/server/booking";
-import { ensureProfile } from "../src/lib/server/training-repo";
+import { ensureProfile, updateProfile } from "../src/lib/server/training-repo";
 import { availableStarts, bookDrive, releaseToWaitlist, saveTemplate } from "../src/lib/server/drive-booking";
 import { applyNoShow, cancelDriveByStudent, cancelInfo, creditRefills, freeCancelDeadline } from "../src/lib/server/cancel";
 import { addCredit, creditBalance, holdCredit, releaseHold } from "../src/lib/server/credit";
@@ -19,7 +19,7 @@ function setup() {
   const a = createUser(db, { email: "a@x.de", name: "Anna", passwordHash: "x", role: "student" });
   const b = createUser(db, { email: "b@x.de", name: "Ben", passwordHash: "x", role: "student" });
   const c = createUser(db, { email: "c@x.de", name: "Can", passwordHash: "x", role: "student" });
-  for (const u of [a, b, c]) ensureProfile(db, u.id, "b197");
+  for (const u of [a, b, c]) { ensureProfile(db, u.id, "b197"); updateProfile(db, u.id, { grundWaived: true }); }
   saveSettings(db, { minLeadHours: 2 });
   saveTemplate(db, t.id, Array.from({ length: 6 }, () => [{ from: 540, to: 1260 }]));
   const book = (userId: string, hhmm: string, minutes = 75, now = NOW, day = THU) =>

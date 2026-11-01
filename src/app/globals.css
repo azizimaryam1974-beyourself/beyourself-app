@@ -617,3 +617,11 @@ details.tl-row { display: block; }
 .app-footer a { color: rgba(246, 240, 230, 0.7); text-decoration: none; }
 .app-footer a:hover { color: var(--champagne); }
 .site-footer { position: relative; z-index: 1; }
+
+/* Prüfungen & getrennte Posten (Schritt 4) */
+.pay-lines { list-style: none; margin: 10px 0 4px; padding: 10px 14px; border-radius: 12px; background: rgba(27, 34, 48, 0.05); display: grid; gap: 6px; font-size: 0.93rem; }
+.pay-lines li { display: flex; justify-content: space-between; gap: 12px; }
+.exam-forms { display: grid; gap: 12px; margin-bottom: 12px; }
+.exam-invite > summary { list-style: none; cursor: pointer; width: fit-content; }
+.exam-invite > summary::-webkit-details-marker { display: none; }
+.exam-invite[open] > summary { margin-bottom: 12px; }

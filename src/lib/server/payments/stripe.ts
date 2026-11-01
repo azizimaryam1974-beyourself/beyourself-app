@@ -49,7 +49,8 @@ export async function createCheckout(o: {
 }): Promise<CheckoutSession> {
   // Stripe erlaubt 30 Min bis 24 Std Gültigkeit.
   const min = Date.now() + 31 * 60_000;
-  const expires = Math.floor(Math.max(o.expiresAt, min) / 1000);
+  const max = Date.now() + 23.5 * 3_600_000; // lange Fristen (Grundbetrag, Prüfung): Bezahlseite gilt max. 24 Std., danach neu
+  const expires = Math.floor(Math.min(Math.max(o.expiresAt, min), max) / 1000);
   const methods = (process.env.STRIPE_METHODS || "card").split(",").map((s) => s.trim()).filter(Boolean);
   return call<CheckoutSession>("POST", "/checkout/sessions", {
     mode: "payment",

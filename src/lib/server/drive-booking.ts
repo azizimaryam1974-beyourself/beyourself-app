@@ -6,7 +6,7 @@ import {
   canBook, computeTraining, DEFAULT_PRICES, KIND_LABEL, priceCents, type DriveKind, type DriveRecord, type PriceConfig, type TrainingState,
 } from "../training";
 import { BookingError, getBooking, getOffer, getSettings, type Booking } from "./booking";
-import { getProfile, listRecords, testfahrtMinutes, type ProfileRow, type StoredRecord } from "./training-repo";
+import { getProfile, grundbetragPaid, listRecords, testfahrtMinutes, type ProfileRow, type StoredRecord } from "./training-repo";
 import { activeHolds, clearHoldsOf, createHold, waitersFor, type Hold } from "./waitlist";
 import { theoryBusy } from "./theory";
 
@@ -255,6 +255,7 @@ export function bookDrive(db: Database.Database, inp: BookDriveInput, now = Date
     const t = trainingWithBookings(db, inp.userId, now);
     if (!t) throw new BookingError("Deine Führerscheinklasse ist noch nicht festgelegt. Bitte melde dich bei der Fahrschule.");
     if (t.profile.blocked) throw new BookingError("Online-Buchung ist für dich gerade gesperrt. Bitte melde dich bei der Fahrschule.");
+    if (!grundbetragPaid(db, inp.userId)) throw new BookingError("Fahrstunden kannst du buchen, sobald dein Grundbetrag bezahlt ist (oben unter „Bitte bezahlen“ oder bar in der Fahrschule).");
     const ok = canBook(t.state, inp.kind, inp.minutes);
     if (!ok.ok) throw new BookingError(ok.reason);
     if (drivesInWeek(db, inp.userId, inp.start) >= t.profile.maxPerWeek) {

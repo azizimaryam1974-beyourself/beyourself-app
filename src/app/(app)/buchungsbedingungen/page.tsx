@@ -30,9 +30,19 @@ export default function TermsPage() {
       <h2>5. Warteliste</h2>
       <p>Du kannst dich pro Woche für einen Tag auf die Warteliste setzen. Wird eine passende Zeit frei, wird die erste Person benachrichtigt
         und kann sie 30 Minuten lang exklusiv buchen; danach ist sie für alle buchbar. Zwischen 22 und 7 Uhr werden keine Nachrichten verschickt.</p>
-      <h2>6. Guthaben am Ende der Ausbildung</h2>
+      <h2>6. Grundbetrag und Prüfungen</h2>
+      <ul>
+        <li>Der Grundbetrag wird mit der Anmeldung fällig. Fahrstunden können gebucht werden, sobald er bezahlt ist.</li>
+        <li>Prüfungstermine legt die Fahrschule nach Bestätigung durch den TÜV fest. Du bestätigst den Termin verbindlich, indem du
+          die Gebühren bis zur genannten Frist bezahlst. Ohne Zahlung verfällt die Einladung.</li>
+        <li>Die TÜV-Gebühren zieht die Fahrschule für den TÜV ein und leitet sie unverändert weiter; sie werden getrennt ausgewiesen.</li>
+        <li>Erscheinst du zu einem bestätigten Prüfungstermin nicht, verfallen die bezahlten Gebühren.</li>
+        <li>Verschiebt oder storniert die Fahrschule oder der TÜV den Termin, erhältst du den vollen Betrag als Guthaben; er wird beim
+          neuen Termin automatisch verrechnet.</li>
+      </ul>
+      <h2>7. Guthaben am Ende der Ausbildung</h2>
       <p>Nicht verbrauchtes Guthaben wird dir am Ende der Ausbildung auf Wunsch ausgezahlt.</p>
-      <h2>7. Widerrufsrecht</h2>
+      <h2>8. Widerrufsrecht</h2>
       <p>Verbraucher haben ein gesetzliches Widerrufsrecht von 14 Tagen. Mit der Buchung verlangst du ausdrücklich, dass wir vor Ablauf
         der Widerrufsfrist mit der Leistung beginnen. Dein Widerrufsrecht erlischt, wenn die Leistung vollständig erbracht ist.
         Die vollständige Widerrufsbelehrung folgt.</p>

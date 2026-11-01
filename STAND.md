@@ -33,6 +33,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 | Kalender | Mit echter Wochenvorlage von Maryam, Stunden durchstreichen am Handy |
 | Beleuchtungsfahrt | Sommer-Zeiten (Sonnenuntergang ~21:40) – ob 15 Min Puffer passt |
 | Daten-Umstellung (alte Angebote löschen) | Nur mit Kopie simuliert – auf dem echten Server beobachten |
+| Schritt 4: Grundbetrag + Prüfungen (01.11.) | Mit Testkonto durchgespielt (Anmeldung → Grundbetrag → Einladung Praxis → bestätigt). Echt testen: mit einem Schüler, der schon im System ist („Schon bezahlt / erlassen“) |
 | Expo-App (iPhone) | **Noch nie** auf Maryams Handy geöffnet; kennt Kalender/Theorie/Fragen noch nicht |
 
 ## 3. Entscheidungen von Maryam (Kurzfassung – Details in ARBEITSWEISE.md)
@@ -66,8 +67,6 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 
 ## 5. Noch NICHT gebaut
 - **Video + Aufnahme** (Konzept fertig, siehe KONZEPT-HYBRID-UNTERRICHT.md) inkl. „Wort geben“ mit Mikrofon.
-- **Schritt 4 Prüfungsphase:** Grundbetrag bei Anmeldung bezahlen, Einladung zur Prüfung durch die Fahrschule (Schüler bestätigt,
-  Nichterscheinen = Geld weg), Warmstunde + Prüfungsgebühr + TÜV-Gebühren zahlen, getrennt auf Rechnung.
 - **Rollen & Rechte:** weitere Admins/Fahrlehrer einladen, jedes Recht einzeln (z. B. Termine ja, Zahlungen nein); je Fahrlehrer eigener Kalender.
 - **Mehrere Fahrschulen** (technisch vorbereiten, erst nach einigen Monaten Betrieb freischalten).
 - **Sonderfahrten-Zahlen einstellbar** (Reform 21/7404 schafft feste 5/4/3 evtl. ab).

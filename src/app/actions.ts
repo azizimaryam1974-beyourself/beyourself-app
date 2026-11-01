@@ -26,6 +26,7 @@ import {
 import { hub } from "@/lib/server/live";
 import { ensureProfile } from "@/lib/server/training-repo";
 import { signups } from "@/lib/server/theory";
+import { ensureGrundbetrag } from "@/lib/server/exams";
 import { addNotification } from "@/lib/server/booking";
 import { parseSignupForm, validateSignup, type FieldErrors } from "@/lib/signup";
 import { validateSignupChoice } from "@/lib/language-package";
@@ -62,12 +63,13 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
   const user = d.transaction(() => {
     const u = createUser(d, { ...result.value, passwordHash, role: "student" });
     ensureProfile(d, u.id, result.value.licenseClass);
+    ensureGrundbetrag(d, u.id); // Grundbetrag wird mit der Anmeldung fällig
     if (result.value.language) bookPackage(d, u.id, result.value.language);
     return u;
   })();
 
   await startSession(user.id);
-  redirect(result.value.language ? "/konto?gebucht=1" : "/konto");
+  redirect(result.value.language ? "/konto?gebucht=1&willkommen=1" : "/konto?willkommen=1");
 }
 
 export async function loginAction(_prev: FormState, form: FormData): Promise<FormState> {

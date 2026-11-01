@@ -16,6 +16,9 @@ import { formatPrice } from "@/lib/language-package";
 import { addDays, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime } from "@/lib/time";
 import { CLASS_LABEL, KIND_LABEL, priceCents, type DriveKind } from "@/lib/training";
 import { Countdown } from "@/components/booking/Countdown";
+import { ensureGrundbetrag, EXAM_LABEL, EXAM_STATUS_LABEL, getExam, listExams } from "@/lib/server/exams";
+import { grundbetragPaid } from "@/lib/server/training-repo";
+import { declineExamAction } from "@/app/exam-actions";
 
 export const metadata = { title: "Termine & Buchen" };
 export const dynamic = "force-dynamic";
@@ -41,23 +44,39 @@ const NOTICE: Record<string, { cls: string; text: string }> = {
   problem: { cls: "alert-error", text: "Bei der Zahlung gab es ein Problem. Schau in deine Nachrichten – die Fahrschule ist informiert." },
 };
 
-function PayBox({ b, providers, credit }: { b: Booking; providers: Provider[]; credit: number }) {
+function PayBox({ b, providers, credit, now }: { b: Booking; providers: Provider[]; credit: number; now: number }) {
   const use = Math.min(credit + b.creditCents, b.priceCents);
   const rest = b.priceCents - use;
+  const exam = b.examId ? getExam(db(), b.examId) : undefined;
+  const longDeadline = (b.payDeadline ?? 0) - now > 2 * 3_600_000;
+  const isGrund = b.offerId === "fee-grundbetrag";
+  const consent = exam
+    ? <>Ich bestätige den Prüfungstermin <strong>verbindlich</strong> und akzeptiere die <Link href="/buchungsbedingungen" target="_blank">Buchungsbedingungen</Link>. Wer nicht erscheint, verliert die Gebühren.</>
+    : <>Ich akzeptiere die <Link href="/buchungsbedingungen" target="_blank">Buchungsbedingungen</Link> und verlange, dass die Fahrschule
+      vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass mein Widerrufsrecht mit vollständiger Erbringung der Leistung erlischt.</>;
   return (
     <div className="pay-box">
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div>
-          <strong>{b.title}</strong> · {formatPrice(b.priceCents)}
-          {b.startsAt && b.endsAt && <div>{fmtSlot(b.startsAt, b.endsAt)}</div>}
-          {b.meetingPoint && <div className="hint">Treffpunkt: {b.meetingPoint}</div>}
+          <strong>{exam ? `Einladung: ${EXAM_LABEL[exam.type]}` : b.title}</strong> · {formatPrice(b.priceCents)}
+          {exam && <div>{fmtDay(exam.startsAt)} · <strong>{fmtTime(exam.startsAt)} Uhr</strong> · {exam.place}</div>}
+          {exam?.warmAt && <div className="hint">Warmstunde ab {fmtTime(exam.warmAt)} Uhr · Treffpunkt: {b.meetingPoint}</div>}
+          {!exam && b.startsAt && b.endsAt && <div>{fmtSlot(b.startsAt, b.endsAt)}</div>}
+          {!exam && b.meetingPoint && <div className="hint">Treffpunkt: {b.meetingPoint}</div>}
+          {isGrund && <div className="hint">Einmalig, mit der Anmeldung fällig. Danach kannst du Fahrstunden buchen.</div>}
           {b.adminMessage && <blockquote className="note">{b.adminMessage}</blockquote>}
         </div>
         <div className="pay-timer">
-          <span className="hint">Bezahlen bis {fmtTime(b.payDeadline!)} Uhr</span>
-          <Countdown until={b.payDeadline!} />
+          {longDeadline
+            ? <span className="hint">Bezahlen bis <strong>{fmtDayShort(b.payDeadline!)}, {fmtTime(b.payDeadline!)} Uhr</strong></span>
+            : <><span className="hint">Bezahlen bis {fmtTime(b.payDeadline!)} Uhr</span><Countdown until={b.payDeadline!} /></>}
         </div>
       </div>
+      {b.lines.length > 1 && (
+        <ul className="pay-lines">
+          {b.lines.map((l, i) => <li key={i}><span>{l.label}{l.part === "tuev" && <span className="badge badge-muted" style={{ marginLeft: 6 }}>TÜV</span>}</span><span>{formatPrice(l.cents)}</span></li>)}
+        </ul>
+      )}
       {use > 0 && (
         <div className="credit-use">Dein Guthaben wird verrechnet: <strong>−{formatPrice(use)}</strong>{rest > 0 ? <> · noch zu zahlen: <strong>{formatPrice(rest)}</strong></> : <> · <strong>nichts mehr zu zahlen</strong></>}</div>
       )}
@@ -66,7 +85,7 @@ function PayBox({ b, providers, credit }: { b: Booking; providers: Provider[]; c
           <input type="hidden" name="b" value={b.id} />
           <label className="check">
             <input type="checkbox" name="terms" required />
-            <span>Ich akzeptiere die <Link href="/buchungsbedingungen" target="_blank">Buchungsbedingungen</Link>.</span>
+            <span>{consent}</span>
           </label>
           <button className="btn btn-gold" type="submit" name="provider" value="guthaben">Mit Guthaben bezahlen</button>
         </form>
@@ -75,8 +94,7 @@ function PayBox({ b, providers, credit }: { b: Booking; providers: Provider[]; c
           <input type="hidden" name="b" value={b.id} />
           <label className="check">
             <input type="checkbox" name="terms" required />
-            <span>Ich akzeptiere die <Link href="/buchungsbedingungen" target="_blank">Buchungsbedingungen</Link> und verlange, dass die Fahrschule
-              vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass mein Widerrufsrecht mit vollständiger Erbringung der Leistung erlischt.</span>
+            <span>{consent}</span>
           </label>
           <div className="row">
             {providers.map((p) => (
@@ -85,10 +103,21 @@ function PayBox({ b, providers, credit }: { b: Booking; providers: Provider[]; c
           </div>
         </form>
       ) : <p className="hint">Online-Zahlung ist noch nicht eingerichtet. Bitte bezahle bar oder mit EC-Karte in der Fahrschule.</p>}
-      <form action={cancelMyBookingAction}>
-        <input type="hidden" name="bookingId" value={b.id} />
-        <button className="link-btn" type="submit">Doch nicht – Zeit wieder freigeben</button>
-      </form>
+      {exam ? (
+        <details className="late-cancel">
+          <summary className="link-btn">Ich kann an diesem Termin nicht …</summary>
+          <form action={declineExamAction} className="late-box">
+            <input type="hidden" name="examId" value={exam.id} />
+            <input name="reason" maxLength={300} placeholder="Grund (optional), z. B. Schule, Arbeit, krank" aria-label="Grund" />
+            <button className="btn btn-secondary btn-small" type="submit">Einladung ablehnen – Fahrschule informieren</button>
+          </form>
+        </details>
+      ) : !isGrund && (
+        <form action={cancelMyBookingAction}>
+          <input type="hidden" name="bookingId" value={b.id} />
+          <button className="link-btn" type="submit">Doch nicht – Zeit wieder freigeben</button>
+        </form>
+      )}
     </div>
   );
 }
@@ -101,6 +130,9 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
   const d = db();
   const now = Date.now();
   const settings = getSettings(d);
+  ensureGrundbetrag(d, user.id, now);
+  const grundOk = grundbetragPaid(d, user.id);
+  const exams = listExams(d, user.id).slice(0, 6);
   const training = trainingWithBookings(d, user.id, now);
   const mine = listBookingsForUser(d, user.id);
   const toPay = mine.filter((b) => b.status === "awaiting_payment");
@@ -119,7 +151,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
   const noticeKey = sp.bezahlt ? "bezahlt" : sp.gebucht ? "gebucht" : sp.angefragt ? "angefragt" : sp.abgesagt ? "abgesagt" : sp.warteliste ? "warteliste" : sp.zahlung;
 
   // Auswahl: Art (k), Länge (d), Startzeit (t)
-  const options = training && !training.profile.blocked ? training.state.bookable : [];
+  const options = training && !training.profile.blocked && grundOk ? training.state.bookable : [];
   const opt = options.find((o) => o.kind === sp.k) ?? null;
   const minutes = opt && opt.durations.includes(Number(sp.d)) ? Number(sp.d) : null;
   const days = opt && minutes ? availableStarts(d, opt.kind as DriveKind, minutes, firstBookableDay(d, now), 14, now, user.id) : [];
@@ -138,7 +170,25 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
       {toPay.length > 0 && (
         <section className="card card-accent" id="offen">
           <h2>Bitte bezahlen</h2>
-          {toPay.map((b) => <PayBox key={b.id} b={b} providers={providers} credit={credit} />)}
+          {toPay.map((b) => <PayBox key={b.id} b={b} providers={providers} credit={credit} now={now} />)}
+        </section>
+      )}
+
+      {exams.length > 0 && (
+        <section className="card" id="pruefungen">
+          <h2>Deine Prüfungen</h2>
+          <ul className="list">
+            {exams.map((e) => (
+              <li key={e.id}>
+                <div>
+                  <strong>{EXAM_LABEL[e.type]}</strong>
+                  <div>{fmtDay(e.startsAt)} · {fmtTime(e.startsAt)} Uhr · {e.place}</div>
+                  {e.warmAt && e.status === "confirmed" && <div className="hint">Warmstunde ab {fmtTime(e.warmAt)} Uhr – bitte Ausweis mitbringen.</div>}
+                </div>
+                <span className={`badge ${e.status === "passed" || e.status === "confirmed" ? "badge-ok" : e.status === "invited" ? "badge-warn" : "badge-muted"}`}>{EXAM_STATUS_LABEL[e.status]}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -148,6 +198,8 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
           <p className="hint">Deine Führerscheinklasse ist noch nicht festgelegt. Die Fahrschule erledigt das – danach kannst du hier buchen.</p>
         ) : training.profile.blocked ? (
           <p className="hint">Online-Buchung ist für dich gerade gesperrt. Bitte melde dich bei der Fahrschule.</p>
+        ) : !grundOk ? (
+          <p className="hint">Fahrstunden kannst du buchen, sobald dein <strong>Grundbetrag</strong> bezahlt ist – oben unter „Bitte bezahlen“ oder bar/EC in der Fahrschule.</p>
         ) : (
           <>
             <p className="book-next"><span className="hint">{CLASS_LABEL[training.profile.licenseClass]} · </span>{training.state.next}
@@ -242,7 +294,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
         {active.length === 0 ? <p className="hint">Noch keine Termine.</p> : (
           <ul className="list">
             {active.map((b) => {
-              const ci = b.kind ? cancelInfo(b, settings, now) : null;
+              const ci = b.kind && !b.examId ? cancelInfo(b, settings, now) : null;
               return (
                 <li key={b.id}>
                   <div>
@@ -255,7 +307,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
                   </div>
                   <div className="row">
                     <span className={`badge ${STATUS[b.status].cls}`}>{STATUS[b.status].label}</span>
-                    {(ci?.mode === "withdraw" || ci?.mode === "free" || (!b.kind && b.status === "requested")) && (
+                    {(ci?.mode === "withdraw" || ci?.mode === "free" || (!b.kind && !b.examId && b.status === "requested")) && (
                       <form action={cancelMyBookingAction}>
                         <input type="hidden" name="bookingId" value={b.id} />
                         <button className="btn btn-secondary btn-small" type="submit">{ci?.mode === "free" ? `Absagen (${formatPrice(b.priceCents)} Guthaben)` : "Anfrage zurückziehen"}</button>
@@ -295,7 +347,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             ))}
           </ul>
         )}
-        {training && !training.profile.blocked && (
+        {training && !training.profile.blocked && grundOk && (
           <form action={addWaitlistAction} className="wait-form">
             <div className="field" style={{ margin: 0 }}>
               <label htmlFor="wday">Tag</label>

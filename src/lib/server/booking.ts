@@ -33,8 +33,17 @@ export interface Booking {
   kind: string | null; minutes: number | null; meetingPoint: string;
   /** Mit Guthaben verrechnet / bei Absage einbehalten */
   creditCents: number; chargeCents: number;
+  /** Prüfung, zu der diese Buchung gehört (Gebühren/Warmstunde) */
+  examId: string | null;
+  /** Einzelposten für die Rechnung (z. B. Fahrschule / TÜV getrennt) */
+  lines: BookingLine[];
   // aus Join
   startsAt?: number | null; endsAt?: number | null; userName?: string; userEmail?: string; userPhone?: string | null;
+}
+export interface BookingLine { label: string; cents: number; part: "school" | "tuev" }
+export function parseLines(raw: unknown): BookingLine[] {
+  if (typeof raw !== "string" || !raw) return [];
+  try { const v = JSON.parse(raw); return Array.isArray(v) ? v as BookingLine[] : []; } catch { return []; }
 }
 export interface Settings { payWindowMin: number; freeCancelHours: number; minLeadHours: number; maxOpenRequests: number; cancelCutoffHour: number; lateChargePct: number; noShowChargePct: number }
 export interface Template { id: string; kind: TemplateKind; label: string; body: string; sort: number }
@@ -73,6 +82,7 @@ const mapBooking = (r: Row): Booking => ({
   providerPayment: (r.provider_payment as string) ?? null, termsAt: (r.terms_at as number) ?? null, reminded: !!r.reminded,
   kind: (r.kind as string) ?? null, minutes: (r.minutes as number) ?? null, meetingPoint: (r.meeting_point as string) ?? "",
   creditCents: (r.credit_cents as number) ?? 0, chargeCents: (r.charge_cents as number) ?? 0,
+  examId: (r.exam_id as string) ?? null, lines: parseLines(r.lines),
   startsAt: (r.starts_at as number) ?? null, endsAt: (r.ends_at as number) ?? null,
   userName: r.user_name as string | undefined, userEmail: r.user_email as string | undefined, userPhone: (r.user_phone as string) ?? null,
 });
@@ -242,7 +252,7 @@ export function listRecentPaid(db: Database.Database, limit = 30): Booking[] {
   return (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'paid' ORDER BY b.paid_at DESC LIMIT ?`).all(limit) as Row[]).map(mapBooking);
 }
 
-function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage" | "kind" | "minutes" | "meetingPoint" | "creditCents" | "chargeCents">): void {
+function insertBooking(db: Database.Database, b: Omit<Booking, "decidedAt" | "paidAt" | "cancelledAt" | "cancelledBy" | "refundCents" | "provider" | "providerRef" | "providerPayment" | "termsAt" | "reminded" | "adminMessage" | "kind" | "minutes" | "meetingPoint" | "creditCents" | "chargeCents" | "examId" | "lines">): void {
   db.prepare(
     `INSERT INTO bookings (id,user_id,offer_id,slot_id,package_id,title,price_cents,status,student_note,created_at,pay_deadline)
      VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
@@ -351,7 +361,7 @@ export function expireDue(db: Database.Database, now = Date.now()): Booking[] {
 
 /** Buchungen, deren Frist bald endet und die noch nicht erinnert wurden. */
 export function dueForReminder(db: Database.Database, withinMs: number, now = Date.now()): Booking[] {
-  const list = (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'awaiting_payment' AND b.reminded = 0 AND b.slot_id IS NOT NULL AND b.pay_deadline BETWEEN ? AND ?`)
+  const list = (db.prepare(`${BOOKING_SELECT} WHERE b.status = 'awaiting_payment' AND b.reminded = 0 AND b.slot_id IS NOT NULL AND b.exam_id IS NULL AND b.pay_deadline BETWEEN ? AND ?`)
     .all(now, now + withinMs) as Row[]).map(mapBooking);
   const upd = db.prepare(`UPDATE bookings SET reminded = 1 WHERE id = ?`);
   for (const b of list) upd.run(b.id);

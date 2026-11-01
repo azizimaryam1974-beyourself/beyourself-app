@@ -51,6 +51,8 @@ export interface TrainingProfile {
   examReadyAt: number | null;
   theoryPassedAt: number | null;
   pruefauftragAt: number | null;
+  /** Praktische Prüfung bestanden */
+  passedAt?: number | null;
 }
 
 export interface DriveRecord { kind: DriveKind; minutes: number; status: RecordStatus }
@@ -152,14 +154,16 @@ export function computeTraining(p: TrainingProfile, records: DriveRecord[], opts
       counters: [
         { kind: "pruefung", label: "Theorieprüfung bestanden", done: p.theoryPassedAt ? 1 : 0, planned: 0, target: 1, binary: true },
         { kind: "pruefung", label: "Prüfauftrag liegt vor", done: p.pruefauftragAt ? 1 : 0, planned: 0, target: 1, binary: true },
+        { kind: "pruefung", label: "Praktische Prüfung bestanden", done: p.passedAt ? 1 : 0, planned: 0, target: 1, binary: true },
       ] },
   );
 
   // Status: Phasen nacheinander; eine Phase ist fertig, wenn alle Zähler erfüllt sind.
   let open = false;
   for (const ph of phases) {
-    const finished = ph.id === "pruefung" ? false : ph.counters.every(complete);
-    if (open) ph.status = "locked";
+    const finished = ph.id === "pruefung" ? !!p.passedAt : ph.counters.every(complete);
+    if (p.passedAt) ph.status = "done"; // Führerschein bestanden → alles erledigt
+    else if (open) ph.status = "locked";
     else if (finished) ph.status = "done";
     else { ph.status = "active"; open = true; }
   }
@@ -206,12 +210,12 @@ export function computeTraining(p: TrainingProfile, records: DriveRecord[], opts
 }
 
 function nextText(current: Phase | null, bookable: BookableOption[], p: TrainingProfile): string {
-  if (!current) return "Alles erledigt – viel Erfolg!";
+  if (!current) return p.passedAt ? "Führerschein bestanden – herzlichen Glückwunsch!" : "Alles erledigt – viel Erfolg!";
   if (current.id === "reife") return "Dein Fahrlehrer prüft, ob du bereit für die Prüfung bist.";
   if (current.id === "pruefung") {
     if (!p.theoryPassedAt) return "Nächster Schritt: Theorieprüfung bestehen.";
     if (!p.pruefauftragAt) return "Wir warten auf den Prüfauftrag der Führerscheinstelle.";
-    return "Du bekommst eine Einladung zur Prüfung, sobald der TÜV-Termin feststeht.";
+    return "Du bekommst eine Einladung zur praktischen Prüfung, sobald der TÜV-Termin feststeht.";
   }
   if (current.id === "testfahrt" && !bookable.length) return "Deine Testfahrt ist gebucht.";
   if (current.id === "uebung" && current.counters[0].target === null) return "Buche Übungsfahrten – dein Fahrlehrer legt fest, wie viele du brauchst.";

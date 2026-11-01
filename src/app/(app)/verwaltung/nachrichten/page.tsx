@@ -4,6 +4,8 @@ import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { listThreads } from "@/lib/server/chat";
 import { fmtDayShort, fmtTime } from "@/lib/time";
+import { addressLine, detailsMap } from "@/lib/server/user-details";
+import { Avatar } from "@/components/ui/Avatar";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Nachrichten" };
@@ -14,6 +16,7 @@ export default async function SchoolChats({ searchParams }: { searchParams: Prom
   if (an) redirect(`/verwaltung/nachrichten/${encodeURIComponent(an)}`);
   const threads = listThreads(db());
   const students = db().prepare(`SELECT id, name FROM users WHERE role = 'student' ORDER BY name`).all() as Array<{ id: string; name: string }>;
+  const det = detailsMap(db());
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(Date.now());
   return (
     <>
@@ -21,7 +24,7 @@ export default async function SchoolChats({ searchParams }: { searchParams: Prom
       <form className="row chat-new" method="get">
         <select name="an" aria-label="Schüler wählen" defaultValue="" required style={{ width: "auto", flex: "1 1 220px" }}>
           <option value="" disabled>Neue Nachricht an …</option>
-          {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {students.map((s) => { const a = det.get(s.id) ? addressLine(det.get(s.id)!) : ""; return <option key={s.id} value={s.id}>{a ? `${s.name} – ${a}` : `${s.name} – (keine Adresse)`}</option>; })}
         </select>
         <button className="btn btn-gold btn-small" type="submit">Schreiben</button>
       </form>
@@ -31,7 +34,7 @@ export default async function SchoolChats({ searchParams }: { searchParams: Prom
             {threads.map((t) => (
               <li key={t.studentId}>
                 <Link href={`/verwaltung/nachrichten/${t.studentId}`} className={t.unread ? "unread" : ""}>
-                  <span className="thread-av">{t.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}</span>
+                  <Avatar id={t.studentId} name={t.name} photoAt={det.get(t.studentId)?.photoAt} size={42} />
                   <span className="thread-main">
                     <strong>{t.name}</strong>
                     <span>{t.lastSender === "school" ? "Du: " : ""}{t.last}</span>

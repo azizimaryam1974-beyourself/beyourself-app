@@ -6,6 +6,8 @@ import { trainingWithBookings } from "@/lib/server/drive-booking";
 import { CLASS_LABEL } from "@/lib/training";
 import { getLanguage } from "@/lib/languages";
 import { PageHead } from "@/components/PageHead";
+import { Avatar } from "@/components/ui/Avatar";
+import { addressLine, detailsMap } from "@/lib/server/user-details";
 
 export const metadata = { title: "Schüler" };
 export const dynamic = "force-dynamic";
@@ -16,6 +18,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
   const d = db();
   const query = (q ?? "").trim().toLowerCase();
   const students = listStudents(d).filter((s) => !query || s.name.toLowerCase().includes(query) || s.email.includes(query) || (s.phone ?? "").includes(query));
+  const det = detailsMap(d);
   const rows = students.map((s) => ({ s, t: trainingWithBookings(d, s.id) }));
 
   return (
@@ -34,7 +37,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             return (
               <Link key={s.id} href={`/verwaltung/schueler/${s.id}`} className="student-card">
                 <div className="sc-top">
-                  <strong className="sc-name">{s.name}</strong>
+                  <span className="sc-who"><Avatar id={s.id} name={s.name} photoAt={det.get(s.id)?.photoAt} size={38} /><strong className="sc-name">{s.name}</strong></span>
                   {t ? <span className="badge">{CLASS_LABEL[t.profile.licenseClass]}</span> : <span className="badge badge-warn">Klasse fehlt</span>}
                 </div>
                 {t ? (
@@ -45,7 +48,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                   </>
                 ) : <div className="hint">Bitte Klasse in der Akte festlegen.</div>}
                 <div className="sc-foot">
-                  <span className="hint">{s.phone ?? s.email}</span>
+                  <span className="hint">{s.phone ?? s.email}{det.get(s.id) && addressLine(det.get(s.id)!) ? ` · ${det.get(s.id)!.city}` : ""}</span>
                   {pkg && <span className={`badge ${pkg.status === "paid" ? "badge-ok" : "badge-warn"}`}>Sprache: {getLanguage(pkg.language)?.labelDe} {pkg.status === "paid" ? "✓" : "· offen"}</span>}
                 </div>
               </Link>

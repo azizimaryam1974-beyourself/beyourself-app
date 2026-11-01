@@ -983,3 +983,53 @@ body:has(.bnav), body:has(.app-main) { background: var(--midnight); }
 .note-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: transparent; border: 1.5px solid var(--line); }
 .note-list li.unread .note-dot { background: #e0a24a; border-color: #e0a24a; }
 .note-list .pre { padding: 4px 6px 12px 25px; color: var(--muted); white-space: pre-wrap; }
+
+/* ---- Formular: zwei Felder nebeneinander (PLZ + Ort) ---- */
+.field-row{display:flex;gap:12px;flex-wrap:wrap}
+.field-row>.field{min-width:0}
+
+/* ---- Profilfoto ---- */
+.avatar { flex: none; display: inline-grid; place-items: center; border-radius: 50%; overflow: hidden; font-weight: 700; color: var(--ink);
+  background: var(--gold-grad); box-shadow: 0 0 0 3px rgba(233, 215, 180, 0.16); line-height: 1; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-up { display: grid; justify-items: center; gap: 4px; }
+.photo-up-btn { position: relative; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.photo-up-btn:disabled { opacity: .6; }
+.photo-up-cam { position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px;
+  background: var(--midnight); border: 2px solid var(--gold); }
+.photo-up-actions { display: flex; gap: 10px; font-size: .82rem; }
+.photo-up .error { font-size: .8rem; max-width: 220px; text-align: center; }
+.dash-avatar-wrap { display: flex; justify-content: center; margin: 4px 0 8px; }
+.dash-avatar-wrap .photo-up-actions .link-btn { color: rgba(246, 240, 230, 0.7); }
+.profile-box { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.profile-box-info { display: grid; gap: 2px; }
+.panel-attention { border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(198, 164, 101, 0.25); }
+.details-form { margin-top: 10px; }
+.student-head-main { display: flex; gap: 14px; align-items: center; }
+.akte-details dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 10px; }
+.akte-details dt { color: var(--muted, #6b6b6b); }
+.akte-details dd { margin: 0; }
+.chat-head { display: flex; align-items: center; gap: 12px; }
+.chat-head small { display: block; font-family: var(--font-body); margin-top: 4px; color: rgba(246, 240, 230, 0.65); font-weight: 400; font-size: .85rem; }
+.thread-list .avatar { margin-right: 2px; }
+
+/* ---- Glocke: Nachrichten + Geburtstage ---- */
+.dash-bell-wrap { position: relative; }
+.dash-bell-wrap > summary { list-style: none; cursor: pointer; }
+.dash-bell-wrap > summary::-webkit-details-marker { display: none; }
+.dash-bell i { width: auto !important; min-width: 16px; height: 16px !important; padding: 0 4px; top: 0 !important; right: -2px !important; font-size: 10px; font-style: normal; font-weight: 700;
+  line-height: 16px; color: #fff; display: grid; place-items: center; }
+.bell-pop { position: absolute; z-index: 30; left: 0; top: 42px; width: min(320px, calc(100vw - 48px)); max-height: 70vh; overflow: auto; text-align: left;
+  padding: 14px; border-radius: 18px; background: #16243b; border: 1px solid rgba(233, 215, 180, 0.2); box-shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.7); }
+.bell-pop h3 { margin: 6px 0 6px; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.bell-pop h3:first-child { margin-top: 0; }
+.bell-pop ul { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 4px; }
+.bell-pop li a { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 12px; text-decoration: none; color: inherit; }
+.bell-pop li a:hover { background: rgba(255, 255, 255, 0.07); }
+.bell-pop li.today a { background: rgba(233, 194, 122, 0.16); }
+.bell-pop li a > span:last-child { display: grid; min-width: 0; }
+.bell-pop small { color: rgba(246, 240, 230, 0.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bell-pop .hint { margin: 0 0 8px; font-size: .85rem; }
+.bell-ico { flex: none; width: 22px; text-align: center; }
+.sc-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.akte-details > summary { cursor: pointer; }

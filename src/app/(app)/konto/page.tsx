@@ -21,6 +21,10 @@ import { upcomingLessons } from "@/lib/server/theory";
 import { CLASS_LABEL } from "@/lib/training";
 import { ensureGrundbetrag, EXAM_LABEL, listExams } from "@/lib/server/exams";
 import { fmtDay, fmtTime } from "@/lib/time";
+import { detailsMissing, getDetails } from "@/lib/server/user-details";
+import { DetailsForm } from "@/components/DetailsForm";
+import { Avatar } from "@/components/ui/Avatar";
+import { PhotoUpload } from "@/components/ui/PhotoUpload";
 
 export const metadata = { title: "Mein Konto" };
 export const dynamic = "force-dynamic";
@@ -77,6 +81,9 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         : training.state.bookable.length
           ? { icon: "car" as const, title: training.state.next, text: "Such dir einen freien Termin aus.", href: "/termine#buchen", cta: "Fahrt buchen" }
           : { icon: "road" as const, title: training.state.next, text: "", href: "/termine", cta: "Meine Termine" };
+  const details = getDetails(db(), user.id);
+  const missing = detailsMissing(db(), user);
+  const detailsInitial = { birthday: details.birthday ?? "", street: details.street, zip: details.zip, city: details.city, phone: user.phone ?? "" };
   const languages = bookableLanguages().map(({ code, labelDe, nativeLabel, rtl }) => ({ code, labelDe, nativeLabel, rtl }));
 
   return (
@@ -84,6 +91,14 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1>Hallo {user.name.split(" ")[0]}!</h1>
       {gebucht && <div className="alert alert-ok">Sprachpaket gebucht – die Übersetzung ist freigeschaltet.</div>}
       {willkommen && <div className="alert alert-ok">Willkommen bei beyourself! Schön, dass du da bist.</div>}
+
+      {missing && (
+        <section className="panel panel-attention" id="angaben">
+          <div className="panel-head"><span className="panel-ico"><Icon name="id" /></span><h2>Bitte vervollständige deine Angaben</h2></div>
+          <p className="hint" style={{ marginTop: 0 }}>Für die Anmeldung beim TÜV und für Notfälle braucht die Fahrschule dein Geburtsdatum, deine Adresse und deine Telefonnummer.</p>
+          <DetailsForm initial={detailsInitial} submitLabel="Angaben speichern" />
+        </section>
+      )}
 
       <Panel icon="road" title="Dein Weg zum Führerschein" className="panel-dark"
         help={<>
@@ -155,6 +170,23 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               <BookLaterForm languages={languages} price={price} />
             </details>
           </>
+        )}
+      </Panel>
+
+      <Panel icon="id" title="Meine Angaben" id="profil"
+        help={<p>Dein Foto sieht nur die Fahrschule (z. B. im Chat). Geburtsdatum, Adresse und Telefon braucht die Fahrschule für die Prüfungsanmeldung. Mit deiner E-Mail-Adresse loggst du dich ein.</p>}>
+        <div className="profile-box">
+          <PhotoUpload hasPhoto={!!details.photoAt}><Avatar id={user.id} name={user.name} photoAt={details.photoAt} size={84} /></PhotoUpload>
+          <div className="profile-box-info">
+            <strong>{user.name}</strong>
+            <span className="hint">{user.email}</span>
+          </div>
+        </div>
+        {!missing && (
+          <details className="book-later">
+            <summary className="btn btn-secondary btn-small">Geburtsdatum, Adresse, Telefon ändern</summary>
+            <DetailsForm initial={detailsInitial} />
+          </details>
         )}
       </Panel>
 

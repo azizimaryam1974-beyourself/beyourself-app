@@ -22,7 +22,7 @@ export interface StoredFile { path: string; name: string; type: string; size: nu
 export class UploadError extends Error {}
 
 /** Speichert eine hochgeladene Datei; prüft Größe und Art (Bilder, PDF). */
-export async function storeUpload(file: File, folder: "chat" | "belege"): Promise<StoredFile> {
+export async function storeUpload(file: File, folder: "chat" | "belege" | "avatars"): Promise<StoredFile> {
   if (!file || typeof file.arrayBuffer !== "function" || file.size === 0) throw new UploadError("Keine Datei gewählt.");
   if (file.size > MAX_UPLOAD) throw new UploadError("Die Datei ist zu groß (höchstens 15 MB).");
   const type = (file.type || "").toLowerCase();

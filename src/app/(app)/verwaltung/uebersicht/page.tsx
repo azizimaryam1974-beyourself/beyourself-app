@@ -7,6 +7,10 @@ import { formatPrice } from "@/lib/language-package";
 import { dayKey, fmtDay, fmtDayShort, fmtTime } from "@/lib/time";
 import { getWeather, WEATHER_EMOJI } from "@/lib/server/weather";
 import { darkStart, sunsetMs } from "@/lib/calendar";
+import { listThreads } from "@/lib/server/chat";
+import { getDetails, upcomingBirthdays } from "@/lib/server/user-details";
+import { Avatar } from "@/components/ui/Avatar";
+import { PhotoUpload } from "@/components/ui/PhotoUpload";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Übersicht" };
@@ -124,6 +128,10 @@ export default async function DashboardPage() {
   const nowDrive = drives.find((t) => t.now) ?? drives.find((t) => t.start > now) ?? null;
   const total = d.phases.reduce((a, p) => a + p.count, 0) || 1;
   const hour = Number(new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", hour: "numeric" }).format(now));
+  const unreadThreads = listThreads(db()).filter((t) => t.unread > 0);
+  const birthdays = upcomingBirthdays(db(), today, 7);
+  const myPhoto = getDetails(db(), me.id).photoAt;
+  const bellCount = unreadThreads.length + birthdays.filter((b) => b.inDays === 0).length;
   const greet = hour < 11 ? "Guten Morgen" : hour < 18 ? "Hallo" : "Guten Abend";
 
   return (
@@ -194,10 +202,36 @@ export default async function DashboardPage() {
       <aside className="dash-side">
         <section className="dash-card dash-profile">
           <div className="row" style={{ justifyContent: "space-between" }}>
-            <Link href="/termine" className="dash-bell" aria-label="Nachrichten">{Icon.bell}{d.todo.length > 0 && <i />}</Link>
+            <details className="dash-bell-wrap">
+              <summary className="dash-bell" aria-label={`Benachrichtigungen${bellCount ? ` (${bellCount} neu)` : ""}`}>{Icon.bell}{bellCount > 0 && <i>{bellCount}</i>}</summary>
+              <div className="bell-pop">
+                <h3>Nachrichten</h3>
+                {unreadThreads.length === 0 ? <p className="hint">Keine ungelesenen Nachrichten.</p> : (
+                  <ul>{unreadThreads.slice(0, 6).map((t) => (
+                    <li key={t.studentId}><Link href={`/verwaltung/nachrichten/${t.studentId}`}>
+                      <span className="bell-ico">💬</span><span><strong>{t.name}</strong><small>{t.unread} neu · {t.last}</small></span>
+                    </Link></li>))}
+                  </ul>
+                )}
+                <h3>Geburtstage</h3>
+                {birthdays.length === 0 ? <p className="hint">In den nächsten 7 Tagen keine.</p> : (
+                  <ul>{birthdays.map((b) => (
+                    <li key={b.userId} className={b.inDays === 0 ? "today" : ""}><Link href={`/verwaltung/nachrichten/${b.userId}`}>
+                      <span className="bell-ico">🎂</span><span><strong>{b.name}</strong><small>{b.inDays === 0 ? `heute ${b.age} Jahre – gratulieren?` : b.inDays === 1 ? `morgen (${b.date}) · wird ${b.age}` : `in ${b.inDays} Tagen (${b.date}) · wird ${b.age}`}</small></span>
+                    </Link></li>))}
+                  </ul>
+                )}
+                {d.todo.length > 0 && <>
+                  <h3>Zu erledigen</h3>
+                  <ul>{d.todo.slice(0, 4).map((t, i) => (
+                    <li key={i}><Link href={t.href}><span className="bell-ico">✔︎</span><span><strong>{t.userName ?? "Kalender"}</strong><small>{t.text}</small></span></Link></li>))}
+                  </ul>
+                </>}
+              </div>
+            </details>
             <span className="hint">Fahrlehrerin</span>
           </div>
-          <div className="dash-avatar">{initials(me.name)}</div>
+          <div className="dash-avatar-wrap"><PhotoUpload hasPhoto={!!myPhoto}><Avatar id={me.id} name={me.name} photoAt={myPhoto} size={84} className="dash-avatar-img" /></PhotoUpload></div>
           <div className="dash-name">{me.name}</div>
           <div className="dash-actions">
             <Link href="/verwaltung/kalender"><span>{Icon.cal}</span>Kalender</Link>

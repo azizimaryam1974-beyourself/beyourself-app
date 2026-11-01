@@ -21,6 +21,9 @@ import { EXAM_LABEL, EXAM_PLACES, EXAM_STATUS_LABEL, ensureGrundbetrag, examMiss
 import { cancelExamAction, examResultAction, grundbetragAction } from "@/app/exam-actions";
 import { getOffer } from "@/lib/server/booking";
 import { fmtDay, fmtTime } from "@/lib/time";
+import { Avatar } from "@/components/ui/Avatar";
+import { DetailsForm } from "@/components/DetailsForm";
+import { addressLine, getDetails, validateDetails } from "@/lib/server/user-details";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Schülerakte" };
@@ -53,6 +56,9 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
     praxis: `Warmstunde ${formatPrice(price("drive-warmstunde"))} + ${formatPrice(price("fee-pruefung"))} + TÜV ${formatPrice(price("fee-tuev-praxis"))}`,
   };
   const canInvite = (type: ExamType) => !exams.some((e) => e.type === type && (e.status === "invited" || e.status === "confirmed" || e.status === "passed"));
+  const det = getDetails(d, id);
+  const detMissing = Object.keys(validateDetails({ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" })).length > 0;
+  const age = det.birthday ? Math.floor((now - Date.parse(det.birthday)) / (365.25 * 86_400_000)) : null;
   const cur = currentPackage(d, id);
   const pkg = cur && cur.status !== "cancelled" ? cur : null;
 
@@ -61,12 +67,15 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
       <Link className="back-link" href="/verwaltung">← Alle Schüler</Link>
       {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
       <div className="student-head">
-        <div>
+        <div className="student-head-main">
+          <Avatar id={user.id} name={user.name} photoAt={det.photoAt} size={64} />
+          <div>
           <h1 style={{ marginBottom: 4 }}>{user.name}</h1>
           <p className="hint" style={{ marginTop: 0 }}>
             {user.phone && <><a href={`tel:${user.phone}`}>{user.phone}</a> · </>}<a href={`mailto:${user.email}`}>{user.email}</a>
             {" · "}seit {fmtDate(Date.parse(user.created_at))}
           </p>
+          </div>
         </div>
         <form action={setClassAction} className="row" key={`cls-${t?.profile.licenseClass ?? "none"}`}>
           <input type="hidden" name="userId" value={id} />
@@ -77,6 +86,17 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
           <button className="btn btn-secondary btn-small" type="submit">{t ? "Klasse ändern" : "Festlegen"}</button>
         </form>
       </div>
+
+      <details className="card akte-details" open={detMissing}>
+        <summary><h2 style={{ display: "inline" }}>Persönliche Angaben</h2> {detMissing && <span className="badge badge-warn">unvollständig</span>}</summary>
+        <dl>
+          <dt>Geburtstag</dt><dd>{det.birthday ? `${det.birthday.split("-").reverse().join(".")} (${age} Jahre)` : "–"}</dd>
+          <dt>Adresse</dt><dd>{addressLine(det) || "–"}</dd>
+          <dt>Telefon</dt><dd>{user.phone ?? "–"}</dd>
+          <dt>E-Mail</dt><dd>{user.email}</dd>
+        </dl>
+        <DetailsForm userId={id} initial={{ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" }} />
+      </details>
 
       {!t ? (
         <div className="card"><p>Für diesen Schüler ist noch keine Klasse festgelegt (Anmeldung vor dem 01.11.2026). Bitte oben auswählen.</p></div>

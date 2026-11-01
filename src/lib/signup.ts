@@ -1,11 +1,16 @@
 import { validateSignupChoice } from "./language-package";
 import type { TargetLanguageCode } from "./languages";
 import { TRAINING_CLASSES, type TrainingClass } from "./training";
+import { validateDetails } from "./server/user-details";
 
 export interface SignupInput {
   name: string;
   email: string;
   phone: string;
+  birthday: string;
+  street: string;
+  zip: string;
+  city: string;
   password: string;
   licenseClass: string;
   wantsPackage: boolean;
@@ -18,7 +23,11 @@ export interface SignupInput {
 export interface SignupValid {
   name: string;
   email: string;
-  phone: string | null;
+  phone: string;
+  birthday: string;
+  street: string;
+  zip: string;
+  city: string;
   password: string;
   licenseClass: TrainingClass;
   language: TargetLanguageCode | null;
@@ -34,6 +43,10 @@ export function parseSignupForm(form: FormData): SignupInput {
     name: s("name"),
     email: s("email").toLowerCase(),
     phone: s("phone"),
+    birthday: s("birthday"),
+    street: s("street"),
+    zip: s("zip"),
+    city: s("city"),
     password: String(form.get("password") ?? ""),
     licenseClass: s("licenseClass"),
     wantsPackage: form.get("wantsPackage") === "yes",
@@ -47,6 +60,7 @@ export function validateSignup(input: SignupInput): { ok: true; value: SignupVal
   const errors: FieldErrors = {};
   if (input.name.length < 2) errors.name = "Bitte gib deinen Namen ein.";
   if (!EMAIL_RE.test(input.email)) errors.email = "Bitte gib eine gültige E-Mail-Adresse ein.";
+  Object.assign(errors, validateDetails({ birthday: input.birthday ?? "", street: input.street ?? "", zip: input.zip ?? "", city: input.city ?? "", phone: input.phone ?? "" }));
   if (input.password.length < 10) errors.password = "Das Passwort braucht mindestens 10 Zeichen.";
   if (!(TRAINING_CLASSES as string[]).includes(input.licenseClass)) errors.licenseClass = "Bitte wähle deine Führerscheinklasse.";
   if (!input.acceptPrivacy) errors.acceptPrivacy = "Bitte bestätige die Datenschutzhinweise.";
@@ -63,7 +77,11 @@ export function validateSignup(input: SignupInput): { ok: true; value: SignupVal
     value: {
       name: input.name,
       email: input.email,
-      phone: input.phone || null,
+      phone: input.phone,
+      birthday: input.birthday,
+      street: input.street.trim(),
+      zip: input.zip.trim(),
+      city: input.city.trim(),
       password: input.password,
       licenseClass: input.licenseClass as TrainingClass,
       language: choice.ok && choice.value ? choice.value.language : null,

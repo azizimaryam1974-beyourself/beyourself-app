@@ -18,7 +18,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 → Danach prüfen: Die alte LIVE-Stunde vom 31.10. muss innerhalb einer Minute auf „Beendet“ springen.
 
 ## 2. Gebaut, aber NOCH NICHT ECHT GETESTET
-(Automatische Tests laufen: 80/80. Durchgespielt im Test-Browser mit Testkonten. Aber nicht mit echten Geräten/Diensten:)
+(Automatische Tests laufen: 89/89. Durchgespielt im Test-Browser mit Testkonten. Aber nicht mit echten Geräten/Diensten:)
 
 | Bereich | Was fehlt zum echten Test |
 |---|---|
@@ -36,6 +36,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 | Schritt 4: Grundbetrag + Prüfungen (01.11.) | Mit Testkonto durchgespielt (Anmeldung → Grundbetrag → Einladung Praxis → bestätigt). Echt testen: mit einem Schüler, der schon im System ist („Schon bezahlt / erlassen“) |
 | Übersicht (Dashboard, 01.11.) | Wetter (DWD über Bright Sky) konnte hier nicht abgerufen werden – auf dem Server prüfen. Zahlen mit echten Fahrten im Februar prüfen |
 | Chat + Belege (01.11.) | Mit Testkonten durchgespielt (Anhang, Antworten, Leeren, Export-ZIP). Echt testen: Foto mit iPhone-Kamera (HEIC-Bilder zeigt der Browser evtl. nicht als Vorschau, Export geht) |
+| Profilfoto + Pflichtangaben + Glocke (01.11.) | Mit Testkonten durchgespielt (Anmeldung mit Geburtstag/Adresse/Telefon, alte Schüler müssen nachtragen, Foto hochladen, Glocke mit Geburtstagen). Echt testen: Foto direkt mit iPhone-Kamera |
 | Expo-App (iPhone) | **Noch nie** auf Maryams Handy geöffnet; kennt Kalender/Theorie/Fragen noch nicht |
 
 ## 3. Entscheidungen von Maryam (Kurzfassung – Details in ARBEITSWEISE.md)

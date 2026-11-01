@@ -27,6 +27,7 @@ import { hub } from "@/lib/server/live";
 import { ensureProfile } from "@/lib/server/training-repo";
 import { signups } from "@/lib/server/theory";
 import { ensureGrundbetrag } from "@/lib/server/exams";
+import { saveDetails } from "@/lib/server/user-details";
 import { addNotification } from "@/lib/server/booking";
 import { parseSignupForm, validateSignup, type FieldErrors } from "@/lib/signup";
 import { validateSignupChoice } from "@/lib/language-package";
@@ -46,9 +47,14 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
     name: input.name,
     email: input.email,
     phone: input.phone,
+    birthday: input.birthday,
+    street: input.street,
+    zip: input.zip,
+    city: input.city,
     licenseClass: input.licenseClass,
     wantsPackage: input.wantsPackage ? "yes" : "no",
     language: input.language ?? "",
+    acceptPrivacy: input.acceptPrivacy ? "on" : "",
   };
   const result = validateSignup(input);
   if (!result.ok) return { fieldErrors: result.errors, values };
@@ -62,6 +68,7 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
   // Konto + Paket in einer Transaktion: entweder beides oder nichts.
   const user = d.transaction(() => {
     const u = createUser(d, { ...result.value, passwordHash, role: "student" });
+    saveDetails(d, u.id, result.value);
     ensureProfile(d, u.id, result.value.licenseClass);
     ensureGrundbetrag(d, u.id); // Grundbetrag wird mit der Anmeldung fällig
     if (result.value.language) bookPackage(d, u.id, result.value.language);

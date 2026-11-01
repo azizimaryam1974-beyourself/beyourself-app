@@ -13,7 +13,7 @@ import { LiveHub } from "../src/lib/live-hub";
 import { MockTranslator } from "../src/lib/translation/mock";
 
 const base: SignupInput = {
-  name: "Ayşe Yılmaz", email: "ayse@example.de", phone: "", password: "geheim12345", licenseClass: "b197",
+  name: "Ayşe Yılmaz", email: "ayse@example.de", phone: "0561 123456", birthday: "2004-05-17", street: "Königsplatz 1", zip: "34117", city: "Kassel", password: "geheim12345", licenseClass: "b197",
   wantsPackage: true, language: "tr", acceptPrivacy: true, acceptPackageTerms: true,
 };
 
@@ -35,6 +35,12 @@ test("Anmeldung: Fehler je Feld", () => {
   if (!r.ok) {
     assert.ok(r.errors.email && r.errors.password && r.errors.acceptPrivacy && r.errors.acceptPackageTerms && r.errors.language);
   }
+});
+
+test("Anmeldung: Geburtstag, Adresse und Telefon sind Pflicht", () => {
+  const r = validateSignup({ ...base, phone: "", birthday: "", street: "Königsplatz", zip: "341", city: "" });
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.ok(r.errors.phone && r.errors.birthday && r.errors.street && r.errors.zip && r.errors.city);
 });
 
 test("Farsi per ENABLE_FARSI zuschaltbar", () => {

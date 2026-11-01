@@ -38,8 +38,31 @@ export function SignupForm({ languages, price, grundPrice, preset }: { languages
           {fe.email && <div className="error">{fe.email}</div>}
         </div>
         <div className="field">
-          <label htmlFor="phone">Telefon <span className="hint">(optional)</span></label>
-          <input id="phone" name="phone" type="tel" autoComplete="tel" defaultValue={v.phone} />
+          <label htmlFor="phone">Telefon / Handy</label>
+          <input id="phone" name="phone" type="tel" autoComplete="tel" required defaultValue={v.phone} />
+          {fe.phone && <div className="error">{fe.phone}</div>}
+        </div>
+        <div className="field">
+          <label htmlFor="birthday">Geburtsdatum</label>
+          <input id="birthday" name="birthday" type="date" autoComplete="bday" required defaultValue={v.birthday} />
+          {fe.birthday && <div className="error">{fe.birthday}</div>}
+        </div>
+        <div className="field">
+          <label htmlFor="street">Straße und Hausnummer</label>
+          <input id="street" name="street" type="text" autoComplete="street-address" required defaultValue={v.street} />
+          {fe.street && <div className="error">{fe.street}</div>}
+        </div>
+        <div className="field-row">
+          <div className="field" style={{ flex: "0 0 7.5em" }}>
+            <label htmlFor="zip">PLZ</label>
+            <input id="zip" name="zip" type="text" inputMode="numeric" autoComplete="postal-code" maxLength={5} required defaultValue={v.zip} />
+            {fe.zip && <div className="error">{fe.zip}</div>}
+          </div>
+          <div className="field" style={{ flex: 1 }}>
+            <label htmlFor="city">Ort</label>
+            <input id="city" name="city" type="text" autoComplete="address-level2" required defaultValue={v.city} />
+            {fe.city && <div className="error">{fe.city}</div>}
+          </div>
         </div>
         <div className="field">
           <label htmlFor="password">Passwort <span className="hint">(mind. 10 Zeichen)</span></label>
@@ -103,7 +126,7 @@ export function SignupForm({ languages, price, grundPrice, preset }: { languages
       <div className="card">
         <div className="field">
           <label className="check">
-            <input type="checkbox" name="acceptPrivacy" />
+            <input type="checkbox" name="acceptPrivacy" defaultChecked={v.acceptPrivacy === "on"} />
             <span>Ich habe die <Link href="/datenschutz" target="_blank">Datenschutzhinweise</Link> gelesen.</span>
           </label>
           {fe.acceptPrivacy && <div className="error">{fe.acceptPrivacy}</div>}

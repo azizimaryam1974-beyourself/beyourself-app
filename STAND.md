@@ -81,14 +81,14 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 ## 6. Recht & Sicherheit (Details TODO-SICHERHEIT.md)
 - **Vorfall 31.10.:** Anthropic-Schlüssel „beyourself-server“ missbraucht (30,5 Mio. Tokens, >10 Modelle, 94,71 $; Karte 31.10. 6× belastet, 108,45 $).
   Anthropic hat die Organisation gesperrt. Schlüssel gelöscht, Root-Passwort geändert (01.11.). Server geprüft: nur Maryams Logins,
-  keine fremden Zugangsschlüssel, keine fremden Programme – aber 13.509 Passwort-Fehlversuche von Bots → **SSH nur mit Schlüssel** (läuft).
+  keine fremden Zugangsschlüssel, keine fremden Programme – aber 13.509 Passwort-Fehlversuche von Bots → **erledigt 01.11.: SSH nur noch mit Schlüssel (MacBook „NWD-mac-2024“), Passwort-Login aus, fail2ban aktiv.** Notfall-Zugang: IONOS-Konsole.
   Wahrscheinlicher Abfluss: Notiz/Zwischenablage/Browser-Erweiterung (AdBlock mit Vollzugriff) – Notiz löschen, Erweiterung entfernen.
   Offen: „Überprüfung beantragen“ bei Anthropic, danach neuer Schlüssel (nur direkt in .env), Ausgabenlimit 30 $.
 - **Anwalt:** Buchungsbedingungen (Ausfall 70/75 %, „Guthaben statt Geld zurück“, Attest-Klausel wird so nicht halten,
   Muster-Ausbildungsvertrag des Fahrlehrerverbands nutzen), Widerrufsbelehrung, Datenschutzerklärung
   (Stripe, PayPal, Video/Aufnahme, Fragen-Prüfung durch Claude), Impressum.
 - **Steuerberater:** TÜV-Gebühren als durchlaufender Posten, Umsatzsteuer, Belege.
-- **Sicherheit offen:** Root-Passwort ändern, SSH-Schlüssel statt Passwort, 2FA (GitHub, Azure, Anthropic, IONOS, Stripe, PayPal),
+- **Sicherheit offen:** ~~Root-Passwort ändern~~ ✔, ~~SSH-Schlüssel statt Passwort~~ ✔ (01.11.), 2FA (GitHub, Azure, Anthropic, IONOS, Stripe, PayPal),
   Anthropic-Schlüssel aus dem Chat löschen/neu + Ausgabenlimit, Azure-Schlüssel neu generieren, Backup außerhalb des Servers,
   `PAYMENTS_TEST_MODE=0` vor echtem Start.
 

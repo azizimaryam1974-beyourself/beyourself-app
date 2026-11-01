@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/server/db";
 import { requireTeacher } from "@/lib/server/auth";
 import { getUser } from "@/lib/server/repo";
@@ -27,9 +28,15 @@ export async function setClassAction(form: FormData): Promise<void> {
   await requireTeacher();
   const userId = str(form, "userId"), c = str(form, "licenseClass");
   student(userId);
-  if (!isTrainingClass(c)) return;
-  if (!getProfile(db(), userId)) ensureProfile(db(), userId, c);
-  else updateProfile(db(), userId, { licenseClass: c });
+  if (!isTrainingClass(c)) redirect(`/verwaltung/schueler/${userId}?fehler=${encodeURIComponent("Bitte eine Klasse auswählen.")}`);
+  try {
+    if (!getProfile(db(), userId)) ensureProfile(db(), userId, c);
+    else updateProfile(db(), userId, { licenseClass: c });
+    if (getProfile(db(), userId)?.licenseClass !== c) throw new Error("nicht gespeichert");
+  } catch (e) {
+    console.error("[klasse]", (e as Error).message);
+    redirect(`/verwaltung/schueler/${userId}?fehler=${encodeURIComponent(`Die Klasse konnte nicht gespeichert werden (${(e as Error).message}). Bitte Claude Bescheid geben.`)}`);
+  }
   refresh(userId);
 }
 

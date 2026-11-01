@@ -34,9 +34,10 @@ function kindsFor(c: string): DriveKind[] {
   return [...base, ...special, "wiederholung", ...(c === "b197" ? (["testfahrt"] as DriveKind[]) : []), "warmstunde"];
 }
 
-export default async function StudentFile({ params }: { params: Promise<{ id: string }> }) {
+export default async function StudentFile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ fehler?: string }> }) {
   await requireTeacher();
   const { id } = await params;
+  const { fehler } = await searchParams;
   const d = db();
   const user = getUser(d, id);
   if (!user || user.role !== "student") notFound();
@@ -58,6 +59,7 @@ export default async function StudentFile({ params }: { params: Promise<{ id: st
   return (
     <>
       <Link className="back-link" href="/verwaltung">← Alle Schüler</Link>
+      {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
       <div className="student-head">
         <div>
           <h1 style={{ marginBottom: 4 }}>{user.name}</h1>

@@ -42,7 +42,7 @@ export function getProfile(db: Database.Database, userId: string): ProfileRow | 
 }
 
 export function ensureProfile(db: Database.Database, userId: string, licenseClass: TrainingClass): ProfileRow {
-  db.prepare(`INSERT OR IGNORE INTO training_profiles (user_id, license_class, repeat_target, updated_at) VALUES (?,?,?,?)`)
+  db.prepare(`INSERT INTO training_profiles (user_id, license_class, repeat_target, updated_at) VALUES (?,?,?,?) ON CONFLICT(user_id) DO NOTHING`)
     .run(userId, licenseClass, MIN_REPEAT, Date.now());
   return getProfile(db, userId)!;
 }

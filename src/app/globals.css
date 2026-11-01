@@ -890,3 +890,96 @@ details.tl-row { display: block; }
 .receipt-edit[open] { padding-top: 6px; }
 .link-btn.danger { color: #b42318; margin-top: 8px; }
 @media (min-width: 861px) and (max-width: 1360px) { .nav a, .nav button { padding: 8px 10px; font-size: 0.9rem; } }
+
+/* ================= Kacheln mit Symbol + „?“-Hilfe (weniger Text, mehr Bild) ================= */
+.ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.panel { background: var(--surface); border: 1px solid var(--glass-border); border-radius: var(--r-lg); padding: 18px 20px; margin-bottom: 16px; box-shadow: var(--shadow-glass); color: var(--text); }
+.panel-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+details.panel > summary.panel-head { margin-bottom: 0; cursor: pointer; list-style: none; }
+details.panel > summary::-webkit-details-marker { display: none; }
+details.panel[open] > summary.panel-head { margin-bottom: 12px; }
+.panel-head h2 { margin: 0; font-size: 1.2rem; flex: 1; min-width: 0; }
+.panel-ico { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--midnight); color: #e9c27a; }
+.panel-right { display: flex; align-items: center; gap: 8px; }
+.help-btn { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid currentColor; background: none; color: var(--muted); font: inherit; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: grid; place-items: center; opacity: 0.8; }
+.help-btn:hover { opacity: 1; color: var(--gold-deep); }
+.help-dialog { border: 0; padding: 0; border-radius: 22px; width: min(92vw, 460px); max-height: 80svh; background: #fbf8f2; color: var(--ink); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6); }
+.help-dialog::backdrop { background: rgba(10, 14, 22, 0.55); }
+.help-inner { padding: 20px 22px 22px; display: grid; gap: 12px; }
+.help-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 1.1rem; }
+.help-head button { border: 0; background: none; font-size: 1.1rem; cursor: pointer; color: var(--muted); padding: 4px 8px; }
+.help-body p { margin: 0 0 10px; line-height: 1.55; }
+.help-body ul { margin: 0 0 10px; padding-left: 20px; line-height: 1.55; }
+.empty-state { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 18px 10px 8px; }
+.empty-state p { margin: 0; color: var(--muted); }
+.empty-ico { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: rgba(198, 164, 101, 0.16); color: var(--gold-deep); }
+.empty-ico .ico { width: 30px; height: 30px; }
+
+/* dunkle Kachel (Weg zum Führerschein) */
+.panel.panel-dark { background: linear-gradient(155deg, rgba(58, 52, 46, 0.9), rgba(22, 28, 40, 0.95)); border-color: rgba(233, 215, 180, 0.2); color: var(--cream); }
+.panel-dark .panel-ico { background: var(--gold-grad); color: var(--ink); }
+.panel-dark .help-btn { color: rgba(246, 240, 230, 0.75); }
+.journey { display: grid; gap: 12px; }
+.jr-top { display: flex; align-items: center; gap: 12px; }
+.jr-top strong { font-size: 1.3rem; color: #f2c27a; }
+.jr-bar { flex: 1; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.jr-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #d99a3e, #f4c560); }
+.jr-road { list-style: none; margin: 0; padding: 12px 4px 6px; display: flex; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; position: relative; }
+.jr-road::-webkit-scrollbar { display: none; }
+.jr-step { flex: 0 0 92px; display: grid; justify-items: center; text-align: center; gap: 6px; position: relative; scroll-snap-align: center; }
+.jr-step::before { content: ""; position: absolute; top: 22px; left: -50%; width: 100%; height: 6px; background: repeating-linear-gradient(90deg, rgba(246, 240, 230, 0.35) 0 8px, transparent 8px 14px), rgba(255, 255, 255, 0.08); z-index: 0; }
+.jr-step:first-child::before { display: none; }
+.jr-step.done::before, .jr-step.active::before { background: linear-gradient(90deg, #d99a3e, #f4c560); }
+.jr-dot { position: relative; z-index: 1; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1rem;
+  background: #1c2940; border: 2px solid rgba(233, 215, 180, 0.3); color: rgba(246, 240, 230, 0.6); }
+.jr-step.done .jr-dot { background: var(--gold-grad); color: var(--ink); border-color: transparent; }
+.jr-step.active .jr-dot { width: 58px; height: 58px; margin-top: -4px; background: #f6f0e6; color: var(--ink); border: 3px solid #e0a24a; box-shadow: 0 0 0 6px rgba(224, 162, 74, 0.25); }
+.jr-step.active .jr-dot svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.jr-step.final .jr-dot { font-size: 1.3rem; }
+.jr-title { font-size: 0.8rem; font-weight: 700; line-height: 1.2; color: rgba(246, 240, 230, 0.9); }
+.jr-step.locked .jr-title { color: rgba(246, 240, 230, 0.5); }
+.jr-step.active .jr-title { color: #f2c27a; }
+.jr-sub { font-size: 0.72rem; color: rgba(246, 240, 230, 0.55); line-height: 1.2; }
+.journey-details { margin-top: 8px; }
+.journey-details > summary { cursor: pointer; color: #f2c27a; font-weight: 700; font-size: 0.9rem; }
+.journey-details[open] > summary { margin-bottom: 10px; }
+.journey-details .progress-view { background: var(--surface); color: var(--text); border-radius: 18px; padding: 14px; }
+
+/* nächster Schritt (gold) */
+.next-card { display: flex; align-items: center; gap: 14px; padding: 16px 18px; margin-bottom: 16px; border-radius: 22px; text-decoration: none; color: #2b1d0c;
+  background: radial-gradient(70% 90% at 85% 40%, rgba(232, 80, 50, 0.35), transparent 70%), linear-gradient(120deg, #f4c560, #f2b04b 45%, #f6d983);
+  box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.7); }
+.next-ico { flex: none; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.45); }
+.next-ico .ico { width: 26px; height: 26px; }
+.next-text { flex: 1; min-width: 0; display: grid; }
+.next-text small { font-size: 0.75rem; opacity: 0.75; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.next-text strong { font-size: 1.1rem; line-height: 1.25; }
+.next-text span { font-size: 0.88rem; opacity: 0.85; }
+.next-cta { flex: none; font-weight: 800; white-space: nowrap; }
+@media (max-width: 520px) { .next-card { flex-wrap: wrap; } .next-cta { width: 100%; text-align: center; padding: 10px; border-radius: 999px; background: rgba(43, 29, 12, 0.88); color: #f6f0e6; } }
+
+/* Schnell-Kacheln */
+.quick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 760px) { .quick-grid { grid-template-columns: 1fr 1fr; } }
+.quick { display: grid; gap: 4px; padding: 14px; border-radius: 20px; text-decoration: none; color: var(--cream);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)), rgba(15, 26, 44, 0.8); border: 1px solid rgba(233, 215, 180, 0.18); }
+.quick strong { font-size: 1rem; }
+.quick > span:last-child { font-size: 0.85rem; color: rgba(246, 240, 230, 0.7); }
+.quick.live > span:last-child { color: #ff8a7a; font-weight: 700; }
+.quick-ico { position: relative; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(233, 215, 180, 0.14); color: #f2c27a; margin-bottom: 4px; }
+.quick-dot { position: absolute; top: -6px; right: -8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #e5383b; color: #fff; font-style: normal; font-size: 0.72rem; font-weight: 800; display: grid; place-items: center; }
+.panel.panel-accent { border: 2px solid rgba(224, 162, 74, 0.6); }
+.mini-details > summary { cursor: pointer; font-weight: 700; color: var(--gold-deep); margin: 4px 0; }
+.panel .notes .pre { white-space: pre-wrap; }
+body:has(.bnav), body:has(.app-main) { background: var(--midnight); }
+.book-later > summary { list-style: none; cursor: pointer; width: fit-content; }
+.book-later > summary::-webkit-details-marker { display: none; }
+.book-later[open] > summary { margin-bottom: 14px; }
+.note-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.note-list summary { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 6px; border-radius: 12px; list-style: none; font-weight: 600; }
+.note-list summary::-webkit-details-marker { display: none; }
+.note-list summary small { margin-left: auto; color: var(--muted); font-weight: 400; white-space: nowrap; }
+.note-list summary:hover { background: rgba(27, 34, 48, 0.05); }
+.note-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: transparent; border: 1.5px solid var(--line); }
+.note-list li.unread .note-dot { background: #e0a24a; border-color: #e0a24a; }
+.note-list .pre { padding: 4px 6px 12px 25px; color: var(--muted); white-space: pre-wrap; }

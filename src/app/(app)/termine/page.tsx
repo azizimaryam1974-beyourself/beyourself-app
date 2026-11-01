@@ -16,6 +16,7 @@ import { formatPrice } from "@/lib/language-package";
 import { addDays, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime } from "@/lib/time";
 import { CLASS_LABEL, KIND_LABEL, priceCents, type DriveKind } from "@/lib/training";
 import { Countdown } from "@/components/booking/Countdown";
+import { Empty, Panel } from "@/components/ui/Panel";
 import { ensureGrundbetrag, EXAM_LABEL, EXAM_STATUS_LABEL, getExam, listExams } from "@/lib/server/exams";
 import { grundbetragPaid } from "@/lib/server/training-repo";
 import { declineExamAction } from "@/app/exam-actions";
@@ -163,20 +164,25 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <h1>Termine & Buchen</h1>
+      <h1>Fahrstunden</h1>
       {noticeKey && NOTICE[noticeKey] && <div className={`alert ${NOTICE[noticeKey].cls}`} role="status">{NOTICE[noticeKey].text}</div>}
       {sp.fehler && <div className="alert alert-error" role="alert">{sp.fehler}</div>}
 
       {toPay.length > 0 && (
-        <section className="card card-accent" id="offen">
-          <h2>Bitte bezahlen</h2>
+        <Panel id="offen" icon="pay" title="Bitte bezahlen" className="panel-accent" help={<>
+          <p>Hier steht alles, was du noch bezahlen musst. Erst mit der Zahlung ist ein Termin fest für dich gebucht.</p>
+          <p>Fahrstunden: Du hast {settings.payWindowMin} Minuten Zeit, danach wird die Zeit wieder für andere frei. Grundbetrag und Prüfungen haben längere Fristen – das Datum steht jeweils daneben.</p>
+          <p>Vorhandenes Guthaben wird automatisch zuerst verrechnet. Bezahlen kannst du online oder bar/EC in der Fahrschule.</p>
+        </>}>
           {toPay.map((b) => <PayBox key={b.id} b={b} providers={providers} credit={credit} now={now} />)}
-        </section>
+        </Panel>
       )}
 
       {exams.length > 0 && (
-        <section className="card" id="pruefungen">
-          <h2>Deine Prüfungen</h2>
+        <Panel id="pruefungen" icon="flag" title="Deine Prüfungen" help={<>
+          <p>Prüfungstermine legt die Fahrschule fest, sobald der TÜV sie bestätigt hat. Du bekommst eine Einladung und bestätigst verbindlich durch Bezahlen.</p>
+          <p>Bitte zur Prüfung immer Personalausweis oder Reisepass mitbringen. Wer nicht erscheint, verliert die Gebühren.</p>
+        </>}>
           <ul className="list">
             {exams.map((e) => (
               <li key={e.id}>
@@ -189,23 +195,26 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
 
-      <section className="card" id="buchen">
-        <h2>Fahrt buchen</h2>
+      <Panel id="buchen" icon="car" title="Fahrt buchen" help={<>
+        <p>Du siehst nur die Fahrten, die für deinen Ausbildungsstand gerade dran sind – z. B. zuerst Übungsfahrten, später Sonderfahrten.</p>
+        <p>So geht&apos;s: 1. Art und Länge wählen (60, 75 oder 90 Minuten) · 2. Tag antippen · 3. Uhrzeit antippen · 4. reservieren und bezahlen.</p>
+        <p>Der Preis wird genau anteilig berechnet. Beleuchtungsfahrten gibt es nur, wenn es draußen dunkel ist.</p>
+      </>}>
         {!training ? (
-          <p className="hint">Deine Führerscheinklasse ist noch nicht festgelegt. Die Fahrschule erledigt das – danach kannst du hier buchen.</p>
+          <Empty icon="wait" text="Wartet auf deine Klasse – die Fahrschule legt sie fest." action={<Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule fragen</Link>} />
         ) : training.profile.blocked ? (
-          <p className="hint">Online-Buchung ist für dich gerade gesperrt. Bitte melde dich bei der Fahrschule.</p>
+          <Empty icon="chat" text="Buchen ist gerade pausiert." action={<Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule schreiben</Link>} />
         ) : !grundOk ? (
-          <p className="hint">Fahrstunden kannst du buchen, sobald dein <strong>Grundbetrag</strong> bezahlt ist – oben unter „Bitte bezahlen“ oder bar/EC in der Fahrschule.</p>
+          <Empty icon="pay" text="Erst den Grundbetrag bezahlen – dann geht's los." action={<a className="btn btn-gold btn-small" href="#offen">Zum Bezahlen</a>} />
         ) : (
           <>
             <p className="book-next"><span className="hint">{CLASS_LABEL[training.profile.licenseClass]} · </span>{training.state.next}
               {" "}<Link href="/konto" className="hint">Fortschritt ansehen</Link></p>
             {options.length === 0 ? (
-              <p className="hint">Gerade gibt es für dich nichts zu buchen.</p>
+              <Empty icon="check" text="Gerade ist alles gebucht – jetzt fahren!" />
             ) : (
               <div className="pick-grid">
                 {options.map((o) => (
@@ -287,11 +296,14 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             )}
           </>
         )}
-      </section>
+      </Panel>
 
-      <section className="card" id="meine">
-        <h2>Meine Termine</h2>
-        {active.length === 0 ? <p className="hint">Noch keine Termine.</p> : (
+      <Panel id="meine" icon="cal" title="Meine Termine" help={<>
+        <p>Kostenlos absagen kannst du bis {settings.freeCancelHours} Stunden vorher, spätestens um {settings.cancelCutoffHour} Uhr am Vortag. Der Betrag kommt als Guthaben auf dein Konto.</p>
+        <p>Danach werden {settings.lateChargePct} % berechnet. Übernimmt jemand anderes den Termin, bekommst du auch das zurück.</p>
+        <p>Wer nicht erscheint oder mehr als 15 Minuten zu spät kommt, zahlt {settings.noShowChargePct} %. Termine, die weniger als 24 Stunden vorher gebucht wurden, können nicht abgesagt werden.</p>
+      </>}>
+        {active.length === 0 ? <Empty icon="cal" text="Noch keine Termine." action={grundOk && options.length ? <a className="btn btn-secondary btn-small" href="#buchen">Fahrt buchen</a> : undefined} /> : (
           <ul className="list">
             {active.map((b) => {
               const ci = b.kind && !b.examId ? cancelInfo(b, settings, now) : null;
@@ -330,13 +342,14 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             })}
           </ul>
         )}
-        <p className="hint">Kostenlos absagen kannst du bis {settings.freeCancelHours} Stunden vorher, spätestens um {settings.cancelCutoffHour} Uhr am Vortag – der Betrag kommt als Guthaben auf dein Konto. Danach werden {settings.lateChargePct} % berechnet. Wer nicht erscheint oder mehr als 15 Minuten zu spät kommt, zahlt {settings.noShowChargePct} %.</p>
-      </section>
+      </Panel>
 
-      <section className="card" id="warteliste">
-        <h2>Warteliste</h2>
-        <p className="hint">Nichts Passendes frei? Trag dich für einen Tag ein. Wird dort etwas frei, bekommst du als Erste/r Bescheid und hast 30 Minuten,
-          in denen nur du buchen kannst. Ein Eintrag pro Woche.</p>
+      <Panel id="warteliste" icon="wait" title="Warteliste" help={<>
+        <p>Nichts Passendes frei? Trag dich für einen Tag und einen Zeitraum ein.</p>
+        <p>Wird dort etwas frei, bekommst du als Erste/r eine Nachricht und hast 30 Minuten, in denen nur du buchen kannst. Danach sehen es alle.</p>
+        <p>Ein Eintrag pro Woche. Nachts (22–7 Uhr) kommen keine Nachrichten.</p>
+      </>}>
+        {waits.length === 0 && !(training && !training.profile.blocked && grundOk) && <Empty icon="wait" text="Noch nicht verfügbar." />}
         {waits.length > 0 && (
           <ul className="list">
             {waits.map((w) => (
@@ -358,15 +371,14 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             <button className="btn btn-secondary btn-small" type="submit">Eintragen</button>
           </form>
         )}
-      </section>
+      </Panel>
 
-      <section className="card" id="guthaben">
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h2 style={{ margin: 0 }}>Guthaben</h2>
-          <span className="credit-big">{formatPrice(credit)}</span>
-        </div>
-        <p className="hint">Bei Absagen bekommst du Geld als Guthaben zurück. Es wird bei deiner nächsten Buchung automatisch verrechnet.</p>
+      <Panel id="guthaben" icon="coin" title="Guthaben" right={<span className="credit-big">{formatPrice(credit)}</span>} help={<>
+        <p>Sagst du rechtzeitig ab, bekommst du das Geld als Guthaben zurück.</p>
+        <p>Es wird bei deiner nächsten Buchung automatisch verrechnet – du musst nichts tun. Am Ende der Ausbildung kann es auf Wunsch ausgezahlt werden.</p>
+      </>}>
         {ledger.length > 0 && (
+          <details className="mini-details"><summary>Bewegungen ansehen</summary>
           <ul className="list ledger">
             {ledger.map((e) => (
               <li key={e.id}>
@@ -374,30 +386,29 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
                 <strong className={e.amountCents < 0 ? "neg" : "pos"}>{e.amountCents > 0 ? "+" : "−"}{formatPrice(Math.abs(e.amountCents))}</strong>
               </li>
             ))}
-          </ul>
+          </ul></details>
         )}
-      </section>
+      </Panel>
 
       {notes.length > 0 && (
-        <section className="card">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <h2 style={{ margin: 0 }}>Nachrichten {unread > 0 && <span className="tab-count">{unread}</span>}</h2>
-            {unread > 0 && <form action={markReadAction}><button className="link-btn" type="submit">Alle gelesen</button></form>}
-          </div>
-          <ul className="list notes">
+        <Panel icon="bell" title={<>Mitteilungen {unread > 0 && <span className="tab-count">{unread}</span>}</>} helpTitle="Mitteilungen"
+          right={unread > 0 ? <form action={markReadAction}><button className="link-btn" type="submit">Alle gelesen</button></form> : undefined}
+          help={<p>Hier landen automatische Mitteilungen: Bestätigungen, Erinnerungen, Warteliste. Für Fragen an die Fahrschule nutze den Chat.</p>}>
+          <ul className="note-list">
             {notes.map((n) => (
               <li key={n.id} className={n.readAt ? "" : "unread"}>
-                <div><strong>{n.title}</strong><div className="pre">{n.body}</div></div>
-                <span className="hint">{fmtDate(n.createdAt)} {fmtTime(n.createdAt)}</span>
+                <details>
+                  <summary><span className="note-dot" aria-hidden />{n.title}<small>{fmtDate(n.createdAt)}</small></summary>
+                  <div className="pre">{n.body}</div>
+                </details>
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       )}
 
       {products.length > 0 && (
-        <section className="card">
-          <h2>Weitere Leistungen</h2>
+        <Panel icon="star" title="Weitere Leistungen" help={<p>Zusätzliche Angebote der Fahrschule. Alle Preise inkl. MwSt.</p>}>
           <div className="product-grid">
             {products.map((o) => (
               <div key={o.id} className="product">
@@ -413,13 +424,12 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
               </div>
             ))}
           </div>
-          <p className="hint">Alle Preise inkl. MwSt.</p>
-        </section>
+        </Panel>
       )}
 
       {history.length > 0 && (
-        <details className="card">
-          <summary><h2 style={{ display: "inline" }}>Verlauf</h2></summary>
+        <details className="panel">
+          <summary className="panel-head"><span className="panel-ico"><svg viewBox="0 0 24 24" className="ico" aria-hidden><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></svg></span><h2>Verlauf</h2></summary>
           <ul className="list">
             {history.map((b) => (
               <li key={b.id}>

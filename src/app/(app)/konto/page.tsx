@@ -11,6 +11,13 @@ import { getOffer, isBookable, listBookingsForUser } from "@/lib/server/booking"
 import { fmtSlot } from "@/lib/time";
 import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
 import { ProgressView } from "@/components/training/ProgressView";
+import { Journey, type Milestone } from "@/components/training/Journey";
+import { Empty, Panel } from "@/components/ui/Panel";
+import { Icon } from "@/components/ui/icons";
+import { grundbetragPaid } from "@/lib/server/training-repo";
+import { creditBalance } from "@/lib/server/credit";
+import { unreadForStudent } from "@/lib/server/chat";
+import { upcomingLessons } from "@/lib/server/theory";
 import { CLASS_LABEL } from "@/lib/training";
 import { ensureGrundbetrag, EXAM_LABEL, listExams } from "@/lib/server/exams";
 import { fmtDay, fmtTime } from "@/lib/time";
@@ -45,82 +52,84 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const next = listBookingsForUser(db(), user.id)
     .filter((b) => b.status === "paid" && (b.startsAt ?? 0) > now)
     .sort((a, b) => (a.startsAt ?? 0) - (b.startsAt ?? 0))[0];
+  const grundOk = grundbetragPaid(db(), user.id);
+  const credit = creditBalance(db(), user.id);
+  const unread = unreadForStudent(db(), user.id);
+  const nextTheory = upcomingLessons(db(), now, now + 21 * 86_400_000)[0];
+  // Der Weg: Anmeldung → Klasse → Grundbetrag → Ausbildungsphasen → Führerschein
+  const steps: Milestone[] = [{ title: "Angemeldet", status: "done" }];
+  steps.push({ title: "Klasse", sub: training ? CLASS_LABEL[training.profile.licenseClass] : "legt die Fahrschule fest", status: training ? "done" : "active" });
+  steps.push({ title: "Grundbetrag", status: grundOk ? "done" : training ? "active" : "locked" });
+  if (training) {
+    for (const ph of training.state.phases) steps.push({ title: ph.title, status: !grundOk && ph.status === "active" ? "locked" : ph.status });
+  } else {
+    for (const t of ["Fahrstunden", "Sonderfahrten", "Prüfung"]) steps.push({ title: t, status: "locked" });
+  }
+  steps.push({ title: "Führerschein", status: training?.profile.passedAt ? "done" : "locked", final: true });
+  if (!steps.some((x) => x.status === "active")) { const f = steps.find((x) => x.status === "locked"); if (f) f.status = "active"; }
+  const percent = training ? training.state.percent : 5;
+  const nextStep = !training
+    ? { icon: "wait" as const, title: "Deine Klasse wird festgelegt", text: "Die Fahrschule erledigt das – du bekommst eine Nachricht.", href: "/nachrichten", cta: "Frage stellen" }
+    : grund && grund.status === "awaiting_payment"
+      ? { icon: "pay" as const, title: `Grundbetrag: ${formatPrice(grund.priceCents)}`, text: "Danach kannst du Fahrstunden buchen.", href: "/termine#offen", cta: "Jetzt bezahlen" }
+      : invited.length
+        ? { icon: "flag" as const, title: `Einladung: ${EXAM_LABEL[invited[0].type]}`, text: `${fmtDay(invited[0].startsAt)} · ${fmtTime(invited[0].startsAt)} Uhr`, href: "/termine#offen", cta: "Bestätigen" }
+        : training.state.bookable.length
+          ? { icon: "car" as const, title: training.state.next, text: "Such dir einen freien Termin aus.", href: "/termine#buchen", cta: "Fahrt buchen" }
+          : { icon: "road" as const, title: training.state.next, text: "", href: "/termine", cta: "Meine Termine" };
   const languages = bookableLanguages().map(({ code, labelDe, nativeLabel, rtl }) => ({ code, labelDe, nativeLabel, rtl }));
 
   return (
     <>
       <h1>Hallo {user.name.split(" ")[0]}!</h1>
-      {gebucht && (
-        <div className="alert alert-ok">
-          Dein Sprachpaket ist gebucht. Die Live-Übersetzung ist ab sofort freigeschaltet. Die {price} kannst du unten
-          online bezahlen oder bar/EC in der Fahrschule.
-        </div>
-      )}
-
+      {gebucht && <div className="alert alert-ok">Sprachpaket gebucht – die Übersetzung ist freigeschaltet.</div>}
       {willkommen && <div className="alert alert-ok">Willkommen bei beyourself! Schön, dass du da bist.</div>}
-      {invited.map((e) => (
-        <div key={e.id} className="card card-accent">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <h2 style={{ margin: 0 }}>Einladung: {EXAM_LABEL[e.type]}</h2>
-              <p className="hint" style={{ margin: "6px 0 0" }}>{fmtDay(e.startsAt)} · {fmtTime(e.startsAt)} Uhr · {e.place} – bitte verbindlich bestätigen.</p>
-            </div>
-            <Link className="btn btn-gold" href="/termine#offen">Ansehen & bestätigen</Link>
-          </div>
-        </div>
-      ))}
-      {grund && grund.status === "awaiting_payment" && (
-        <div className="card card-accent">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <h2 style={{ margin: 0 }}>Grundbetrag: {formatPrice(grund.priceCents)}</h2>
-              <p className="hint" style={{ margin: "6px 0 0" }}>Einmalig, inklusive Theorie-App, Theorieunterricht und Lernmaterial. Danach kannst du Fahrstunden buchen.
-                Online bezahlen oder bar/EC in der Fahrschule.</p>
-            </div>
-            <Link className="btn btn-gold" href="/termine#offen">Jetzt bezahlen</Link>
-          </div>
-        </div>
-      )}
 
-      <section className="card">
-        <h2>Dein Weg zum Führerschein</h2>
-        {training ? <ProgressView state={training.state} classLabel={CLASS_LABEL[training.profile.licenseClass]} />
-          : <p className="hint">Deine Fahrschule legt deine Führerscheinklasse fest – danach siehst du hier deinen Fortschritt.</p>}
-      </section>
-
-      <div className="card card-accent">
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <div>
-            <h2 style={{ margin: 0 }}>Fahrstunden & Termine</h2>
-            <p className="hint" style={{ margin: "6px 0 0" }}>
-              {next && next.startsAt && next.endsAt ? <>Nächster Termin: <strong>{next.title}</strong>, {fmtSlot(next.startsAt, next.endsAt)}</> : "Freie Termine ansehen, anfragen und online bezahlen."}
-            </p>
-          </div>
-          <Link className="btn btn-gold" href="/termine">Termine & Buchen</Link>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h2 style={{ margin: 0 }}>Live-Unterricht</h2>
-          {live.length > 0 && <span className="badge badge-live">LIVE</span>}
-        </div>
-        {live.length === 0 ? (
-          <p className="hint" style={{ marginTop: 12 }}>Gerade läuft keine Theoriestunde. Diese Seite zeigt sie an, sobald sie beginnt.</p>
-        ) : (
-          <ul className="list">
-            {live.map((l) => (
-              <li key={l.id}>
-                <span><span className="dot dot-live" /> {l.title}</span>
-                <Link className="btn" href={`/live/${l.id}`}>{access ? `Mitlesen auf ${lang?.labelDe}` : "Mitlesen (Deutsch)"}</Link>
-              </li>
-            ))}
-          </ul>
+      <Panel icon="road" title="Dein Weg zum Führerschein" className="panel-dark"
+        help={<>
+          <p>Hier siehst du auf einen Blick, wo du gerade stehst. Das Auto zeigt deine aktuelle Station, Gold mit Haken heißt erledigt.</p>
+          <p>Der Weg ist für jede Klasse etwas anders (z. B. B197 mit Automatik- und Schaltstunden). Wie viele Übungsstunden du brauchst, legt deine Fahrlehrerin fest.</p>
+          <p>Unten bei „Details“ siehst du jede Stunde einzeln: gefahren = gold, gebucht = gestreift, offen = leer. 1 Kästchen = 45 Minuten.</p>
+        </>}>
+        <Journey steps={steps} percent={percent} />
+        {training && (
+          <details className="journey-details">
+            <summary>Details ansehen</summary>
+            <ProgressView state={training.state} classLabel={CLASS_LABEL[training.profile.licenseClass]} />
+          </details>
         )}
+      </Panel>
+
+      <Link href={nextStep.href} className="next-card">
+        <span className="next-ico"><Icon name={nextStep.icon} /></span>
+        <span className="next-text"><small>Dein nächster Schritt</small><strong>{nextStep.title}</strong>{nextStep.text && <span>{nextStep.text}</span>}</span>
+        <span className="next-cta">{nextStep.cta} →</span>
+      </Link>
+
+      <div className="quick-grid">
+        <Link href="/termine" className="quick">
+          <span className="quick-ico"><Icon name="cal" /></span>
+          <strong>Fahrstunden</strong>
+          <span>{next && next.startsAt ? `${fmtDay(next.startsAt).split(",")[0]}, ${fmtTime(next.startsAt)}` : "kein Termin"}</span>
+        </Link>
+        <Link href={live[0] ? `/live/${live[0].id}` : "/theorie"} className={`quick ${live[0] ? "live" : ""}`}>
+          <span className="quick-ico"><Icon name="live" /></span>
+          <strong>Theorie</strong>
+          <span>{live[0] ? "● läuft jetzt" : nextTheory?.scheduled_at ? `${fmtDay(nextTheory.scheduled_at).split(",")[0]}, ${fmtTime(nextTheory.scheduled_at)}` : "kein Termin"}</span>
+        </Link>
+        <Link href="/nachrichten" className="quick">
+          <span className="quick-ico"><Icon name="chat" />{unread > 0 && <i className="quick-dot">{unread}</i>}</span>
+          <strong>Chat</strong>
+          <span>{unread > 0 ? `${unread} neu` : "Fahrschule schreiben"}</span>
+        </Link>
+        <Link href="/termine#guthaben" className="quick">
+          <span className="quick-ico"><Icon name="coin" /></span>
+          <strong>Guthaben</strong>
+          <span>{formatPrice(credit)}</span>
+        </Link>
       </div>
 
-      <div className="card">
-        <h2>Sprachpaket</h2>
+      <Panel icon="lang" title="Sprachpaket" help={<p>Mit dem Sprachpaket liest du jede Theoriestunde live übersetzt auf deinem Handy mit – oder hörst sie über Kopfhörer. Einmalig {price} für die ganze Ausbildung.</p>}>
         {pkg && pkg.status !== "cancelled" ? (
           <div className="row" style={{ justifyContent: "space-between" }}>
             <div>
@@ -140,15 +149,18 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         ) : (
           <>
             {pkg?.status === "cancelled" && <div className="alert alert-info">Dein letztes Sprachpaket wurde storniert.</div>}
-            <p>Noch kein Sprachpaket. Für {price} (einmalig, inkl. MwSt.) liest du jede Theoriestunde übersetzt mit.</p>
-            <BookLaterForm languages={languages} price={price} />
+            <p className="hint" style={{ marginTop: 0 }}>Theorie in deiner Sprache mitlesen – einmalig {price}.</p>
+            <details className="book-later">
+              <summary className="btn btn-secondary btn-small">Sprache wählen & buchen</summary>
+              <BookLaterForm languages={languages} price={price} />
+            </details>
           </>
         )}
-      </div>
+      </Panel>
 
       {past.length > 0 && (
-        <div className="card">
-          <h2>Vergangene Stunden nachlesen</h2>
+        <details className="panel">
+          <summary className="panel-head"><span className="panel-ico"><Icon name="history" /></span><h2>Vergangene Stunden nachlesen</h2></summary>
           <ul className="list">
             {past.map((l) => (
               <li key={l.id}>
@@ -157,7 +169,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </>
   );

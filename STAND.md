@@ -79,6 +79,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 - **Sonderfahrten-Zahlen einstellbar** (Reform 21/7404 schafft feste 5/4/3 evtl. ab).
 - **Rechnungen/Belege** (für Steuerberater), Kassenbuch Barzahlungen.
 - **Pakete** (z. B. 10 Fahrstunden im Voraus).
+- **Handy-Design (Maryams Wunsch 01.11.):** schwebende Glas-Leiste unten wie Instagram, wird beim Scrollen kleiner und beim Stehenbleiben wieder groß – auf der Webseite gebaut, **in der Handy-App genauso**.
 - **Push-Nachrichten** aufs Handy; **Expo-App**: Fahrlehrer-Funktionen, Kalender, Theorie, Fragen (Video erst in echter App, nicht Expo Go).
 - **Webseite-Inhalte:** Fotos, Adresse/Telefon/Bürozeiten, „Über uns“, Impressum; Preise auf der Startseite; Umschreibung-Text.
 - **Videos:** B neu (Blinker eingefügt) + B197 wieder komplett mit Blinker (01.11.) – auf iPhone prüfen; `bg-b78.mp4` fehlt.

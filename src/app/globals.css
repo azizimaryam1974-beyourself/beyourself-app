@@ -765,3 +765,33 @@ details.tl-row { display: block; }
 .mnav-panel a:hover, .mnav-panel button:hover { background: rgba(233, 215, 180, 0.12); }
 .mnav-extra { border-top: 1px solid rgba(233, 215, 180, 0.15); margin-top: 6px; padding-top: 6px; opacity: 0.8; }
 .site-header:not(.dark) .mnav-panel { background: #fbf8f2; color: var(--ink); }
+
+/* ================= Handy: schwebende Leiste unten (Glas, wird beim Scrollen kleiner) ================= */
+.bnav, .bnav-more, .bnav-shade { display: none; }
+@media (max-width: 860px) {
+  body:has(.bnav) { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
+  .bnav { display: flex; position: fixed; z-index: 70; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom));
+    width: min(calc(100vw - 28px), 440px); gap: 2px; padding: 6px; border-radius: 999px;
+    background: rgba(238, 234, 226, 0.6); -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.75); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 14px 34px -12px rgba(0, 0, 0, 0.55);
+    transform: translateX(-50%); transform-origin: 50% 100%; transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.4, 1); will-change: transform; }
+  .bnav.mini { transform: translateX(-50%) translateY(6px) scale(0.84); }
+  .bnav a, .bnav button { flex: 1; min-width: 0; display: grid; justify-items: center; gap: 1px; padding: 9px 4px 7px; border-radius: 999px;
+    color: #141a24; text-decoration: none; background: none; border: 0; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bnav .on { background: rgba(20, 26, 36, 0.11); }
+  .bnav-ico { position: relative; display: block; }
+  .bnav-ico svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+  .bnav .on .bnav-ico svg { stroke-width: 2.4; }
+  .bnav-ico i { position: absolute; right: -3px; bottom: 0; width: 9px; height: 9px; border-radius: 50%; background: #e5383b; border: 1.5px solid #eee9df; }
+  .bnav-label { font-size: 0.68rem; font-weight: 700; line-height: 1.2; white-space: nowrap; transition: opacity 0.2s; }
+  .bnav.mini .bnav-label { opacity: 0; }
+  .bnav-shade { display: block; position: fixed; inset: 0; z-index: 68; background: rgba(10, 14, 22, 0.35); border: 0; }
+  .bnav-more { display: grid; gap: 2px; position: fixed; z-index: 69; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom)); min-width: 220px; padding: 8px;
+    border-radius: 22px; background: rgba(238, 234, 226, 0.92); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.75); box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.6); }
+  .bnav-more a, .bnav-more button { display: block; width: 100%; text-align: left; padding: 13px 16px; border-radius: 14px; font: inherit; font-weight: 600;
+    color: #141a24; text-decoration: none; background: none; border: 0; cursor: pointer; }
+  .bnav-more a:hover, .bnav-more button:hover { background: rgba(20, 26, 36, 0.08); }
+  /* oben bleibt auf dem Handy nur das Logo */
+  .site-header .nav.nav-user { display: none; }
+}

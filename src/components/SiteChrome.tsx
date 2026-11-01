@@ -3,7 +3,7 @@ import { currentUser } from "@/lib/server/auth";
 import { logoutAction } from "@/app/actions";
 import { Brand } from "./Brand";
 import { NavLinks, type NavItem } from "./NavLinks";
-import { MobileNav } from "./MobileNav";
+import { BottomNav, type BottomItem } from "./BottomNav";
 import { db } from "@/lib/server/db";
 import { listBookingsByStatus } from "@/lib/server/booking";
 
@@ -26,19 +26,27 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
           { href: "/konto", label: "Mein Konto" },
         ]
       : [];
+  // Handy: Leiste unten (die wichtigsten 4, Rest unter „Mehr“)
+  const bottom: BottomItem[] = user?.role === "teacher"
+    ? [
+        { href: "/verwaltung/uebersicht", label: "Übersicht", icon: "home" },
+        { href: "/verwaltung/kalender", label: "Kalender", icon: "cal", dot: teacherOpen > 0 },
+        { href: "/verwaltung", label: "Schüler", icon: "people" },
+        { href: "/unterricht", label: "Theorie", icon: "live" },
+      ]
+    : [
+        { href: "/konto", label: "Start", icon: "home" },
+        { href: "/termine", label: "Fahrstunden", icon: "car" },
+        { href: "/theorie", label: "Theorie", icon: "live", match: ["/theorie", "/live"] },
+      ];
   return (
+    <>
     <header className={`site-header ${tone === "dark" ? "dark" : ""}`}>
       <div className="wrap">
         <div className="bar">
           <Link href="/" aria-label="Zur Startseite der Webseite" style={{ textDecoration: "none" }}>
             <Brand sub={false} id={tone} />
           </Link>
-          {user && (
-            <MobileNav items={items}>
-              <Link href="/">Webseite</Link>
-              <form action={logoutAction}><button type="submit">Abmelden</button></form>
-            </MobileNav>
-          )}
           <nav className={`nav ${user ? "nav-user" : ""}`} aria-label="Hauptmenü">
             {user ? (
               <>
@@ -64,6 +72,14 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
         </div>
       </div>
     </header>
+    {user && (
+      <BottomNav items={bottom}>
+        {user.role === "teacher" && <Link href="/verwaltung/einstellungen">Einstellungen</Link>}
+        <Link href="/">Webseite ansehen</Link>
+        <form action={logoutAction}><button type="submit">Abmelden</button></form>
+      </BottomNav>
+    )}
+    </>
   );
 }
 

@@ -60,13 +60,15 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 3. **Upload-Speed** in der Fahrschule messen (speedtest.net) → Wert schicken.
 4. **Hardware kaufen:** Ansteck-Funkmikrofon (USB), Full-HD-Webcam + Stativ, HDMI-Kabel.
 5. **Beleuchtungsfahrt:** Start 15 Min nach Sonnenuntergang ok? (Im Juni/Juli bleibt bis 23 Uhr wenig Zeit.)
-6. **Stripe-Konto + PayPal-Geschäftskonto** anlegen (gemeinsam, Schritt für Schritt).
+6. **Geschäftskonto (Bank)** eröffnen → danach **Stripe** + **PayPal-Geschäftskonto** (gemeinsam, Schritt für Schritt). Stand 01.11.: noch kein Geschäftskonto.
 7. **IONOS-Mailpasswort** in `.env` eintragen (gemeinsam).
 8. **Echte Arbeitszeiten** (Wochenvorlage) eintragen.
 9. Texte „Was ist enthalten“ bei Preise & Leistungen durchlesen.
 
 ## 5. Noch NICHT gebaut
 - **Video + Aufnahme** (Konzept fertig, siehe KONZEPT-HYBRID-UNTERRICHT.md) inkl. „Wort geben“ mit Mikrofon.
+- **KI-Telefonassistent (Wunsch 01.11.):** beantwortet Anrufe und Fragen (Preise, Klassen, Termine, Anmeldung), leitet Wichtiges an Maryam weiter.
+  Braucht: Telefonnummer (virtuelle Nummer möglich), Anbieter für Sprache/Telefonie, klare Ansage „Sie sprechen mit einer KI“, Datenschutz, Kostenlimit.
 - **Rollen & Rechte:** weitere Admins/Fahrlehrer einladen, jedes Recht einzeln (z. B. Termine ja, Zahlungen nein); je Fahrlehrer eigener Kalender.
 - **Mehrere Fahrschulen** (technisch vorbereiten, erst nach einigen Monaten Betrieb freischalten).
 - **Sonderfahrten-Zahlen einstellbar** (Reform 21/7404 schafft feste 5/4/3 evtl. ab).

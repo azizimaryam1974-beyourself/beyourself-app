@@ -1,0 +1,9 @@
+[Unit]
+Description=beyourself: alle 3 Minuten auf neue Version prüfen
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=3min
+
+[Install]
+WantedBy=timers.target

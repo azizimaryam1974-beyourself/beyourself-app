@@ -134,3 +134,12 @@ src/lib/server/          Datenbank, Login, Zugriffsregeln, Singletons
 src/app/api/live/…       publish (Lehrkraft) · stream (SSE) · stats
 src/app/api/speech-token Kurzlebige Azure-Tokens
 ```
+
+## Automatische Updates (seit 01.11.2026)
+Der Server prüft alle 3 Minuten, ob es bei GitHub (`main`) einen neuen Stand gibt, sichert dann die Datenbank,
+baut neu und schaltet erst um, wenn der Bau geklappt hat (`deploy/autodeploy.sh`, systemd-Timer `beyourself-deploy`).
+Einmalig einrichten (auf dem Server):
+```
+cd /opt/beyourself && git pull && docker compose up -d --build && cp deploy/beyourself-deploy.service deploy/beyourself-deploy.timer /etc/systemd/system/ && systemctl daemon-reload && systemctl enable --now beyourself-deploy.timer
+```
+Protokoll: `journalctl -u beyourself-deploy -n 50` · Ausschalten: `systemctl disable --now beyourself-deploy.timer`

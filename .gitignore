@@ -6,3 +6,5 @@ data/
 *.db
 next-env.d.ts
 *.tsbuildinfo
+.deploy-failed
+backups/

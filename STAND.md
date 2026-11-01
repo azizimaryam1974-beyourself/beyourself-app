@@ -14,6 +14,7 @@ Maryam hat zuletzt den Stand mit der aufgeräumten Verwaltung eingespielt (Scree
 - Theorie: Termine mit Anmeldung, Fragen mit Prüfung, Hand heben, Beamer-Ansicht
 
 Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
+**Ab Einrichtung des Auto-Updates (01.11., siehe README) nicht mehr nötig** – neue Versionen sind ca. 3–10 Min. nach dem Hochladen online.
 → Danach prüfen: Die alte LIVE-Stunde vom 31.10. muss innerhalb einer Minute auf „Beendet“ springen.
 
 ## 2. Gebaut, aber NOCH NICHT ECHT GETESTET

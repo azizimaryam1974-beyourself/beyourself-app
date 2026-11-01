@@ -51,9 +51,13 @@ function smooth(pts: Array<[number, number]>): string {
 }
 
 function RevenueChart({ weeks }: { weeks: WeekBar[] }) {
-  const W = 640, H = 210, padX = 18, padTop = 26, padBottom = 28;
-  const max = Math.max(1, ...weeks.map((w) => w.school + w.tuev));
-  const x = (i: number) => padX + (i * (W - 2 * padX)) / (weeks.length - 1);
+  const W = 640, H = 230, padL = 58, padR = 18, padTop = 44, padBottom = 28;
+  // Skala passt sich an: runde Schritte (50 €, 100 €, 250 €, 500 €, 1.000 € …), höchstens 4 Linien
+  const top = Math.max(1, ...weeks.map((w) => Math.max(w.school, w.tuev)));
+  const step = [5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 2500000].find((st) => top / st <= 4) ?? 5000000;
+  const max = Math.ceil(top / step) * step;
+  const ticks = Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step);
+  const x = (i: number) => padL + (i * (W - padL - padR)) / (weeks.length - 1);
   const y = (v: number) => padTop + (H - padTop - padBottom) * (1 - v / max);
   const past = weeks.map((w, i) => [x(i), y(w.school)] as [number, number]);
   const split = weeks.findIndex((w) => w.future);
@@ -71,6 +75,12 @@ function RevenueChart({ weeks }: { weeks: WeekBar[] }) {
           <stop offset="1" stopColor="#d99a3e" stopOpacity="0" />
         </linearGradient>
       </defs>
+      {ticks.map((v) => (
+        <g key={v}>
+          <line x1={padL} x2={W - padR} y1={y(v)} y2={y(v)} stroke="rgba(246,240,230,.1)" strokeDasharray={v === 0 ? undefined : "3 5"} />
+          <text x={padL - 8} y={y(v) + 4} textAnchor="end" fontSize="11" fill="rgba(246,240,230,.55)">{euro(v)}</text>
+        </g>
+      ))}
       {area && <path d={area} fill="url(#dash-area)" />}
       {tuev && <path d={tuev} fill="none" stroke="#f6f0e6" strokeOpacity="0.55" strokeWidth="2" />}
       {solid && <path d={solid} fill="none" stroke="#e0a24a" strokeWidth="3" strokeLinecap="round" />}

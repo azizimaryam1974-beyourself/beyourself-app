@@ -23,6 +23,8 @@ import { getOffer } from "@/lib/server/booking";
 import { fmtDay, fmtTime } from "@/lib/time";
 import { Avatar } from "@/components/ui/Avatar";
 import { ClassSelect } from "@/components/ClassSelect";
+import { driveHistory } from "@/lib/server/drive-history";
+import { DriveHistoryList } from "@/components/training/DriveHistory";
 import { DetailsForm } from "@/components/DetailsForm";
 import { hasIdDocument, listDocs } from "@/lib/server/student-docs";
 import { StudentDocs } from "@/components/docs/StudentDocs";
@@ -62,6 +64,7 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
   const det = getDetails(d, id);
   const detMissing = Object.keys(validateDetails({ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" })).length > 0;
   const age = det.birthday ? Math.floor((now - Date.parse(det.birthday)) / (365.25 * 86_400_000)) : null;
+  const hist = driveHistory(d, id, now);
   const docs = listDocs(d, id);
   const hasId = hasIdDocument(d, id);
   const docsNew = docs.filter((x) => x.status === "neu").length;
@@ -263,29 +266,21 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
 
       {t && (
         <section className="card">
-          <h2>Fahrten</h2>
+          <h2 id="fahrten">Fahrt-Historie</h2>
           <AddRecordForm userId={id} today={dayKey(Date.now())}
             kinds={kindsFor(t.profile.licenseClass).map((k) => ({ value: k, label: KIND_LABEL[k] }))} />
-          {t.records.length > 0 && (
-            <ul className="list rec-list" style={{ marginTop: 16 }}>
-              {t.records.map((r) => (
-                <li key={r.id}>
-                  <span><strong>{fmtDate(r.at)}</strong> · {r.minutes} Min {KIND_LABEL[r.kind]}{r.note && <span className="hint"> · {r.note}</span>}</span>
-                  <span className="rec-actions">
-                    <span className={`badge ${STATUS_CLS[r.status]}`}>{STATUS_LABEL[r.status]}</span>
-                    <form action={recordStatusAction} className="rec-actions">
-                      <input type="hidden" name="userId" value={id} />
-                      <input type="hidden" name="recordId" value={r.id} />
-                      {r.status !== "done" && <button className="link-btn" name="status" value="done" type="submit">gefahren</button>}
-                      {r.status !== "no_show" && <button className="link-btn" name="status" value="no_show" type="submit">nicht erschienen</button>}
-                      {r.status !== "late" && <button className="link-btn" name="status" value="late" type="submit">zu spät</button>}
-                      {r.source === "manual" && <button className="link-btn" name="do" value="delete" type="submit">löschen</button>}
-                    </form>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div style={{ marginTop: 16 }}>
+            <DriveHistoryList past={hist.past} upcoming={hist.upcoming} actions={(e) => e.recordId && (
+              <form action={recordStatusAction} className="rec-actions">
+                <input type="hidden" name="userId" value={id} />
+                <input type="hidden" name="recordId" value={e.recordId} />
+                {e.status !== "done" && <button className="link-btn" name="status" value="done" type="submit">gefahren</button>}
+                {e.status !== "no_show" && <button className="link-btn" name="status" value="no_show" type="submit">nicht erschienen</button>}
+                {e.status !== "late" && <button className="link-btn" name="status" value="late" type="submit">zu spät</button>}
+                {e.source === "manual" && <button className="link-btn" name="do" value="delete" type="submit">löschen</button>}
+              </form>
+            )} />
+          </div>
         </section>
       )}
 

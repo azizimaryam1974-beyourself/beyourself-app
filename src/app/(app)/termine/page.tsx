@@ -1,5 +1,7 @@
 import { getBankDetails } from "@/lib/server/finance";
 import { stripeTestMode } from "@/lib/server/payments/stripe";
+import { driveHistory } from "@/lib/server/drive-history";
+import { DriveHistoryList } from "@/components/training/DriveHistory";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/server/auth";
@@ -152,6 +154,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
   const cfg = priceConfig(d);
   const credit = creditBalance(d, user.id);
   const bank = getBankDetails(d);
+  const hist = driveHistory(d, user.id, now);
   const ledger = listCredit(d, user.id, 20);
   const waits = listWaitlist(d, user.id, dayKey(now));
   const waitDays = Array.from({ length: 21 }, (_, i) => addDays(dayKey(now), i + 1)).filter((x) => !closedReason(x));
@@ -378,6 +381,13 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             <button className="btn btn-secondary btn-small" type="submit">Eintragen</button>
           </form>
         )}
+      </Panel>
+
+      <Panel id="fahrten" icon="history" title="Meine Fahrten" help={<>
+        <p>Hier siehst du jede Fahrt: wann, wie lange, welche Art und mit wem. Oben stehen deine kommenden Fahrten, darunter alle bisherigen.</p>
+        <p>Stimmt etwas nicht? Schreib der Fahrschule im Chat.</p>
+      </>}>
+        <DriveHistoryList past={hist.past} upcoming={hist.upcoming} />
       </Panel>
 
       <Panel id="guthaben" icon="coin" title="Guthaben" right={<span className="credit-big">{formatPrice(credit)}</span>} help={<>

@@ -1059,3 +1059,10 @@ body:has(.bnav), body:has(.app-main) { background: var(--midnight); }
 .id-warning { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin: 10px 0; border-radius: 14px;
   background: rgba(214, 69, 50, 0.08); border: 1px solid rgba(214, 69, 50, 0.35); color: #6e1d12; }
 @media (max-width: 560px) { .doc-top { flex-wrap: wrap; } .doc-up { width: 100%; justify-items: start; margin-left: 40px; } .doc-files { margin-left: 0; } }
+
+/* ---- Klasse wählen (speichert sofort) ---- */
+.class-select { display: grid; gap: 4px; justify-items: start; }
+.class-select-label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--champagne, #e9d7b4); }
+.class-select select { width: auto; min-width: 190px; border: 2px solid var(--gold); }
+.class-select-state { min-height: 1.2em; font-size: .85rem; color: var(--champagne, #e9d7b4); }
+.student-head .hint, .student-head .hint a { color: rgba(246, 240, 230, 0.78); }

@@ -4,7 +4,7 @@ import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getUser } from "@/lib/server/repo";
 import { trainingWithBookings as trainingStateFor } from "@/lib/server/drive-booking";
-import { examReadyAction, recordStatusAction, saveDocsAction, setClassAction, testfahrtAction } from "@/app/training-actions";
+import { examReadyAction, recordStatusAction, saveDocsAction, testfahrtAction } from "@/app/training-actions";
 import { CLASS_LABEL, KIND_LABEL, TRAINING_CLASSES, type DriveKind } from "@/lib/training";
 import { dayKey, fmtDate } from "@/lib/time";
 import { ProgressView } from "@/components/training/ProgressView";
@@ -22,6 +22,7 @@ import { cancelExamAction, examResultAction, grundbetragAction } from "@/app/exa
 import { getOffer } from "@/lib/server/booking";
 import { fmtDay, fmtTime } from "@/lib/time";
 import { Avatar } from "@/components/ui/Avatar";
+import { ClassSelect } from "@/components/ClassSelect";
 import { DetailsForm } from "@/components/DetailsForm";
 import { hasIdDocument, listDocs } from "@/lib/server/student-docs";
 import { StudentDocs } from "@/components/docs/StudentDocs";
@@ -82,14 +83,7 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
           </p>
           </div>
         </div>
-        <form action={setClassAction} className="row" key={`cls-${t?.profile.licenseClass ?? "none"}`}>
-          <input type="hidden" name="userId" value={id} />
-          <select name="licenseClass" defaultValue={t?.profile.licenseClass ?? ""} aria-label="Klasse" style={{ width: "auto" }}>
-            {!t && <option value="" disabled>Klasse wählen …</option>}
-            {TRAINING_CLASSES.map((c) => <option key={c} value={c}>{CLASS_LABEL[c]}</option>)}
-          </select>
-          <button className="btn btn-secondary btn-small" type="submit">{t ? "Klasse ändern" : "Festlegen"}</button>
-        </form>
+        <ClassSelect userId={id} current={t?.profile.licenseClass ?? null} key={`cls-${t?.profile.licenseClass ?? "none"}`} />
       </div>
 
       <details className="card akte-details" open={detMissing}>
@@ -112,7 +106,7 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
       </details>
 
       {!t ? (
-        <div className="card"><p>Für diesen Schüler ist noch keine Klasse festgelegt (Anmeldung vor dem 01.11.2026). Bitte oben auswählen.</p></div>
+        <div className="card"><p>Für diesen Schüler ist noch keine Klasse festgelegt (Anmeldung vor dem 01.11.2026). Bitte oben rechts bei „Führerscheinklasse“ auswählen – wird sofort gespeichert.</p></div>
       ) : (
         <div className="akte-grid">
           <section className="card">

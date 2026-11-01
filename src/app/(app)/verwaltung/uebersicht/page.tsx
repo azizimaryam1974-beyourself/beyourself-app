@@ -12,6 +12,7 @@ import { getDetails, upcomingBirthdays } from "@/lib/server/user-details";
 import { Avatar } from "@/components/ui/Avatar";
 import { PhotoUpload } from "@/components/ui/PhotoUpload";
 import { docsToCheck } from "@/lib/server/student-docs";
+import { Popover } from "@/components/ui/Popover";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Übersicht" };
@@ -204,8 +205,7 @@ export default async function DashboardPage() {
       <aside className="dash-side">
         <section className="dash-card dash-profile">
           <div className="row" style={{ justifyContent: "space-between" }}>
-            <details className="dash-bell-wrap">
-              <summary className="dash-bell" aria-label={`Benachrichtigungen${bellCount ? ` (${bellCount} neu)` : ""}`}>{Icon.bell}{bellCount > 0 && <i>{bellCount}</i>}</summary>
+            <Popover className="dash-bell-wrap" label={`Benachrichtigungen${bellCount ? ` (${bellCount} neu)` : ""}`} summary={<>{Icon.bell}{bellCount > 0 && <i>{bellCount}</i>}</>}>
               <div className="bell-pop">
                 <h3>Nachrichten</h3>
                 {unreadThreads.length === 0 ? <p className="hint">Keine ungelesenen Nachrichten.</p> : (
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
                   </ul>
                 </>}
               </div>
-            </details>
+            </Popover>
             <span className="hint">Fahrlehrerin</span>
           </div>
           <div className="dash-avatar-wrap"><PhotoUpload hasPhoto={!!myPhoto}><Avatar id={me.id} name={me.name} photoAt={myPhoto} size={84} className="dash-avatar-img" /></PhotoUpload></div>

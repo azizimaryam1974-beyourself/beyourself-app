@@ -105,8 +105,17 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
   Anthropic-Schlüssel aus dem Chat löschen/neu + Ausgabenlimit, Azure-Schlüssel neu generieren, Backup außerhalb des Servers,
   `PAYMENTS_TEST_MODE=0` vor echtem Start.
 
-## 7. Vorschlag für morgen (Reihenfolge)
-1. Update einspielen (Abschnitt 1) und gemeinsam auf Handy + Laptop durchklicken (Abschnitt 2, Liste abhaken).
-2. Wochenvorlage eintragen, eine Test-Fahrt buchen/absagen, eine Theoriestunde mit Beamer testen.
-3. Entscheidung Video (Weg A/B) → dann bauen.
-4. Danach Schritt 4 (Prüfungsphase) und Rollen & Rechte.
+## 7. Nächste Schritte (Stand 01.11.2026, 23:40)
+1. **ALS ERSTES (Maryam will direkt damit anfangen): Guthaben online aufladen mit Stripe.**
+   Schüler gibt Betrag ein (z. B. 750 €) → Stripe Checkout (Karte/Apple Pay/Google Pay/Link/Klarna) → Webhook bucht
+   automatisch „Einzahlung“ (reason deposit, zählt als Einnahme) → Nachricht an Schüler + Fahrschule.
+   Vorher mit Maryam klären: Mindest-/Höchstbetrag (Gebühren ~1,5 % Karte, Klarna mehr; Überweisung Finom kostenlos).
+2. Danach: App (Expo) starten. Vorher klären: iPhone zuerst oder auch Android, Push-Benachrichtigungen,
+   Apple-Entwicklerkonto (99 €/Jahr), Expo Go auf Maryams iPhone installieren. Gleiche Glas-Leiste unten wie im Web.
+3. Stripe läuft im Testmodus (Sandbox, Webhook eingerichtet, Grundbetrag 520 € erfolgreich bezahlt am 01.11.).
+   Zahlarten im Stripe-Dashboard: Karte, Apple Pay, Google Pay, Link, Klarna an; SEPA/Überweisung/ausländische Wallets aus.
+4. PayPal **direkt** (Maryams Wunsch, schon gebaut) – sobald Steuernummer + PayPal-Geschäftskonto da sind.
+   Klarna direkt: erst Händlerangebot von Klarna mit Stripe-Gebühren vergleichen, dann ggf. bauen und in Stripe ausschalten.
+5. Finom-Bankverbindung in Einstellungen → Regeln eintragen (falls noch nicht).
+6. Anthropic-Schlüssel tauschen nach Freischaltung (war teilweise auf Bildschirmfoto); Azure-Schlüssel am 01.11. getauscht ✔.
+7. Offene Frage an Maryam: Fahrstunden ohne Ausweis wirklich sperren oder nur Hinweis?

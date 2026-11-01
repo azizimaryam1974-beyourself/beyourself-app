@@ -3,129 +3,96 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Interaktiver Wellen-Hintergrund: feine goldene/türkise Linien, die ruhig atmen und
- * wie Wasser mitschwingen, wenn Maus oder Finger darüberfahren.
+ * Wasser-Effekt unter der Maus: Fährt die Maus über eine FREIE Fläche, breiten sich unter ihr
+ * weiche Wellenringe aus – wie auf einer Wasseroberfläche. Sonst passiert nichts.
  *
- * Technik (leicht für Handy und Laptop):
- * - eine einzige Zeichenfläche in Bildschirmgröße (klebt beim Scrollen, wird nicht mitgescrollt)
- * - jede Linie besteht aus Punkten mit Feder + Nachbar-Kopplung → Wellen laufen weiter und federn nach
- * - zeichnet nur, solange der Bereich sichtbar ist; bei „weniger Bewegung“ (Systemeinstellung) nur ein Standbild
+ * Bewusst sparsam:
+ * - nur mit Maus (Laptop/PC), nicht auf dem Handy
+ * - nicht beim Scrollen, nicht über Kacheln, Texten oder Knöpfen
+ * - gezeichnet wird nur, solange eine Welle sichtbar ist; danach kostet es nichts
  */
 export function WaveField() {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    const host = canvas?.parentElement?.parentElement; // .flow
+    const host = canvas?.closest<HTMLElement>(".flow");
     if (!canvas || !host) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const small = window.matchMedia("(max-width: 720px)").matches;
 
-    const LINES = small ? 14 : 22;
-    const PTS = small ? 40 : 72;
-    let W = 0, H = 0, dpr = 1;
-    let off = new Float32Array(LINES * PTS); // Auslenkung
-    let vel = new Float32Array(LINES * PTS); // Geschwindigkeit
+    type Ring = { x: number; y: number; born: number; power: number };
+    let rings: Ring[] = [];
+    let raf = 0, running = false, lastSpawn = 0, lastScroll = 0;
+    let lx = -1, ly = -1;
+    let W = 0, H = 0;
 
-    const size = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+    const fit = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       W = canvas.clientWidth; H = canvas.clientHeight;
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      const w = Math.round(W * dpr), h = Math.round(H * dpr);
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    size();
 
-    // Maus/Finger (Koordinaten relativ zur Zeichenfläche)
-    let mx = -9999, my = -9999, pmx = -9999, pmy = -9999, lastMove = 0;
-    const onMove = (x: number, y: number) => {
-      const r = canvas.getBoundingClientRect();
-      mx = x - r.left; my = y - r.top; lastMove = performance.now();
-    };
-    const pm = (e: PointerEvent) => onMove(e.clientX, e.clientY);
-    const tm = (e: TouchEvent) => { const t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); };
-    // Beim Scrollen auf dem Handy: sanfter Schwung über die ganze Breite
-    let lastScroll = window.scrollY, scrollKick = 0;
-    const onScroll = () => { const y = window.scrollY; scrollKick += Math.max(-40, Math.min(40, y - lastScroll)); lastScroll = y; };
-    window.addEventListener("pointermove", pm, { passive: true });
-    window.addEventListener("touchmove", tm, { passive: true });
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", size);
-
-    const gap = () => H / (LINES + 1);
-    const baseY = (l: number, i: number, t: number) => {
-      const x = (i / (PTS - 1)) * W;
-      // ruhiges Atmen: zwei langsame, gegeneinander laufende Wellen
-      return gap() * (l + 1) + Math.sin(x * 0.004 + t * 0.00035 + l * 0.45) * 10 + Math.sin(x * 0.0021 - t * 0.0002 + l) * 7;
-    };
-
-    let raf = 0, visible = false, t0 = performance.now();
-    const step = (now: number) => {
-      const t = now - t0;
-      // Kraft durch die Bewegung der Maus: drückt Punkte in Bewegungsrichtung, weich auslaufend
-      const R = small ? 130 : 200;
-      const moving = now - lastMove < 120 && pmx > -9000;
-      const dvx = moving ? mx - pmx : 0, dvy = moving ? my - pmy : 0;
-      const speed = Math.min(60, Math.hypot(dvx, dvy));
-      const kick = scrollKick * 0.06; scrollKick *= 0.6;
-      for (let l = 0; l < LINES; l++) {
-        const row = l * PTS;
-        for (let i = 0; i < PTS; i++) {
-          const k = row + i;
-          if (speed > 0.5) {
-            const x = (i / (PTS - 1)) * W, y = baseY(l, i, t) + off[k];
-            const d2 = (x - mx) ** 2 + (y - my) ** 2;
-            if (d2 < R * R * 4) {
-              const f = Math.exp(-d2 / (R * R));
-              vel[k] += (dvy * 0.32 + Math.sign(y - my || 1) * speed * 0.2) * f;
-            }
-          }
-          if (kick) vel[k] += kick * Math.sin(i * 0.25 + l * 0.6);
-          // Kopplung an die Nachbarn → die Welle läuft weiter (das „Saftige“)
-          const left = i > 0 ? off[k - 1] : 0, right = i < PTS - 1 ? off[k + 1] : 0;
-          vel[k] += (left + right - 2 * off[k]) * 0.22 - off[k] * 0.01;
-          vel[k] *= 0.962;
-        }
-        for (let i = 0; i < PTS; i++) { const k = row + i; off[k] = Math.max(-90, Math.min(90, off[k] + vel[k])); }
-      }
-      pmx = mx; pmy = my;
-
+    const LIFE = 1500;
+    const draw = (now: number) => {
       ctx.clearRect(0, 0, W, H);
-      ctx.lineWidth = small ? 1 : 1.25;
-      for (let l = 0; l < LINES; l++) {
-        const row = l * PTS;
-        const mix = l / (LINES - 1);
-        // oben gold, unten türkis – passend zur Seite
-        const r = Math.round(214 - 119 * mix), g = Math.round(184 - 26 * mix), b = Math.round(120 + 40 * mix);
-        ctx.strokeStyle = `rgba(${r},${g},${b},${0.2 + 0.14 * Math.sin(mix * Math.PI)})`;
-        ctx.beginPath();
-        let px = 0, py = baseY(l, 0, t) + off[row];
-        ctx.moveTo(px, py);
-        for (let i = 1; i < PTS; i++) {
-          const x = (i / (PTS - 1)) * W, y = baseY(l, i, t) + off[row + i];
-          ctx.quadraticCurveTo(px, py, (px + x) / 2, (py + y) / 2);
-          px = x; py = y;
+      rings = rings.filter((r) => now - r.born < LIFE);
+      for (const r of rings) {
+        const age = (now - r.born) / LIFE;            // 0 … 1
+        const fade = (1 - age) * (1 - age);
+        const base = 8 + age * 150 * r.power;
+        // drei Ringe hintereinander = Wasserwelle
+        for (let k = 0; k < 3; k++) {
+          const rad = base - k * 16;
+          if (rad <= 2) continue;
+          ctx.beginPath();
+          ctx.arc(r.x, r.y, rad, 0, Math.PI * 2);
+          ctx.strokeStyle = k === 1 ? `rgba(168, 200, 219, ${0.22 * fade})` : `rgba(233, 215, 180, ${(0.42 - k * 0.12) * fade})`;
+          ctx.lineWidth = 1.6 - k * 0.4;
+          ctx.stroke();
         }
-        ctx.lineTo(px, py);
-        ctx.stroke();
       }
-      if (visible && !reduced) raf = requestAnimationFrame(step);
+      if (rings.length) raf = requestAnimationFrame(draw);
+      else { running = false; ctx.clearRect(0, 0, W, H); }
     };
 
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      cancelAnimationFrame(raf);
-      if (visible) raf = requestAnimationFrame(step);
-    });
-    io.observe(host);
-    if (reduced) requestAnimationFrame(step);
+    const start = () => { if (!running) { running = true; fit(); raf = requestAnimationFrame(draw); } };
 
+    // Nur freie Fläche: nicht über Inhalten
+    const CONTENT = ".tile, .class-card, .steps li, .contact-card, .about-photo, .section-title, .lead, p, a, button, h1, h2, h3, .lang-ribbon, .split-head, dl";
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const now = performance.now();
+      if (now - lastScroll < 250) return;                       // beim Scrollen nichts
+      if ((e.target as Element | null)?.closest(CONTENT)) { lx = -1; return; }
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const dist = lx < 0 ? 0 : Math.hypot(x - lx, y - ly);
+      if (lx >= 0 && dist < 3) return;                          // nur echte Mausbewegung
+      if (now - lastSpawn < 70) return;
+      lastSpawn = now; lx = x; ly = y;
+      rings.push({ x, y, born: now, power: 0.6 + Math.min(1, dist / 40) * 0.6 });
+      if (rings.length > 16) rings.shift();
+      start();
+    };
+    const onScroll = () => {
+      lastScroll = performance.now();
+      if (rings.length) { rings = []; }                          // Wellen sofort weg
+    };
+    const onLeave = () => { lx = -1; };
+
+    host.addEventListener("pointermove", onMove, { passive: true });
+    host.addEventListener("pointerleave", onLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      io.disconnect(); cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", pm); window.removeEventListener("touchmove", tm);
-      window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", size);
-      off = new Float32Array(0); vel = new Float32Array(0);
+      cancelAnimationFrame(raf);
+      host.removeEventListener("pointermove", onMove);
+      host.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 

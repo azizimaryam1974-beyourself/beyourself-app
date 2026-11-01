@@ -604,3 +604,9 @@ details.tl-row { display: block; }
 .app-main .live-head .hint, .app-main .live-shell > .hint { color: rgba(246, 240, 230, 0.78); }
 .app-main .captions { background: rgba(15, 26, 44, 0.72); backdrop-filter: blur(6px); }
 @media (max-width: 700px) { .captions { height: min(42vh, 420px); } }
+
+/* Flüssig: Puls-Punkt nur mit transform/opacity (kein Neuzeichnen bei jedem Bild) */
+.dot-live { box-shadow: none; animation: none; position: relative; }
+.dot-live::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: rgba(184, 115, 71, 0.6);
+  animation: pulse-ring 1.8s ease-out infinite; will-change: transform, opacity; }
+@keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.7; } 70%, 100% { transform: scale(3); opacity: 0; } }

@@ -436,3 +436,12 @@
   .flow .class-link { grid-column: 1; }
   .flow .tile { padding: 16px 18px; }
 }
+/* Flüssig: keine Misch-Modi (zwingen den Browser, Ebenen bei jedem Bild neu zu verrechnen) */
+.demo::before { mix-blend-mode: normal; opacity: 0.45; }
+.blinker, .headlights { mix-blend-mode: normal; }
+/* Flüssig: Gold-Straße ohne Leucht-Filter und ohne Zeichen-Animation (großes Bild wurde jedes Mal neu berechnet) */
+.road-gold { animation: none; stroke-dashoffset: 0; filter: none; stroke-width: 2.8; }
+.road-teal { animation: none; opacity: 1; }
+/* Karten: beim Darüberfahren nur Randfarbe, keine Bewegung (sonst beim Scrollen unter der Maus ständig neu) */
+.flow .tile, .flow .class-card, .class-card { transition: none; }
+.flow .tile:hover, .flow .class-card:hover, .class-card:hover { transform: none; }

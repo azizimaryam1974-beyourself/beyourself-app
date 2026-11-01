@@ -11,15 +11,8 @@ interface Props {
   heroLoop: string;
   heroPoster: string;
   turnVideo: Record<string, string>;
-}
-
-async function exists(url: string, kind = "video"): Promise<boolean> {
-  try {
-    const r = await fetch(url, { method: "HEAD", cache: "force-cache" });
-    return r.ok && (r.headers.get("content-type") ?? "").startsWith(kind);
-  } catch {
-    return false;
-  }
+  /** Vom Server geprüft: welche Dateien es gibt (spart Nachfragen beim Laden → kein Ruckeln/Flackern) */
+  available: { loop: boolean; poster: boolean; turn: Record<string, boolean> };
 }
 
 /**
@@ -27,14 +20,16 @@ async function exists(url: string, kind = "video"): Promise<boolean> {
  * Mit Videos: Loop läuft, Klick spielt den passenden Abbiege-Clip und wechselt
  * dann zur Klassen-Seite. Ohne Videos: Ersatz-Animation (Lichter, Weg-Linie).
  */
-export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
+export function CityHero({ signs, heroLoop, heroPoster, turnVideo, available }: Props) {
   const router = useRouter();
-  const [hasLoop, setHasLoop] = useState(false);
-  const [hasPoster, setHasPoster] = useState(false);
+  const hasLoop = available.loop, hasPoster = available.poster;
+  const [warm, setWarm] = useState(false);
   const [turning, setTurning] = useState<SignItem | null>(null);
   const [viaVideo, setViaVideo] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const turnRef = useRef<HTMLVideoElement>(null);
+  /** Ein vorgeladenes Video je Klasse – startet beim Antippen sofort. */
+  const clips = useRef<Record<string, HTMLVideoElement | null>>({});
+  const active = useRef<HTMLVideoElement | null>(null);
   const cityRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<React.CSSProperties>({});
   const reduced = useRef(false);
@@ -62,10 +57,11 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    exists(heroLoop).then(setHasLoop);
-    exists(heroPoster, "image").then(setHasPoster);
     for (const s of signs) router.prefetch(`/klasse/${s.slug}`);
-  }, [heroLoop, router, signs]);
+    // Abbiege-Clips erst laden, wenn die Seite steht (sonst bremst es den Start).
+    const t = window.setTimeout(() => setWarm(true), 1500);
+    return () => clearTimeout(t);
+  }, [router, signs]);
 
   // Alles, was nach dem Klick noch "nachlaufen" könnte (Timer, Video-Ereignisse),
   // wird hier gesammelt und beim Verlassen der Seite sauber beendet. Sonst springt
@@ -76,8 +72,8 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
   const stopAll = useCallback(() => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    const v = turnRef.current;
-    if (v) { v.onended = null; v.onerror = null; v.pause(); }
+    const v = active.current;
+    if (v) { v.onended = null; v.onerror = null; v.pause(); try { v.currentTime = 0; } catch {} }
   }, []);
   const reset = useCallback(() => {
     stopAll();
@@ -102,12 +98,11 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
       router.push(`/klasse/${s.slug}`);
     };
     if (reduced.current) return go();
-    const v = turnRef.current;
-    if (v && (await exists(turnVideo[s.slug]))) {
-      if (done.current) return;
+    const v = clips.current[s.slug];
+    if (v && available.turn[s.slug]) {
+      active.current = v;
       setViaVideo(true);
-      v.src = turnVideo[s.slug];
-      v.load();
+      if (v.preload !== "auto" || v.readyState < 2) { v.preload = "auto"; v.load(); }
       v.onended = go;
       v.onerror = () => later(go, 300);
       // Links/rechts: kurz blinken (über dem stehenden Auto), dann läuft der Clip.
@@ -129,7 +124,10 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo }: Props) {
         {hasLoop && (
           <video className="city-video" src={heroLoop} poster={heroPoster} autoPlay muted loop playsInline preload="auto" />
         )}
-        <video ref={turnRef} className="city-turn" muted playsInline preload="none" />
+        {signs.filter((x) => available.turn[x.slug]).map((x) => (
+          <video key={x.slug} ref={(el) => { clips.current[x.slug] = el; }} className={`city-turn ${turning?.slug === x.slug && playing ? "on" : ""}`}
+            src={turnVideo[x.slug]} muted playsInline preload={warm ? "auto" : "none"} />
+        ))}
         {(hasLoop || hasPoster) && (
           <div className={`city-stage ${hasLoop ? "overlay-only" : ""}`} style={stage}>
             <div className="city-kb">

@@ -175,7 +175,7 @@
 .city { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
 .city-video, .city-turn { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .city-turn { opacity: 0; transition: opacity 0.35s ease; }
-.city.turning.playing .city-turn { opacity: 1; }
+.city.turning.playing .city-turn.on { opacity: 1; }
 /* Lesbarkeit: links dunkler, Licht bleibt rechts sichtbar */
 .city-veil { position: absolute; inset: 0; background:
   linear-gradient(90deg, rgba(15, 26, 44, 0.88) 0%, rgba(15, 26, 44, 0.55) 45%, rgba(15, 26, 44, 0.15) 100%),
@@ -330,3 +330,12 @@
 .city-turn { z-index: 2; }
 .city-veil { z-index: 3; }
 .city.turning.turn-straight.via-video .headlights { animation: none; }
+
+/* Flüssiger: über dem laufenden Video keine teure Hintergrund-Unschärfe (wird sonst bei jedem Videobild neu berechnet) */
+.hero .site-header.dark .bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(15, 26, 44, 0.62); }
+.hero .sign-hint { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(15, 26, 44, 0.7); }
+.city-video, .city-turn { will-change: opacity; transform: translateZ(0); }
+@media (max-width: 920px) {
+  .hero-light, .hero-haze { animation: none; }
+}
+.hero { --sy: 0; }

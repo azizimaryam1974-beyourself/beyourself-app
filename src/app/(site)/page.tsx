@@ -4,6 +4,10 @@ import { bookableLanguages } from "@/lib/languages";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { LiveDemo, type DemoLine } from "./LiveDemo";
 import { CityHero } from "./CityHero";
+import fs from "node:fs";
+import path from "node:path";
+
+const hasPublicFile = (url: string) => fs.existsSync(path.join(process.cwd(), "public", url));
 import { EXTRA_CLASSES, LICENSE_CLASSES, VIDEO } from "@/lib/classes";
 import { Parallax } from "./Parallax";
 
@@ -58,6 +62,10 @@ export default function Home() {
           heroLoop={VIDEO.heroLoop}
           heroPoster={VIDEO.heroPoster}
           turnVideo={Object.fromEntries(LICENSE_CLASSES.map((c) => [c.slug, VIDEO.turn(c.slug)]))}
+          available={{
+            loop: hasPublicFile(VIDEO.heroLoop), poster: hasPublicFile(VIDEO.heroPoster),
+            turn: Object.fromEntries(LICENSE_CLASSES.map((c) => [c.slug, hasPublicFile(VIDEO.turn(c.slug))])),
+          }}
         />
         <SiteHeader tone="dark" />
 

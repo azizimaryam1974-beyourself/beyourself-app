@@ -1,4 +1,4 @@
-import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { AppFooter, SiteHeader } from "@/components/SiteChrome";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,7 +7,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SiteHeader tone="dark" />
         <main className="wrap" style={{ paddingTop: 12 }}>{children}</main>
       </div>
-      <SiteFooter />
+      <AppFooter />
     </>
   );
 }

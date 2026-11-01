@@ -86,3 +86,16 @@ export function SiteFooter() {
     </footer>
   );
 }
+
+/** Im eingeloggten Bereich: nur eine schlichte Zeile statt der Webseiten-Fußzeile. */
+export function AppFooter() {
+  return (
+    <footer className="app-footer">
+      <div className="wrap">
+        <span>© {new Date().getFullYear()} Fahrschule beyourself</span>
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+      </div>
+    </footer>
+  );
+}

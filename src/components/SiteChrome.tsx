@@ -6,15 +6,18 @@ import { NavLinks, type NavItem } from "./NavLinks";
 import { BottomNav, type BottomItem } from "./BottomNav";
 import { db } from "@/lib/server/db";
 import { listBookingsByStatus } from "@/lib/server/booking";
+import { unreadForSchool, unreadForStudent } from "@/lib/server/chat";
 
 export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }) {
   const user = await currentUser();
   // Eingeloggt: nur das eigene Arbeits-Menü. Besucher: das Menü der Webseite.
   const teacherOpen = user?.role === "teacher" ? listBookingsByStatus(db(), ["requested"]).length : 0;
+  const chatUnread = !user ? 0 : user.role === "teacher" ? unreadForSchool(db()) : unreadForStudent(db(), user.id);
   const items: NavItem[] = user?.role === "teacher"
     ? [
         { href: "/verwaltung/uebersicht", label: "Übersicht" },
         { href: "/verwaltung/kalender", label: "Kalender", badge: teacherOpen },
+        { href: "/verwaltung/nachrichten", label: "Nachrichten", badge: chatUnread },
         { href: "/verwaltung", label: "Schüler" },
         { href: "/unterricht", label: "Live-Unterricht" },
         { href: "/verwaltung/einstellungen", label: "Einstellungen" },
@@ -23,6 +26,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
       ? [
           { href: "/termine", label: "Fahrstunden" },
           { href: "/theorie", label: "Theorie", match: ["/theorie", "/live"] },
+          { href: "/nachrichten", label: "Nachrichten", badge: chatUnread },
           { href: "/konto", label: "Mein Konto" },
         ]
       : [];
@@ -31,13 +35,14 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
     ? [
         { href: "/verwaltung/uebersicht", label: "Übersicht", icon: "home" },
         { href: "/verwaltung/kalender", label: "Kalender", icon: "cal", dot: teacherOpen > 0 },
+        { href: "/verwaltung/nachrichten", label: "Chat", icon: "chat", dot: chatUnread > 0 },
         { href: "/verwaltung", label: "Schüler", icon: "people" },
-        { href: "/unterricht", label: "Theorie", icon: "live" },
       ]
     : [
         { href: "/konto", label: "Start", icon: "home" },
         { href: "/termine", label: "Fahrstunden", icon: "car" },
         { href: "/theorie", label: "Theorie", icon: "live", match: ["/theorie", "/live"] },
+        { href: "/nachrichten", label: "Chat", icon: "chat", dot: chatUnread > 0 },
       ];
   return (
     <>
@@ -74,7 +79,9 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
     </header>
     {user && (
       <BottomNav items={bottom}>
+        {user.role === "teacher" && <Link href="/unterricht">Live-Unterricht (Theorie)</Link>}
         {user.role === "teacher" && <Link href="/verwaltung/einstellungen">Einstellungen</Link>}
+        {user.role === "student" && <Link href="/konto">Mein Konto</Link>}
         <Link href="/">Webseite ansehen</Link>
         <form action={logoutAction}><button type="submit">Abmelden</button></form>
       </BottomNav>

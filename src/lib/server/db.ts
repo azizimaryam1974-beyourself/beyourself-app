@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { BOOKING_SCHEMA, seedBookingDefaults } from "./booking-schema";
+import { CHAT_SCHEMA } from "./chat";
 
 /**
  * SQLite reicht für eine Fahrschule locker aus (eine Datei, einfache
@@ -73,6 +74,7 @@ export function openDatabase(file: string): Database.Database {
   db.pragma("foreign_keys = ON");
   db.exec(SCHEMA);
   db.exec(BOOKING_SCHEMA);
+  db.exec(CHAT_SCHEMA);
   seedBookingDefaults(db);
   return db;
 }

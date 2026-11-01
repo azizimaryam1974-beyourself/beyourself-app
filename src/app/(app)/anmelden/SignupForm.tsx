@@ -1,6 +1,7 @@
 "use client";
 
 import { PasswordInput } from "@/components/PasswordInput";
+import { DocFileInput } from "@/components/docs/DocUpload";
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
@@ -69,6 +70,21 @@ export function SignupForm({ languages, price, grundPrice, preset }: { languages
           <PasswordInput id="password" name="password" autoComplete="new-password" required minLength={10} />
           {fe.password && <div className="error">{fe.password}</div>}
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Ausweis <span className="hint" style={{ fontWeight: 400 }}>(kannst du auch später hochladen)</span></h2>
+        <p className="hint" style={{ marginTop: 0 }}>Ein Foto oder Scan, Vorder- und Rückseite, gut lesbar. <strong>Ohne Ausweis kannst du keine Fahrstunden buchen</strong> –
+          wenn du ihn gerade nicht da hast, lädst du ihn später in deinem Konto hoch.</p>
+        <div className="field">
+          <label htmlFor="ausweis">Personalausweis oder Reisepass</label>
+          <DocFileInput id="ausweis" name="ausweis" />
+        </div>
+        <div className="field">
+          <label htmlFor="aufenthaltstitel">Aufenthaltstitel <span className="hint">(nur wenn du keinen deutschen oder EU-Pass hast)</span></label>
+          <DocFileInput id="aufenthaltstitel" name="aufenthaltstitel" />
+        </div>
+        <p className="hint" style={{ marginBottom: 0 }}>Nur die Fahrschule sieht diese Dateien. Nummern, die wir nicht brauchen (z. B. die Zugangsnummer/CAN auf dem Ausweis), darfst du abdecken.</p>
       </div>
 
       <div className="card">

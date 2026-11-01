@@ -23,6 +23,8 @@ import { getOffer } from "@/lib/server/booking";
 import { fmtDay, fmtTime } from "@/lib/time";
 import { Avatar } from "@/components/ui/Avatar";
 import { DetailsForm } from "@/components/DetailsForm";
+import { hasIdDocument, listDocs } from "@/lib/server/student-docs";
+import { StudentDocs } from "@/components/docs/StudentDocs";
 import { addressLine, getDetails, validateDetails } from "@/lib/server/user-details";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +61,9 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
   const det = getDetails(d, id);
   const detMissing = Object.keys(validateDetails({ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" })).length > 0;
   const age = det.birthday ? Math.floor((now - Date.parse(det.birthday)) / (365.25 * 86_400_000)) : null;
+  const docs = listDocs(d, id);
+  const hasId = hasIdDocument(d, id);
+  const docsNew = docs.filter((x) => x.status === "neu").length;
   const cur = currentPackage(d, id);
   const pkg = cur && cur.status !== "cancelled" ? cur : null;
 
@@ -96,6 +101,14 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
           <dt>E-Mail</dt><dd>{user.email}</dd>
         </dl>
         <DetailsForm userId={id} initial={{ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" }} />
+      </details>
+
+      <details className="card akte-docs" id="unterlagen" open={docsNew > 0 || !hasId}>
+        <summary><h2 style={{ display: "inline" }}>Unterlagen</h2>{" "}
+          {!hasId ? <span className="badge badge-error">Ausweis fehlt</span> : docsNew > 0 ? <span className="badge badge-warn">{docsNew} neu – bitte prüfen</span> : <span className="badge badge-ok">Ausweis da</span>}
+        </summary>
+        <p className="hint">Tippe auf eine Datei, um sie anzusehen. „Geprüft“ hakt Sehtest und Erste Hilfe auch unten bei „Unterlagen & Notiz“ ab. Du kannst auch selbst für den Schüler hochladen (z. B. wenn er Papiere mitbringt).</p>
+        <StudentDocs docs={docs} teacher userId={id} umschreibung={t?.profile.licenseClass === "umschreibung"} />
       </details>
 
       {!t ? (

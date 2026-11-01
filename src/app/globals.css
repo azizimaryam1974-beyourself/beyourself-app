@@ -1033,3 +1033,29 @@ body:has(.bnav), body:has(.app-main) { background: var(--midnight); }
 .bell-ico { flex: none; width: 22px; text-align: center; }
 .sc-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .akte-details > summary { cursor: pointer; }
+
+/* ---- Unterlagen (Ausweis, Sehtest …) ---- */
+.badge-error { background: rgba(214, 69, 50, 0.18); color: #8a2416; }
+.doc-file { width: 100%; padding: 10px; border: 1.5px dashed rgba(156, 122, 60, 0.55); border-radius: 14px; background: rgba(255, 255, 255, 0.5); }
+.doc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.doc-item { padding: 12px; border-radius: 14px; background: rgba(15, 26, 44, 0.04); border: 1px solid rgba(15, 26, 44, 0.08); }
+.doc-item.doc-main.doc-fehlt, .doc-item.doc-main.doc-abgelehnt { border-color: #d6452f; background: rgba(214, 69, 50, 0.06); }
+.doc-top { display: flex; gap: 12px; align-items: center; }
+.doc-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.doc-text small { color: rgba(30, 30, 30, 0.62); }
+.doc-dot { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .85rem;
+  border: 2px solid rgba(15, 26, 44, 0.2); }
+.doc-ok .doc-dot { background: var(--gold-grad); border-color: transparent; color: var(--ink); }
+.doc-neu .doc-dot { border-color: var(--gold); color: var(--gold-deep); }
+.doc-abgelehnt .doc-dot { border-color: #d6452f; color: #d6452f; }
+.doc-files { list-style: none; margin: 10px 0 0 40px; padding: 0; display: grid; gap: 6px; }
+.doc-files li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: .9rem; }
+.doc-files a { overflow-wrap: anywhere; }
+.doc-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.doc-reject > summary { list-style: none; cursor: pointer; display: inline; }
+.doc-reject[open] { flex-basis: 100%; }
+.doc-up { display: inline-grid; gap: 4px; justify-items: end; flex: none; }
+.doc-up .error { font-size: .8rem; }
+.id-warning { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin: 10px 0; border-radius: 14px;
+  background: rgba(214, 69, 50, 0.08); border: 1px solid rgba(214, 69, 50, 0.35); color: #6e1d12; }
+@media (max-width: 560px) { .doc-top { flex-wrap: wrap; } .doc-up { width: 100%; justify-items: start; margin-left: 40px; } .doc-files { margin-left: 0; } }

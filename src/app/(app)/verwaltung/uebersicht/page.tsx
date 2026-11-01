@@ -11,6 +11,7 @@ import { listThreads } from "@/lib/server/chat";
 import { getDetails, upcomingBirthdays } from "@/lib/server/user-details";
 import { Avatar } from "@/components/ui/Avatar";
 import { PhotoUpload } from "@/components/ui/PhotoUpload";
+import { docsToCheck } from "@/lib/server/student-docs";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Übersicht" };
@@ -131,7 +132,8 @@ export default async function DashboardPage() {
   const unreadThreads = listThreads(db()).filter((t) => t.unread > 0);
   const birthdays = upcomingBirthdays(db(), today, 7);
   const myPhoto = getDetails(db(), me.id).photoAt;
-  const bellCount = unreadThreads.length + birthdays.filter((b) => b.inDays === 0).length;
+  const newDocs = docsToCheck(db());
+  const bellCount = unreadThreads.length + birthdays.filter((b) => b.inDays === 0).length + newDocs.length;
   const greet = hour < 11 ? "Guten Morgen" : hour < 18 ? "Hallo" : "Guten Abend";
 
   return (
@@ -221,6 +223,14 @@ export default async function DashboardPage() {
                     </Link></li>))}
                   </ul>
                 )}
+                {newDocs.length > 0 && <>
+                  <h3>Neue Unterlagen</h3>
+                  <ul>{newDocs.map((x) => (
+                    <li key={x.userId}><Link href={`/verwaltung/schueler/${x.userId}#unterlagen`}>
+                      <span className="bell-ico">📄</span><span><strong>{x.name}</strong><small>{x.count} {x.count === 1 ? "Datei" : "Dateien"} prüfen</small></span>
+                    </Link></li>))}
+                  </ul>
+                </>}
                 {d.todo.length > 0 && <>
                   <h3>Zu erledigen</h3>
                   <ul>{d.todo.slice(0, 4).map((t, i) => (

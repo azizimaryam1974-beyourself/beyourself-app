@@ -22,3 +22,20 @@ test("Angaben: fehlen erst, dann vollständig; Geburtstage der nächsten Tage", 
   assert.equal(setPhoto(db, u.id, null), "avatars/x.jpg");
   assert.equal(getDetails(db, u.id).birthday, "2005-11-03"); // Foto ändern lässt Angaben stehen
 });
+
+import { addDoc, docsToCheck, hasIdDocument, listDocs, removeDoc, setDocStatus } from "../src/lib/server/student-docs";
+
+test("Unterlagen: Ausweis zählt, solange er nicht abgelehnt ist", () => {
+  const db = openDatabase(":memory:");
+  const u = createUser(db, { email: "c@d.de", name: "Ali Test", passwordHash: "x", role: "student" });
+  assert.equal(hasIdDocument(db, u.id), false);
+  const a = addDoc(db, { userId: u.id, type: "ausweis", path: "unterlagen/a.jpg", name: "a.jpg", fileType: "image/jpeg", size: 10 });
+  assert.equal(hasIdDocument(db, u.id), true);
+  assert.equal(docsToCheck(db)[0].count, 1);
+  setDocStatus(db, a.id, "abgelehnt", "unscharf");
+  assert.equal(hasIdDocument(db, u.id), false);
+  assert.equal(listDocs(db, u.id)[0].note, "unscharf");
+  assert.equal(docsToCheck(db).length, 0);
+  assert.equal(removeDoc(db, a.id), "unterlagen/a.jpg");
+  assert.equal(listDocs(db, u.id).length, 0);
+});

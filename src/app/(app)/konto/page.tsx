@@ -25,6 +25,10 @@ import { detailsMissing, getDetails } from "@/lib/server/user-details";
 import { DetailsForm } from "@/components/DetailsForm";
 import { Avatar } from "@/components/ui/Avatar";
 import { PhotoUpload } from "@/components/ui/PhotoUpload";
+import { hasIdDocument, listDocs } from "@/lib/server/student-docs";
+import { StudentDocs } from "@/components/docs/StudentDocs";
+import { DocUpload } from "@/components/docs/DocUpload";
+import { ScrollTop } from "@/components/ScrollTop";
 
 export const metadata = { title: "Mein Konto" };
 export const dynamic = "force-dynamic";
@@ -83,6 +87,9 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           : { icon: "road" as const, title: training.state.next, text: "", href: "/termine", cta: "Meine Termine" };
   const details = getDetails(db(), user.id);
   const missing = detailsMissing(db(), user);
+  const docs = listDocs(db(), user.id);
+  const hasId = hasIdDocument(db(), user.id);
+  const idRejected = !hasId && docs.some((x) => x.type === "ausweis");
   const detailsInitial = { birthday: details.birthday ?? "", street: details.street, zip: details.zip, city: details.city, phone: user.phone ?? "" };
   const languages = bookableLanguages().map(({ code, labelDe, nativeLabel, rtl }) => ({ code, labelDe, nativeLabel, rtl }));
 
@@ -90,13 +97,29 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
     <>
       <h1>Hallo {user.name.split(" ")[0]}!</h1>
       {gebucht && <div className="alert alert-ok">Sprachpaket gebucht – die Übersetzung ist freigeschaltet.</div>}
+      {(willkommen || gebucht) && <ScrollTop />}
       {willkommen && <div className="alert alert-ok">Willkommen bei beyourself! Schön, dass du da bist.</div>}
 
-      {missing && (
+      {(missing || !hasId) && (
         <section className="panel panel-attention" id="angaben">
           <div className="panel-head"><span className="panel-ico"><Icon name="id" /></span><h2>Bitte vervollständige deine Angaben</h2></div>
-          <p className="hint" style={{ marginTop: 0 }}>Für die Anmeldung beim TÜV und für Notfälle braucht die Fahrschule dein Geburtsdatum, deine Adresse und deine Telefonnummer.</p>
-          <DetailsForm initial={detailsInitial} submitLabel="Angaben speichern" />
+          {!hasId && (
+            <div className="id-warning" role="alert">
+              <span aria-hidden>⚠️</span>
+              <div>
+                <strong>{idRejected ? "Bitte lade deinen Ausweis noch einmal hoch." : "Ohne Ausweis bekommst du keine Fahrstunden."}</strong>
+                <div>Lade ein Foto oder einen Scan von deinem Personalausweis oder Reisepass hoch (Vorder- und Rückseite). Hast du keinen deutschen oder EU-Pass, bitte auch deinen Aufenthaltstitel.</div>
+                <div className="row" style={{ marginTop: 10 }}>
+                  <DocUpload type="ausweis" label="Ausweis hochladen" primary />
+                  <DocUpload type="aufenthaltstitel" label="Aufenthaltstitel hochladen" />
+                </div>
+              </div>
+            </div>
+          )}
+          {missing && <>
+            <p className="hint">Für die Anmeldung beim TÜV und für Notfälle braucht die Fahrschule dein Geburtsdatum, deine Adresse und deine Telefonnummer.</p>
+            <DetailsForm initial={detailsInitial} submitLabel="Angaben speichern" />
+          </>}
         </section>
       )}
 
@@ -188,6 +211,15 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
             <DetailsForm initial={detailsInitial} />
           </details>
         )}
+      </Panel>
+
+      <Panel icon="check" title="Meine Unterlagen" id="unterlagen"
+        help={<>
+          <p>Diese Unterlagen braucht die Führerscheinstelle der Stadt Kassel für deinen Führerschein. Lade sie hier als Foto oder PDF hoch – die Fahrschule prüft sie und hakt sie ab.</p>
+          <p><strong>Wichtig:</strong> Passbild, Sehtest und Erste-Hilfe-Bescheinigung brauchst du zusätzlich <strong>auf Papier im Original</strong>. Das Hochladen hier hilft der Fahrschule, alles rechtzeitig vorzubereiten.</p>
+          <p>Gelb = wird geprüft, Gold mit Haken = in Ordnung, rot = bitte neu hochladen.</p>
+        </>}>
+        <StudentDocs docs={docs} umschreibung={training?.profile.licenseClass === "umschreibung"} />
       </Panel>
 
       {past.length > 0 && (

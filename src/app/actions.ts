@@ -28,6 +28,8 @@ import { ensureProfile } from "@/lib/server/training-repo";
 import { signups } from "@/lib/server/theory";
 import { ensureGrundbetrag } from "@/lib/server/exams";
 import { saveDetails } from "@/lib/server/user-details";
+import { addDoc } from "@/lib/server/student-docs";
+import { storeUpload } from "@/lib/server/uploads";
 import { addNotification } from "@/lib/server/booking";
 import { parseSignupForm, validateSignup, type FieldErrors } from "@/lib/signup";
 import { validateSignupChoice } from "@/lib/language-package";
@@ -74,6 +76,19 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
     if (result.value.language) bookPackage(d, u.id, result.value.language);
     return u;
   })();
+
+  // Ausweis / Aufenthaltstitel (freiwillig bei der Anmeldung). Klappt eine Datei nicht, geht die Anmeldung trotzdem durch –
+  // im Konto steht dann der Hinweis, den Ausweis nachzureichen.
+  for (const type of ["ausweis", "aufenthaltstitel"] as const) {
+    for (const file of form.getAll(type).filter((x): x is File => x instanceof File && x.size > 0).slice(0, 4)) {
+      try {
+        const st = await storeUpload(file, "unterlagen");
+        addDoc(d, { userId: user.id, type, path: st.path, name: st.name, fileType: st.type, size: st.size });
+      } catch (e) {
+        console.error("[anmeldung] Unterlage nicht gespeichert:", (e as Error).message);
+      }
+    }
+  }
 
   await startSession(user.id);
   redirect(result.value.language ? "/konto?gebucht=1&willkommen=1" : "/konto?willkommen=1");

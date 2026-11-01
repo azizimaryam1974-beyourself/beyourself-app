@@ -20,6 +20,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
         { href: "/verwaltung/nachrichten", label: "Nachrichten", badge: chatUnread },
         { href: "/verwaltung", label: "Schüler" },
         { href: "/unterricht", label: "Live-Unterricht" },
+        { href: "/verwaltung/belege", label: "Belege" },
         { href: "/verwaltung/einstellungen", label: "Einstellungen" },
       ]
     : user?.role === "student"
@@ -56,7 +57,6 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
             {user ? (
               <>
                 <NavLinks items={items} />
-                <Link href="/" className="nav-quiet">Webseite</Link>
                 <form action={logoutAction}>
                   <button type="submit" className="nav-quiet">Abmelden</button>
                 </form>
@@ -79,6 +79,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
     </header>
     {user && (
       <BottomNav items={bottom}>
+        {user.role === "teacher" && <Link href="/verwaltung/belege">📷 Belege scannen</Link>}
         {user.role === "teacher" && <Link href="/unterricht">Live-Unterricht (Theorie)</Link>}
         {user.role === "teacher" && <Link href="/verwaltung/einstellungen">Einstellungen</Link>}
         {user.role === "student" && <Link href="/konto">Mein Konto</Link>}

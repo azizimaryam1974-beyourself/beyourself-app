@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { BOOKING_SCHEMA, seedBookingDefaults } from "./booking-schema";
 import { CHAT_SCHEMA } from "./chat";
+import { RECEIPT_SCHEMA } from "./receipts";
 
 /**
  * SQLite reicht für eine Fahrschule locker aus (eine Datei, einfache
@@ -75,6 +76,7 @@ export function openDatabase(file: string): Database.Database {
   db.exec(SCHEMA);
   db.exec(BOOKING_SCHEMA);
   db.exec(CHAT_SCHEMA);
+  db.exec(RECEIPT_SCHEMA);
   seedBookingDefaults(db);
   return db;
 }

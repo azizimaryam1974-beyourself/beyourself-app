@@ -35,6 +35,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 | Daten-Umstellung (alte Angebote löschen) | Nur mit Kopie simuliert – auf dem echten Server beobachten |
 | Schritt 4: Grundbetrag + Prüfungen (01.11.) | Mit Testkonto durchgespielt (Anmeldung → Grundbetrag → Einladung Praxis → bestätigt). Echt testen: mit einem Schüler, der schon im System ist („Schon bezahlt / erlassen“) |
 | Übersicht (Dashboard, 01.11.) | Wetter (DWD über Bright Sky) konnte hier nicht abgerufen werden – auf dem Server prüfen. Zahlen mit echten Fahrten im Februar prüfen |
+| Chat + Belege (01.11.) | Mit Testkonten durchgespielt (Anhang, Antworten, Leeren, Export-ZIP). Echt testen: Foto mit iPhone-Kamera (HEIC-Bilder zeigt der Browser evtl. nicht als Vorschau, Export geht) |
 | Expo-App (iPhone) | **Noch nie** auf Maryams Handy geöffnet; kennt Kalender/Theorie/Fragen noch nicht |
 
 ## 3. Entscheidungen von Maryam (Kurzfassung – Details in ARBEITSWEISE.md)
@@ -68,6 +69,8 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 
 ## 5. Noch NICHT gebaut
 - **Video + Aufnahme** (Konzept fertig, siehe KONZEPT-HYBRID-UNTERRICHT.md) inkl. „Wort geben“ mit Mikrofon.
+- **E-Mail (IONOS) in der App (Wunsch 01.11.):** Lesen, Antworten, Signatur. Noch offen – Entscheidung von Maryam (siehe Chat 01.11.): großer Baustein, Passwort läge auf dem Server; Alternative: iPhone-Mail-App mit IONOS-Konto.
+- **Belege: KI liest Betrag/Firma/Datum automatisch** (Claude Haiku Vision), sobald Anthropic-Konto wieder frei.
 - **KI-Telefonassistent (Wunsch 01.11.):** beantwortet Anrufe und Fragen (Preise, Klassen, Termine, Anmeldung), leitet Wichtiges an Maryam weiter.
   Braucht: Telefonnummer (virtuelle Nummer möglich), Anbieter für Sprache/Telefonie, klare Ansage „Sie sprechen mit einer KI“, Datenschutz, Kostenlimit.
 - **Konto selbst löschen (Pflicht für App Store, auch DSGVO):** Vorschlag: „Konto löschen“ unter Mein Konto → Konto sofort gesperrt (kein Login,

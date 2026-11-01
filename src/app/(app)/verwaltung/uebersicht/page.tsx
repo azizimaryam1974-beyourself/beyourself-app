@@ -106,6 +106,7 @@ const Icon = {
   gear: <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" /></svg>,
   phone: <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></svg>,
   chat: <svg viewBox="0 0 24 24"><path d="M4 20l1.5-4A8 8 0 1 1 9 19.5Z" /></svg>,
+  receipt: <svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6M9 16h3" /></svg>,
   bell: <svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4ZM10 20a2 2 0 0 0 4 0" /></svg>,
 };
 
@@ -202,7 +203,7 @@ export default async function DashboardPage() {
             <Link href="/verwaltung/kalender"><span>{Icon.cal}</span>Kalender</Link>
             <Link href="/verwaltung"><span>{Icon.people}</span>Schüler</Link>
             <Link href="/unterricht"><span>{Icon.live}</span>Theorie</Link>
-            <Link href="/verwaltung/einstellungen"><span>{Icon.gear}</span>Einstellungen</Link>
+            <Link href="/verwaltung/belege"><span>{Icon.receipt}</span>Beleg</Link>
           </div>
           <div className="dash-gold">
             {nowDrive ? (

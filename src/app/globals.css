@@ -167,7 +167,7 @@ p { margin: 0 0 1em; }
 label { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; }
 .field { margin-bottom: 18px; }
 .hint { color: var(--muted); font-size: 0.92rem; font-weight: 400; }
-input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
+input[type="text"], input:not([type]), input[type="search"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
   width: 100%; min-height: 48px; padding: 12px 14px; border-radius: var(--r-md);
   border: 1px solid var(--line); background: var(--surface-strong); color: var(--text); font: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -863,3 +863,30 @@ details.tl-row { display: block; }
 .thread-main span { display: block; color: var(--muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .thread-meta { display: grid; justify-items: end; gap: 4px; }
 .thread-meta small { color: var(--muted); }
+
+/* ================= Belege ================= */
+.receipt-form { display: grid; gap: 12px; }
+.receipt-pick { display: flex; flex-wrap: wrap; gap: 10px; }
+.receipt-preview { display: flex; align-items: center; gap: 12px; }
+.receipt-preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; }
+.receipt-preview small { display: block; color: var(--muted); }
+.receipt-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.receipt-fields .field { margin: 0; }
+@media (max-width: 720px) { .receipt-fields { grid-template-columns: 1fr 1fr; } }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); text-decoration: none; color: inherit; font-weight: 600; font-size: 0.9rem; }
+.chip.on { background: var(--midnight); color: var(--cream); border-color: var(--midnight); }
+.receipt-range { align-items: end; margin-bottom: 12px; }
+.receipt-sum { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 12px 14px; border-radius: 14px; background: rgba(27, 34, 48, 0.05); margin-bottom: 12px; }
+.receipt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.receipt-list > li { display: grid; grid-template-columns: 64px 1fr auto; gap: 6px 14px; align-items: center; padding: 10px; border-radius: 16px; border: 1px solid var(--line); }
+.receipt-thumb img, .receipt-thumb .receipt-pdf { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; display: grid; place-items: center; }
+.receipt-pdf { width: 64px; height: 64px; border-radius: 10px; display: grid; place-items: center; background: var(--midnight); color: var(--cream); font-weight: 700; font-size: 0.8rem; }
+.receipt-info { display: grid; gap: 3px; min-width: 0; }
+.receipt-info > span:not(.badge) { color: var(--muted); font-size: 0.9rem; }
+.receipt-info .badge { width: fit-content; }
+.receipt-amt { font-weight: 800; font-size: 1.05rem; white-space: nowrap; }
+.receipt-edit { grid-column: 1 / -1; }
+.receipt-edit[open] { padding-top: 6px; }
+.link-btn.danger { color: #b42318; margin-top: 8px; }
+@media (min-width: 861px) and (max-width: 1360px) { .nav a, .nav button { padding: 8px 10px; font-size: 0.9rem; } }

@@ -172,7 +172,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
     <>
       <h1>Fahrstunden</h1>
       {noticeKey && NOTICE[noticeKey] && <div className={`alert ${NOTICE[noticeKey].cls}`} role="status">{NOTICE[noticeKey].text}</div>}
-      {sp.fehler && <div className="alert alert-error" role="alert">{sp.fehler}</div>}
+      {sp.fehler && toPay.length === 0 && <div className="alert alert-error" role="alert">{sp.fehler}</div>}
 
       {toPay.length > 0 && (
         <Panel id="offen" icon="pay" title="Bitte bezahlen" className="panel-accent" help={<>
@@ -180,6 +180,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
           <p>Fahrstunden: Du hast {settings.payWindowMin} Minuten Zeit, danach wird die Zeit wieder für andere frei. Grundbetrag und Prüfungen haben längere Fristen – das Datum steht jeweils daneben.</p>
           <p>Vorhandenes Guthaben wird automatisch zuerst verrechnet. Bezahlen kannst du online oder bar/EC in der Fahrschule.</p>
         </>}>
+          {sp.fehler && <div className="alert alert-error" role="alert">{sp.fehler}</div>}
           {toPay.map((b) => <PayBox key={b.id} b={b} providers={providers} credit={credit} now={now} />)}
         </Panel>
       )}

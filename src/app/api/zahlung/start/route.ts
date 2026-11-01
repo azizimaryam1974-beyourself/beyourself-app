@@ -17,6 +17,7 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof PaymentError) return back(e.message);
     console.error("[zahlung] Start fehlgeschlagen", (e as Error).message);
-    return back("Die Bezahlseite konnte gerade nicht geöffnet werden. Bitte versuche es gleich noch einmal oder wähle eine andere Zahlart.");
+    const detail = (e as Error).message.startsWith("Stripe") ? ` (${(e as Error).message.slice(0, 200)})` : "";
+    return back(`Die Bezahlseite konnte gerade nicht geöffnet werden. Bitte versuche es gleich noch einmal oder wähle eine andere Zahlart.${detail}`);
   }
 }

@@ -56,14 +56,16 @@ export async function createCheckout(o: {
   const min = Date.now() + 31 * 60_000;
   const max = Date.now() + 23.5 * 3_600_000; // lange Fristen (Grundbetrag, Prüfung): Bezahlseite gilt max. 24 Std., danach neu
   const expires = Math.floor(Math.min(Math.max(o.expiresAt, min), max) / 1000);
-  const methods = (process.env.STRIPE_METHODS || "card").split(",").map((s) => s.trim()).filter(Boolean);
+  // Zahlarten werden seit 2026 im Stripe-Dashboard festgelegt (Einstellungen → Zahlungsmethoden), nicht mehr hier.
+  // Optional: eine bestimmte Zahlarten-Konfiguration aus dem Dashboard (pmc_…).
+  const pmc = process.env.STRIPE_PAYMENT_METHOD_CONFIG || undefined;
   return call<CheckoutSession>("POST", "/checkout/sessions", {
     mode: "payment",
     client_reference_id: o.bookingId,
     customer_email: o.email,
     locale: "de",
     expires_at: expires,
-    payment_method_types: methods,
+    payment_method_configuration: pmc,
     line_items: [{ quantity: "1", price_data: { currency: "eur", unit_amount: String(o.amountCents), product_data: { name: o.title, description: o.description || undefined } } } as Params],
     metadata: { booking: o.bookingId },
     payment_intent_data: { metadata: { booking: o.bookingId }, description: `${o.title} (${o.bookingId.slice(0, 8)})` },

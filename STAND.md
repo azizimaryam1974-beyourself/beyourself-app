@@ -74,7 +74,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 - **Pakete** (z. B. 10 Fahrstunden im Voraus).
 - **Push-Nachrichten** aufs Handy; **Expo-App**: Fahrlehrer-Funktionen, Kalender, Theorie, Fragen (Video erst in echter App, nicht Expo Go).
 - **Webseite-Inhalte:** Fotos, Adresse/Telefon/Bürozeiten, „Über uns“, Impressum; Preise auf der Startseite; Umschreibung-Text.
-- **Videos:** neuer Runway-Clip Klasse B (Linksabbiegen vom Startbild, gleiches Auto), `bg-b78.mp4` fehlt.
+- **Videos:** Klasse B neu (01.11., Runway + Blinker von Claude eingefügt) – auf iPhone prüfen; `bg-b78.mp4` fehlt.
 - Fachbegriffe-Übersetzungen von Muttersprachlern prüfen lassen.
 
 ## 6. Recht & Sicherheit (Details TODO-SICHERHEIT.md)

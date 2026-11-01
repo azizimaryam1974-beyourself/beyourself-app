@@ -11,6 +11,11 @@ export function stripeEnabled(): boolean {
   return !!process.env.STRIPE_SECRET_KEY;
 }
 
+/** Testschlüssel (sk_test_…): Zahlungen nur mit Testkarten, kein echtes Geld. */
+export function stripeTestMode(): boolean {
+  return (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_");
+}
+
 interface Params { [k: string]: string | number | boolean | undefined | Params | Array<string | Params> }
 
 /** {a:{b:1}, c:["x"]} → a[b]=1&c[0]=x (Stripe-Format) */

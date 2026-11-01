@@ -8,6 +8,7 @@ import { markPaidCashAction } from "@/app/booking-actions";
 import { deleteBlockAction, toggleHourAction } from "@/app/calendar-actions";
 import { BlockForm } from "../einstellungen/arbeitszeiten/Forms";
 import { DayTools } from "./DayTools";
+import { stripeTestMode } from "@/lib/server/payments/stripe";
 import { closedReason, frameFor, sunsetMs, workIntervals, type Interval } from "@/lib/calendar";
 import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, dayKey, fmtDate, fmtDay, fmtDayShort, fmtSlot, fmtTime, isDayKey, mondayOf } from "@/lib/time";
@@ -112,6 +113,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       {providers.length === 0 && (
         <div className="alert alert-info"><strong>Online-Zahlung ist noch nicht eingerichtet.</strong> Buchungen funktionieren schon; Zahlungen markierst du mit „Bar/EC bezahlt“.</div>
       )}
+      {providers.includes("stripe") && stripeTestMode() && <div className="alert alert-info"><strong>Stripe im Testmodus:</strong> Schüler zahlen mit Testkarte 4242 4242 4242 4242 – kein echtes Geld. Vor dem echten Start die Live-Schlüssel eintragen.</div>}
       {providers.includes("test") && <div className="alert alert-error"><strong>Testmodus:</strong> Schüler können mit einer Test-Zahlung „bezahlen“. Vor dem echten Start ausschalten.</div>}
 
       {requests.length > 0 && (

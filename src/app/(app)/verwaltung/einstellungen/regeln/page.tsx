@@ -7,6 +7,7 @@ import { availableProviders } from "@/lib/server/payments/service";
 import { PageHead } from "@/components/PageHead";
 import { SettingsForm } from "../SettingsForms";
 import { getBankDetails } from "@/lib/server/finance";
+import { stripeTestMode } from "@/lib/server/payments/stripe";
 import { saveBankAction } from "@/app/finance-actions";
 
 export const metadata = { title: "Regeln & Verbindungen" };
@@ -36,7 +37,8 @@ export default async function RulesPage() {
       <section className="card">
         <h2>Verbindungen</h2>
         <ul className="list">
-          <li><span>Zahlung mit Karte, Apple Pay, Google Pay (Stripe)</span><Status ok={providers.includes("stripe")} on="verbunden" off="noch nicht eingerichtet" /></li>
+          <li><span>Zahlung mit Karte, Apple Pay, Google Pay (Stripe)</span><Status ok={providers.includes("stripe")} on={stripeTestMode() ? "verbunden – TESTMODUS (kein echtes Geld)" : "verbunden – echte Zahlungen"} off="noch nicht eingerichtet" /></li>
+          <li><span>Stripe-Rückmeldung (Webhook)</span><Status ok={!!process.env.STRIPE_WEBHOOK_SECRET} on="eingerichtet" off="fehlt noch" /></li>
           <li><span>PayPal</span><Status ok={providers.includes("paypal")} on="verbunden" off="noch nicht eingerichtet" /></li>
           <li><span>E-Mails von info@fahrschule-beyourself.de</span><Status ok={mailEnabled()} on="aktiv" off="noch nicht eingerichtet" /></li>
         </ul>

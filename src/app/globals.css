@@ -1127,3 +1127,4 @@ a.dash-kpi::after { content: "›"; margin-left: auto; opacity: .35; font-size: 
 .fin-sum .fin-csv { background: rgba(255, 255, 255, 0.92); color: var(--ink); }
 .student-table .st-name { text-decoration: none; color: var(--ink, #1c2330); }
 .student-table .st-name:hover { text-decoration: underline; }
+.test-hint { margin: 6px 0 10px; padding: 10px 12px; border-radius: 12px; background: rgba(60, 120, 220, 0.1); border: 1px dashed rgba(60, 120, 220, 0.5); font-size: .9rem; }

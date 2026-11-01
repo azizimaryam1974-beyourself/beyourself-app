@@ -1,4 +1,5 @@
 import { getBankDetails } from "@/lib/server/finance";
+import { stripeTestMode } from "@/lib/server/payments/stripe";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/server/auth";
@@ -98,6 +99,9 @@ function PayBox({ b, providers, credit, now }: { b: Booking; providers: Provider
             <input type="checkbox" name="terms" required />
             <span>{consent}</span>
           </label>
+          {providers.includes("stripe") && stripeTestMode() && (
+            <p className="test-hint">Testmodus – es fließt kein echtes Geld. Testkarte: <strong>4242 4242 4242 4242</strong>, Ablaufdatum irgendwann in der Zukunft, Prüfnummer beliebig (z. B. 123).</p>
+          )}
           <div className="row">
             {providers.map((p) => (
               <button key={p} className={`btn ${p === "stripe" ? "btn-gold" : p === "paypal" ? "btn-paypal" : "btn-secondary"}`} type="submit" name="provider" value={p}>{PROVIDER_BTN[p]}</button>

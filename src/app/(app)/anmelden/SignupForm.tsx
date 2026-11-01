@@ -13,7 +13,7 @@ const CLASS_HINT: Record<string, string> = {
   umschreibung: "ausländischen Führerschein umschreiben",
 };
 
-export function SignupForm({ languages, price, grundPrice }: { languages: LanguageOption[]; price: string; grundPrice: string }) {
+export function SignupForm({ languages, price, grundPrice, preset }: { languages: LanguageOption[]; price: string; grundPrice: string; preset?: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(signupAction, {});
   const v = state.values ?? {};
   const fe = state.fieldErrors ?? {};
@@ -51,7 +51,7 @@ export function SignupForm({ languages, price, grundPrice }: { languages: Langua
         <div className="choice-group">
           {TRAINING_CLASSES.map((c) => (
             <label key={c} className="choice">
-              <input type="radio" name="licenseClass" value={c} defaultChecked={v.licenseClass === c} required />
+              <input type="radio" name="licenseClass" value={c} defaultChecked={(v.licenseClass ?? preset) === c} required />
               <span><strong>{CLASS_LABEL[c]}</strong><span className="hint" style={{ display: "block" }}>{CLASS_HINT[c]}</span></span>
             </label>
           ))}
@@ -60,7 +60,7 @@ export function SignupForm({ languages, price, grundPrice }: { languages: Langua
       </div>
 
       <div className="card">
-        <h2>Sprachpaket</h2>
+        <h2>Sprachpaket <span className="hint" style={{ fontWeight: 400 }}>(freiwillig)</span></h2>
         <p className="hint">
           Live-Übersetzung im Theorieunterricht in deiner Sprache – einmalig <strong>{price}</strong> inkl. MwSt.
           für die gesamte Ausbildung.

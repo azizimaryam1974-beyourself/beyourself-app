@@ -49,8 +49,8 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
                   <Link href="/#ueber-uns">Über uns</Link>
                   <Link href="/#kontakt">Kontakt</Link>
                 </span>
-                <Link href="/login">Login</Link>
-                <Link href="/anmelden" className="btn btn-gold btn-small" style={{ marginLeft: 4 }}>Anmelden</Link>
+                <Link href="/login">Einloggen</Link>
+                <Link href="/anmelden" className="btn btn-gold btn-small" style={{ marginLeft: 4 }}>Fahrschüler werden</Link>
               </>
             )}
           </nav>
@@ -73,7 +73,7 @@ export function SiteFooter() {
             <a href="/#klassen">Klassen und Preise</a>
             <a href="/#sprachen">Live-Übersetzung</a>
             <a href="/#kontakt">Kontakt</a>
-            <a href="/anmelden">Anmelden</a>
+            <a href="/anmelden">Fahrschüler werden</a><a href="/login">Einloggen</a>
           </div>
           <div>
             <a href="mailto:info@fahrschule-beyourself.de">info@fahrschule-beyourself.de</a>

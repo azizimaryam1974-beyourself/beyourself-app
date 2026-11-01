@@ -70,6 +70,10 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 - **Video + Aufnahme** (Konzept fertig, siehe KONZEPT-HYBRID-UNTERRICHT.md) inkl. „Wort geben“ mit Mikrofon.
 - **KI-Telefonassistent (Wunsch 01.11.):** beantwortet Anrufe und Fragen (Preise, Klassen, Termine, Anmeldung), leitet Wichtiges an Maryam weiter.
   Braucht: Telefonnummer (virtuelle Nummer möglich), Anbieter für Sprache/Telefonie, klare Ansage „Sie sprechen mit einer KI“, Datenschutz, Kostenlimit.
+- **Konto selbst löschen (Pflicht für App Store, auch DSGVO):** Vorschlag: „Konto löschen“ unter Mein Konto → Konto sofort gesperrt (kein Login,
+  keine Nachrichten), Persönliches gelöscht/anonymisiert. Was das Gesetz verlangt, bleibt gesperrt aufbewahrt (Rechnungen/Zahlungen 8–10 Jahre,
+  Ausbildungsnachweis). Offene Beträge und gebuchte Termine bleiben bestehen (Löschen ≠ Vertrag kündigen) – vorher klare Warnung,
+  Fahrschule bekommt Nachricht. Mit Anwalt abstimmen. Bauen zusammen mit der Handy-App.
 - **Rollen & Rechte:** weitere Admins/Fahrlehrer einladen, jedes Recht einzeln (z. B. Termine ja, Zahlungen nein); je Fahrlehrer eigener Kalender.
 - **Mehrere Fahrschulen** (technisch vorbereiten, erst nach einigen Monaten Betrieb freischalten).
 - **Sonderfahrten-Zahlen einstellbar** (Reform 21/7404 schafft feste 5/4/3 evtl. ab).

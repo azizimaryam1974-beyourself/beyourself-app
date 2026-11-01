@@ -43,7 +43,7 @@ export default async function ClassPage({ params }: { params: Promise<{ slug: st
           <div className="glass-panel">
             {c.long.map((p, i) => <p key={i}>{p}</p>)}
             <div className="row" style={{ marginTop: 22 }}>
-              <Link href="/anmelden" className="btn btn-gold">Für Klasse {c.k} anmelden</Link>
+              <Link href={`/anmelden?klasse=${c.slug}`} className="btn btn-gold">Für Klasse {c.k} anmelden</Link>
               <a href="mailto:info@fahrschule-beyourself.de" className="btn btn-glass">Preis anfragen</a>
             </div>
           </div>

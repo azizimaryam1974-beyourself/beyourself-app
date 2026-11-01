@@ -76,7 +76,7 @@ export default function Home() {
               übersetzt auf dein Handy.
             </p>
             <div className="row">
-              <Link href="/anmelden" className="btn btn-gold">Jetzt anmelden</Link>
+              <Link href="/anmelden" className="btn btn-gold">Fahrschüler werden</Link>
               <a href="#klassen" className="btn btn-glass">Klassen ansehen</a>
             </div>
           </div>
@@ -189,7 +189,7 @@ export default function Home() {
             <p className="lead">Fragen zu Klassen, Preisen oder dem Sprachpaket? Schreib uns – wir melden uns schnell.</p>
             <div className="row">
               <a className="btn btn-gold" href="mailto:info@fahrschule-beyourself.de">E-Mail schreiben</a>
-              <Link className="btn btn-glass" href="/anmelden">Direkt anmelden</Link>
+              <Link className="btn btn-glass" href="/anmelden">Fahrschüler werden</Link>
             </div>
           </div>
           <dl className="contact-card">

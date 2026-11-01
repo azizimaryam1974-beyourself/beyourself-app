@@ -728,3 +728,8 @@ details.tl-row { display: block; }
 .dash-list { grid-template-columns: minmax(0, 1fr); }
 .dash-list li, .dash-todo li { min-width: 0; }
 @media (max-width: 1000px) { .dash-side { order: -1; } }
+.signup-steps { list-style: none; counter-reset: st; padding: 0; margin: 16px 0 22px; display: grid; gap: 10px; }
+.signup-steps li { counter-increment: st; display: grid; grid-template-columns: 34px 1fr; column-gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(233, 215, 180, 0.18); color: var(--cream); }
+.signup-steps li::before { content: counter(st); grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--ink); background: var(--gold-grad); }
+.signup-steps span { font-size: 0.9rem; color: rgba(246, 240, 230, 0.75); }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PasswordInput } from "@/components/PasswordInput";
 import { loginAction, type FormState } from "@/app/actions";
 
 export function LoginForm() {
@@ -14,7 +15,7 @@ export function LoginForm() {
       </div>
       <div className="field">
         <label htmlFor="password">Passwort</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput id="password" name="password" autoComplete="current-password" required />
       </div>
       <button className="btn btn-block" type="submit" disabled={pending}>{pending ? "…" : "Einloggen"}</button>
     </form>

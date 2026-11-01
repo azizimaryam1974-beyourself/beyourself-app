@@ -733,3 +733,35 @@ details.tl-row { display: block; }
   background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(233, 215, 180, 0.18); color: var(--cream); }
 .signup-steps li::before { content: counter(st); grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--ink); background: var(--gold-grad); }
 .signup-steps span { font-size: 0.9rem; color: rgba(246, 240, 230, 0.75); }
+
+/* Passwort anzeigen */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 52px; width: 100%; }
+.pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 0; background: none; cursor: pointer;
+  display: grid; place-items: center; color: var(--muted); border-radius: 10px; }
+.pw-eye:hover { background: rgba(27, 34, 48, 0.06); }
+.pw-eye svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Handy-Menü (eingeloggt): ein Knopf statt langer Leiste; Kopfzeile scrollt mit */
+.mnav { display: none; position: relative; }
+@media (max-width: 860px) {
+  .site-header { position: static; padding: 10px 0; }
+  .site-header .nav.nav-user { display: none; }
+  .site-header .bar:has(.mnav) { flex-wrap: nowrap; }
+  .mnav { display: block; }
+}
+.mnav-btn { display: inline-flex; align-items: center; gap: 10px; font: inherit; font-weight: 700; font-size: 0.95rem; color: inherit; cursor: pointer;
+  padding: 9px 12px 9px 16px; border-radius: 999px; border: 1px solid rgba(233, 215, 180, 0.35); background: rgba(255, 255, 255, 0.08); }
+.mnav-ico { display: grid; gap: 4px; width: 18px; }
+.mnav-ico i { display: block; height: 2px; border-radius: 2px; background: currentColor; transition: transform 0.2s, opacity 0.2s; }
+.mnav-ico.x i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.mnav-ico.x i:nth-child(2) { opacity: 0; }
+.mnav-ico.x i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.mnav-panel { position: absolute; right: 0; top: calc(100% + 10px); z-index: 60; min-width: 230px; display: grid; gap: 2px; padding: 8px; border-radius: 20px;
+  background: #16243a; border: 1px solid rgba(233, 215, 180, 0.25); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8); color: var(--cream); }
+.mnav-panel a, .mnav-panel button { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; color: inherit; background: none; border: 0; cursor: pointer;
+  text-decoration: none; padding: 12px 14px; border-radius: 12px; }
+.mnav-panel a.on { background: var(--gold-grad); color: var(--ink); }
+.mnav-panel a:hover, .mnav-panel button:hover { background: rgba(233, 215, 180, 0.12); }
+.mnav-extra { border-top: 1px solid rgba(233, 215, 180, 0.15); margin-top: 6px; padding-top: 6px; opacity: 0.8; }
+.site-header:not(.dark) .mnav-panel { background: #fbf8f2; color: var(--ink); }

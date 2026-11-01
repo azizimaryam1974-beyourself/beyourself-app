@@ -1,5 +1,7 @@
 "use client";
 
+import { PasswordInput } from "@/components/PasswordInput";
+
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signupAction, type FormState } from "@/app/actions";
@@ -41,7 +43,7 @@ export function SignupForm({ languages, price, grundPrice, preset }: { languages
         </div>
         <div className="field">
           <label htmlFor="password">Passwort <span className="hint">(mind. 10 Zeichen)</span></label>
-          <input id="password" name="password" type="password" autoComplete="new-password" required minLength={10} />
+          <PasswordInput id="password" name="password" autoComplete="new-password" required minLength={10} />
           {fe.password && <div className="error">{fe.password}</div>}
         </div>
       </div>

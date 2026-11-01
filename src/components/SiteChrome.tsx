@@ -3,6 +3,7 @@ import { currentUser } from "@/lib/server/auth";
 import { logoutAction } from "@/app/actions";
 import { Brand } from "./Brand";
 import { NavLinks, type NavItem } from "./NavLinks";
+import { MobileNav } from "./MobileNav";
 import { db } from "@/lib/server/db";
 import { listBookingsByStatus } from "@/lib/server/booking";
 
@@ -32,7 +33,13 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
           <Link href="/" aria-label="Zur Startseite der Webseite" style={{ textDecoration: "none" }}>
             <Brand sub={false} id={tone} />
           </Link>
-          <nav className="nav" aria-label="Hauptmenü">
+          {user && (
+            <MobileNav items={items}>
+              <Link href="/">Webseite</Link>
+              <form action={logoutAction}><button type="submit">Abmelden</button></form>
+            </MobileNav>
+          )}
+          <nav className={`nav ${user ? "nav-user" : ""}`} aria-label="Hauptmenü">
             {user ? (
               <>
                 <NavLinks items={items} />

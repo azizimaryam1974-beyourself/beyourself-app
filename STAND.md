@@ -79,6 +79,11 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 - Fachbegriffe-Übersetzungen von Muttersprachlern prüfen lassen.
 
 ## 6. Recht & Sicherheit (Details TODO-SICHERHEIT.md)
+- **Vorfall 31.10.:** Anthropic-Schlüssel „beyourself-server“ missbraucht (30,5 Mio. Tokens, >10 Modelle, 94,71 $; Karte 31.10. 6× belastet, 108,45 $).
+  Anthropic hat die Organisation gesperrt. Schlüssel gelöscht, Root-Passwort geändert (01.11.). Server geprüft: nur Maryams Logins,
+  keine fremden Zugangsschlüssel, keine fremden Programme – aber 13.509 Passwort-Fehlversuche von Bots → **SSH nur mit Schlüssel** (läuft).
+  Wahrscheinlicher Abfluss: Notiz/Zwischenablage/Browser-Erweiterung (AdBlock mit Vollzugriff) – Notiz löschen, Erweiterung entfernen.
+  Offen: „Überprüfung beantragen“ bei Anthropic, danach neuer Schlüssel (nur direkt in .env), Ausgabenlimit 30 $.
 - **Anwalt:** Buchungsbedingungen (Ausfall 70/75 %, „Guthaben statt Geld zurück“, Attest-Klausel wird so nicht halten,
   Muster-Ausbildungsvertrag des Fahrlehrerverbands nutzen), Widerrufsbelehrung, Datenschutzerklärung
   (Stripe, PayPal, Video/Aufnahme, Fragen-Prüfung durch Claude), Impressum.

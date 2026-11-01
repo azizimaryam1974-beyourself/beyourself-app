@@ -9,7 +9,6 @@ import path from "node:path";
 
 const hasPublicFile = (url: string) => fs.existsSync(path.join(process.cwd(), "public", url));
 import { EXTRA_CLASSES, LICENSE_CLASSES, VIDEO } from "@/lib/classes";
-import { Parallax } from "./Parallax";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +32,6 @@ export default function Home() {
 
   return (
     <>
-      <Parallax />
       {/* ---------------- Kopfbereich ---------------- */}
       <section className="hero" id="top">
         <div className="hero-light" aria-hidden />

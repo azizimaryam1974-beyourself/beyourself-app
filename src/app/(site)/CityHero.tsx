@@ -55,8 +55,20 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo, available }: 
     return () => window.removeEventListener("resize", layout);
   }, [layout, hasPoster, hasLoop]);
 
+  // Loop anhalten, solange die Kreuzung nicht zu sehen ist (spart beim Scrollen Rechenleistung).
   useEffect(() => {
-    reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = cityRef.current;
+    const v = el?.querySelector<HTMLVideoElement>(".city-video");
+    if (!el || !v || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
+    }, { threshold: 0.05 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasLoop]);
+
+  useEffect(() => {
+    reduced.current =window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     for (const s of signs) router.prefetch(`/klasse/${s.slug}`);
     // Abbiege-Clips erst laden, wenn die Seite steht (sonst bremst es den Start).
     const t = window.setTimeout(() => setWarm(true), 1500);
@@ -105,9 +117,7 @@ export function CityHero({ signs, heroLoop, heroPoster, turnVideo, available }: 
       if (v.preload !== "auto" || v.readyState < 2) { v.preload = "auto"; v.load(); }
       v.onended = go;
       v.onerror = () => later(go, 300);
-      // Links/rechts: kurz blinken (über dem stehenden Auto), dann läuft der Clip.
-      if (s.turn !== "straight") await new Promise((r) => later(() => r(null), 950));
-      if (done.current) return;
+      // Der Clip blinkt selbst (B: eingefügt, B197: von Runway) → sofort starten.
       setPlaying(true);
       try { await v.play(); } catch { later(go, 300); return; }
       // Sicherheitsnetz nur bis kurz nach Clip-Ende – und es wird beim Verlassen gelöscht.

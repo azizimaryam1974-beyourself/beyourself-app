@@ -74,7 +74,8 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 - **Pakete** (z. B. 10 Fahrstunden im Voraus).
 - **Push-Nachrichten** aufs Handy; **Expo-App**: Fahrlehrer-Funktionen, Kalender, Theorie, Fragen (Video erst in echter App, nicht Expo Go).
 - **Webseite-Inhalte:** Fotos, Adresse/Telefon/Bürozeiten, „Über uns“, Impressum; Preise auf der Startseite; Umschreibung-Text.
-- **Videos:** Klasse B neu (01.11., Runway + Blinker von Claude eingefügt) – auf iPhone prüfen; `bg-b78.mp4` fehlt.
+- **Videos:** B neu (Blinker eingefügt) + B197 wieder komplett mit Blinker (01.11.) – auf iPhone prüfen; `bg-b78.mp4` fehlt.
+- **Scrollen flüssiger (01.11.):** Glas-Unschärfe, Parallax und weichgezeichnetes Video entfernt, Videos pausieren außerhalb des Bildes – auf iPhone prüfen.
 - Fachbegriffe-Übersetzungen von Muttersprachlern prüfen lassen.
 
 ## 6. Recht & Sicherheit (Details TODO-SICHERHEIT.md)

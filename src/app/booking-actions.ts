@@ -282,13 +282,19 @@ export async function adjustCreditAction(_p: ActionState, form: FormData): Promi
   if (!u) return { error: "Schüler nicht gefunden." };
   const cents = parseEuro(str(form, "amount"));
   if (!Number.isFinite(cents) || cents <= 0) return { error: "Bitte einen Betrag eintragen, z. B. 30 oder 45,50." };
-  const payout = str(form, "type") === "payout";
+  const type = str(form, "type");
+  const payout = type === "payout", deposit = type === "deposit";
   if (payout && cents > creditBalance(db(), userId)) return { error: "So viel Guthaben hat der Schüler nicht." };
-  addCredit(db(), { userId, amountCents: payout ? -cents : cents, reason: payout ? "payout" : "manual", note: str(form, "note") });
-  notifyUser(u, payout ? "Guthaben ausgezahlt" : "Guthaben gutgeschrieben",
-    payout ? `${formatPrice(cents)} deines Guthabens wurden an dich ausgezahlt.` : `Die Fahrschule hat dir ${formatPrice(cents)} gutgeschrieben.${str(form, "note") ? ` (${str(form, "note")})` : ""}`, "/termine#guthaben");
+  const note = deposit ? [str(form, "method") === "bar" ? "bar" : "Überweisung", str(form, "note")].filter(Boolean).join(" · ") : str(form, "note");
+  addCredit(db(), { userId, amountCents: payout ? -cents : cents, reason: payout ? "payout" : deposit ? "deposit" : "manual", note });
+  const balance = creditBalance(db(), userId);
+  notifyUser(u, payout ? "Guthaben ausgezahlt" : deposit ? "Einzahlung angekommen" : "Guthaben gutgeschrieben",
+    payout ? `${formatPrice(cents)} deines Guthabens wurden an dich ausgezahlt.`
+      : deposit ? `Deine Einzahlung über ${formatPrice(cents)} ist angekommen. Dein Guthaben: ${formatPrice(balance)}. Damit kannst du Grundbetrag, Fahrstunden und Prüfungen bezahlen – einfach bei „Offene Zahlungen“ auf „Mit Guthaben bezahlen“ tippen.`
+      : `Die Fahrschule hat dir ${formatPrice(cents)} gutgeschrieben.${note ? ` (${note})` : ""}`, "/termine#guthaben");
   revalidatePath(`/verwaltung/schueler/${userId}`);
-  return { ok: payout ? "Als ausgezahlt gebucht." : "Gutgeschrieben." };
+  revalidatePath("/verwaltung/finanzen");
+  return { ok: payout ? "Als ausgezahlt gebucht." : deposit ? "Einzahlung gebucht – der Schüler kann jetzt mit Guthaben bezahlen." : "Gutgeschrieben." };
 }
 
 // ============ Warteliste (Schüler) ===================================================

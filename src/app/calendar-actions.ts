@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { requireTeacher, requireUser } from "@/lib/server/auth";
-import { BookingError } from "@/lib/server/booking";
+import { BookingError, getBooking } from "@/lib/server/booking";
 import { addBlock, bookDrive, dayRanges, deleteBlock, finishEarly, mainTeacherId, saveTemplate, setDayOverride, toggleStrike } from "@/lib/server/drive-booking";
 import { isDriveKind } from "@/lib/server/training-repo";
-import { notifySchool, when } from "@/lib/server/payments/service";
+import { notifySchool, notifyStudent, when } from "@/lib/server/payments/service";
+import { applyShift, fillShiftText, planShift, ShiftError, type ShiftItem } from "@/lib/server/shift-day";
+import { sendMessage } from "@/lib/server/chat";
 import { formatPrice } from "@/lib/language-package";
 import { addDays, berlinToMs, isDayKey } from "@/lib/time";
 import type { DayRange } from "@/lib/calendar";
@@ -141,4 +143,36 @@ export async function bookDriveAction(form: FormData): Promise<void> {
   }
   refresh();
   redirect(target);
+}
+
+// ---------- Ganzen Tag verschieben ---------------------------------------------------------
+
+/** Alle Termine eines Tages ab Uhrzeit um X Minuten verschieben und alle betroffenen Schüler benachrichtigen. */
+export async function shiftDayAction(form: FormData): Promise<void> {
+  const teacher = await requireTeacher();
+  const day = str(form, "day"), week = str(form, "w");
+  const fromMin = toMin(str(form, "from") || "00:00"), delta = Number(str(form, "delta"));
+  const back = (msg: string, ok = false) => redirect(`/verwaltung/kalender?w=${week || day}&${ok ? "ok" : "fehler"}=${encodeURIComponent(msg)}`);
+  if (!isDayKey(day) || Number.isNaN(fromMin) || !Number.isFinite(delta) || delta === 0 || Math.abs(delta) > 240) back("Bitte Tag, Uhrzeit und Minuten wählen.");
+  let items: ShiftItem[] = [];
+  try {
+    items = planShift(db(), day, fromMin, delta);
+  } catch (e) {
+    if (e instanceof ShiftError) back(e.message);
+    throw e;
+  }
+  if (!items.length) back("An diesem Tag gibt es ab dieser Uhrzeit keine Termine zum Verschieben.");
+  applyShift(db(), items);
+  const text = str(form, "text");
+  if (form.get("notify") === "on") {
+    for (const it of items) {
+      const body = fillShiftText(text || "Hallo {name}, dein Termin heute verschiebt sich um {minuten} Minuten: neu um {neu} Uhr statt {alt} Uhr.", it, delta);
+      try { sendMessage(db(), { studentId: it.userId, sender: "school", senderId: teacher.id, body }); } catch { /* Chat optional */ }
+      const b = getBooking(db(), it.bookingId);
+      if (b) notifyStudent(b, "Dein Termin wurde verschoben", body);
+    }
+  }
+  refresh();
+  revalidatePath("/verwaltung/uebersicht");
+  back(`${items.length} ${items.length === 1 ? "Termin" : "Termine"} um ${delta > 0 ? "+" : ""}${delta} Minuten verschoben${form.get("notify") === "on" ? " – alle wurden benachrichtigt (Chat + Mitteilung)" : ""}.`, true);
 }

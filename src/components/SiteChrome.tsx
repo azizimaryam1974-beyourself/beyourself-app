@@ -19,7 +19,8 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
         { href: "/verwaltung/kalender", label: "Kalender", badge: teacherOpen },
         { href: "/verwaltung/nachrichten", label: "Nachrichten", badge: chatUnread },
         { href: "/verwaltung", label: "Schüler" },
-        { href: "/unterricht", label: "Live-Unterricht" },
+        { href: "/unterricht", label: "Theorie" },
+        { href: "/verwaltung/finanzen", label: "Finanzen" },
         { href: "/verwaltung/belege", label: "Belege" },
         { href: "/verwaltung/einstellungen", label: "Einstellungen" },
       ]
@@ -79,6 +80,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
     </header>
     {user && (
       <BottomNav items={bottom}>
+        {user.role === "teacher" && <Link href="/verwaltung/finanzen">💶 Finanzen</Link>}
         {user.role === "teacher" && <Link href="/verwaltung/belege">📷 Belege scannen</Link>}
         {user.role === "teacher" && <Link href="/unterricht">Live-Unterricht (Theorie)</Link>}
         {user.role === "teacher" && <Link href="/verwaltung/einstellungen">Einstellungen</Link>}

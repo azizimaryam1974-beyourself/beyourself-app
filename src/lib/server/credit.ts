@@ -13,13 +13,15 @@ import { randomUUID } from "node:crypto";
  *  refill                Termin nach später Absage neu besetzt → Ausfallgebühr zurück
  *  no_show               nicht erschienen / zu spät (Rest nach Ausfallgebühr)
  *  school_cancel         Fahrschule hat abgesagt
+ *  deposit               Einzahlung (Überweisung oder bar) – Vorauszahlung, zählt als Einnahme
  *  manual / payout       von der Fahrschule gebucht / ausgezahlt
  */
-export type CreditReason = "hold" | "hold_release" | "pay" | "cancel_free" | "cancel_late" | "refill" | "no_show" | "school_cancel" | "manual" | "payout";
+export type CreditReason = "deposit" | "hold" | "hold_release" | "pay" | "cancel_free" | "cancel_late" | "refill" | "no_show" | "school_cancel" | "manual" | "payout";
 
 export interface CreditEntry { id: string; userId: string; bookingId: string | null; amountCents: number; reason: CreditReason; note: string; createdAt: number }
 
 export const CREDIT_LABEL: Record<CreditReason, string> = {
+  deposit: "Einzahlung",
   hold: "für Zahlung verwendet", hold_release: "Zahlung nicht abgeschlossen – zurück", pay: "Fahrt mit Guthaben bezahlt",
   cancel_free: "Kostenlose Absage", cancel_late: "Späte Absage (Rest)", refill: "Termin wurde neu besetzt – Ausfallgebühr zurück",
   no_show: "Nicht erschienen / zu spät (Rest)", school_cancel: "Absage durch die Fahrschule", manual: "Gutschrift der Fahrschule", payout: "Ausgezahlt",

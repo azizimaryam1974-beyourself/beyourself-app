@@ -37,6 +37,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 | Übersicht (Dashboard, 01.11.) | Wetter (DWD über Bright Sky) konnte hier nicht abgerufen werden – auf dem Server prüfen. Zahlen mit echten Fahrten im Februar prüfen |
 | Chat + Belege (01.11.) | Mit Testkonten durchgespielt (Anhang, Antworten, Leeren, Export-ZIP). Echt testen: Foto mit iPhone-Kamera (HEIC-Bilder zeigt der Browser evtl. nicht als Vorschau, Export geht) |
 | Profilfoto + Pflichtangaben + Glocke (01.11.) | Mit Testkonten durchgespielt (Anmeldung mit Geburtstag/Adresse/Telefon, alte Schüler müssen nachtragen, Foto hochladen, Glocke mit Geburtstagen). Echt testen: Foto direkt mit iPhone-Kamera |
+| Finanzen, Einzahlung aufs Guthaben, Tag verschieben (01.11.) | Mit Testkonten durchgespielt. Echt testen: Datumsfeld auf dem iPhone (Korrektur nur im Testbrowser geprüft), Bankverbindung eintragen sobald Geschäftskonto da |
 | Expo-App (iPhone) | **Noch nie** auf Maryams Handy geöffnet; kennt Kalender/Theorie/Fragen noch nicht |
 
 ## 3. Entscheidungen von Maryam (Kurzfassung – Details in ARBEITSWEISE.md)

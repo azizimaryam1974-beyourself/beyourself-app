@@ -112,7 +112,7 @@ export function ChatView({ studentId, side, initial, otherName, canClear }: {
                         📎 {m.file.name} <small>{Math.max(1, Math.round(m.file.size / 1024))} KB</small>
                       </a>)}
                   {m.body && <p>{m.body}</p>}
-                  <span className="chat-time">{fmt.format(m.createdAt)}{mine && (m.readAt ? " · gelesen" : "")}</span>
+                  <span className="chat-time">{fmt.format(m.createdAt)}{mine && side === "school" && (m.readAt ? " · gelesen" : " · zugestellt")}</span>
                 </div>
                 {menu === m.id && (
                   <button type="button" className="chat-reply-btn" onClick={(e) => { e.stopPropagation(); setReply(m); setMenu(null); }}>↩︎ Antworten</button>

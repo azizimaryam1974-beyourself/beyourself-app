@@ -7,6 +7,7 @@ import { dayRanges, listBlocks, mainTeacherId, STRIKE_NOTE } from "./drive-booki
 import { getProfile, grundbetragPaid, listRecords, testfahrtMinutes } from "./training-repo";
 import { creditBalance } from "./credit";
 import { examMissing, listExams, type Exam } from "./exams";
+import type { MoneyCategory } from "./finance";
 
 /**
  * Zahlen und Listen für die Übersicht der Fahrschule (Startseite nach dem Login).
@@ -18,9 +19,9 @@ export const IDLE_DAYS = 14;
 const DAY = 86_400_000;
 
 type Row = Record<string, unknown>;
-export type Category = "fahrten" | "grundbetrag" | "pruefungen" | "sprachpaket" | "sonstiges";
+export type Category = MoneyCategory;
 export const CATEGORY_LABEL: Record<Category, string> = {
-  fahrten: "Fahrstunden", grundbetrag: "Grundbeträge", pruefungen: "Prüfungen (Fahrschule)", sprachpaket: "Sprachpakete", sonstiges: "Sonstiges",
+  fahrten: "Fahrstunden", grundbetrag: "Grundbeträge", pruefungen: "Prüfungen (Fahrschule)", sprachpaket: "Sprachpakete", guthaben: "Einzahlungen aufs Guthaben", sonstiges: "Sonstiges",
 };
 
 interface PaidRow { offer_id: string; price_cents: number; credit_cents: number; paid_at: number; exam_id: string | null; lines: string; starts_at: number | null }
@@ -92,6 +93,14 @@ export function buildDashboard(db: Database.Database, now = Date.now()): Dashboa
     } else if (r.paid_at >= prevStart && r.paid_at < prevSameDay) revenuePrev += school;
     const wi = weekOf(r.paid_at);
     if (wi >= 0 && !weeks[wi].future) { weeks[wi].school += school; weeks[wi].tuev += tuev; }
+  }
+  // Einzahlungen aufs Guthaben (Vorauszahlung) sind Einnahmen, Auszahlungen ziehen ab
+  const moves = db.prepare(`SELECT amount_cents, created_at FROM credit_ledger WHERE reason IN ('deposit','payout')`).all() as Array<{ amount_cents: number; created_at: number }>;
+  for (const mv of moves) {
+    if (mv.created_at >= monthStart) { revenueMonth += mv.amount_cents; cat.set("guthaben", (cat.get("guthaben") ?? 0) + mv.amount_cents); }
+    else if (mv.created_at >= prevStart && mv.created_at < prevSameDay) revenuePrev += mv.amount_cents;
+    const wi = weekOf(mv.created_at);
+    if (wi >= 0 && !weeks[wi].future) weeks[wi].school += mv.amount_cents;
   }
   // Ausblick: schon bezahlte künftige Fahrten/Prüfungen nach Termin-Woche (gestrichelt)
   for (const r of paid) {

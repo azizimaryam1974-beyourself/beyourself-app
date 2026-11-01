@@ -1,3 +1,4 @@
+import { getBankDetails } from "@/lib/server/finance";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/server/auth";
@@ -146,6 +147,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
   const products = listOffers(d, { bookableOnly: true }).filter((o) => o.kind === "product" || (o.kind === "language" && pkg?.status === "booked"));
   const cfg = priceConfig(d);
   const credit = creditBalance(d, user.id);
+  const bank = getBankDetails(d);
   const ledger = listCredit(d, user.id, 20);
   const waits = listWaitlist(d, user.id, dayKey(now));
   const waitDays = Array.from({ length: 21 }, (_, i) => addDays(dayKey(now), i + 1)).filter((x) => !closedReason(x));
@@ -376,7 +378,15 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
       <Panel id="guthaben" icon="coin" title="Guthaben" right={<span className="credit-big">{formatPrice(credit)}</span>} help={<>
         <p>Sagst du rechtzeitig ab, bekommst du das Geld als Guthaben zurück.</p>
         <p>Es wird bei deiner nächsten Buchung automatisch verrechnet – du musst nichts tun. Am Ende der Ausbildung kann es auf Wunsch ausgezahlt werden.</p>
+        <p><strong>Guthaben aufladen:</strong> Du kannst auch vorab einen größeren Betrag überweisen oder bar in der Fahrschule zahlen (z. B. 750 €). Davon bezahlst du dann Grundbetrag, Fahrstunden und Prüfungen mit einem Tipp.</p>
       </>}>
+        <details className="mini-details"><summary>Guthaben aufladen</summary>
+          <div className="topup">
+            <p>Überweise einen Betrag deiner Wahl oder zahl bar in der Fahrschule. Sobald das Geld da ist, trägt die Fahrschule es ein – du bekommst eine Nachricht.</p>
+            {bank ? <pre className="bank-box">{bank}{"\n"}Verwendungszweck: Guthaben {user.name}</pre>
+              : <p className="hint">Die Bankverbindung trägt die Fahrschule bald hier ein. Bis dahin: bar in der Fahrschule oder im Chat nachfragen.</p>}
+          </div>
+        </details>
         {ledger.length > 0 && (
           <details className="mini-details"><summary>Bewegungen ansehen</summary>
           <ul className="list ledger">

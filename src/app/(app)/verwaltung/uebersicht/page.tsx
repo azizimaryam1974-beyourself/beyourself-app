@@ -146,17 +146,17 @@ export default async function DashboardPage() {
         </div>
 
         <div className="dash-kpis">
-          <div className="dash-kpi"><span className="dash-ico">{Icon.people}</span><div><small>In Ausbildung</small><strong>{k.students}</strong>{k.newStudents > 0 && <em>+{k.newStudents} neu (30 Tage)</em>}</div></div>
-          <div className="dash-kpi"><span className="dash-ico">{Icon.euro}</span><div><small>Einnahmen {new Intl.DateTimeFormat("de-DE", { month: "long" }).format(now)}</small><strong>{euro(k.revenueMonth)}</strong>
+          <Link href="/verwaltung?ansicht=tabelle" className="dash-kpi"><span className="dash-ico">{Icon.people}</span><div><small>In Ausbildung</small><strong>{k.students}</strong>{k.newStudents > 0 && <em>+{k.newStudents} neu (30 Tage)</em>}</div></Link>
+          <Link href="/verwaltung/finanzen" className="dash-kpi"><span className="dash-ico">{Icon.euro}</span><div><small>Einnahmen {new Intl.DateTimeFormat("de-DE", { month: "long" }).format(now)}</small><strong>{euro(k.revenueMonth)}</strong>
             <em>mit TÜV: {euro(k.revenueMonth + k.tuevMonth)}</em>
-            {diff !== null && <em className={diff >= 0 ? "up" : "down"}>{diff >= 0 ? "▲" : "▼"} {Math.abs(diff)} % zum Vormonat</em>}</div></div>
-          <div className="dash-kpi"><span className="dash-ico">{Icon.clock}</span><div><small>Offene Zahlungen</small><strong>{euro(k.openPayments)}</strong><em>{k.openCount} offen</em></div></div>
-          <div className="dash-kpi"><span className="dash-ico">{Icon.gauge}</span><div><small>Diese Woche gebucht</small><strong>{k.utilization} %</strong><em>{Math.round(k.bookedMin / 60)} von {Math.round(k.workMin / 60)} Std.</em></div></div>
+            {diff !== null && <em className={diff >= 0 ? "up" : "down"}>{diff >= 0 ? "▲" : "▼"} {Math.abs(diff)} % zum Vormonat</em>}</div></Link>
+          <Link href="/verwaltung/finanzen?art=offen" className="dash-kpi"><span className="dash-ico">{Icon.clock}</span><div><small>Offene Zahlungen</small><strong>{euro(k.openPayments)}</strong><em>{k.openCount} offen</em></div></Link>
+          <Link href="/verwaltung/kalender" className="dash-kpi"><span className="dash-ico">{Icon.gauge}</span><div><small>Diese Woche gebucht</small><strong>{k.utilization} %</strong><em>{Math.round(k.bookedMin / 60)} von {Math.round(k.workMin / 60)} Std.</em></div></Link>
         </div>
 
         <section className="dash-card">
           <div className="dash-card-head">
-            <div><h2>Einnahmen</h2><p className="hint">Eingegangenes Geld pro Woche · gestrichelt: schon bezahlte Termine der nächsten Wochen</p></div>
+            <div><h2><Link href="/verwaltung/finanzen" className="dash-h-link">Einnahmen →</Link></h2><p className="hint">Eingegangenes Geld pro Woche · gestrichelt: schon bezahlte Termine der nächsten Wochen</p></div>
             <div className="dash-legend">
               <span><i style={{ background: "#e0a24a" }} /> Fahrschule</span>
               <span><i style={{ background: "#f6f0e6" }} /> TÜV (durchlaufend)</span>
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
           <RevenueChart weeks={d.weeks} />
           <div className="dash-cats">
             {d.byCategory.length === 0 ? <span className="hint">Diesen Monat noch keine Einnahmen.</span> : d.byCategory.map((c) => (
-              <span key={c.cat}><small>{CATEGORY_LABEL[c.cat]}</small><strong>{euro(c.cents)}</strong></span>
+              <Link key={c.cat} href={`/verwaltung/finanzen?bereich=${c.cat}`}><small>{CATEGORY_LABEL[c.cat]}</small><strong>{euro(c.cents)}</strong></Link>
             ))}
             {k.tuevMonth > 0 && <span className="muted"><small>TÜV-Gebühren (weiterleiten)</small><strong>{euro(k.tuevMonth)}</strong></span>}
           </div>
@@ -223,6 +223,12 @@ export default async function DashboardPage() {
                     </Link></li>))}
                   </ul>
                 )}
+                {d.today.some((x) => x.private && x.end > now) && <>
+                  <h3>Heute privat</h3>
+                  <ul>{d.today.filter((x) => x.private && x.end > now).map((x, i) => (
+                    <li key={i}><Link href="/verwaltung/kalender"><span className="bell-ico">🔒</span><span><strong>{fmtTime(x.start)}–{fmtTime(x.end)} Uhr</strong><small>{x.title}</small></span></Link></li>))}
+                  </ul>
+                </>}
                 {newDocs.length > 0 && <>
                   <h3>Neue Unterlagen</h3>
                   <ul>{newDocs.map((x) => (

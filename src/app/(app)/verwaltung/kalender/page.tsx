@@ -55,13 +55,13 @@ function hourCells(work: Interval[], blocks: Block[], items: Item[]): Cell[] {
   return cells;
 }
 
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ w?: string; fehler?: string }> }) {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ w?: string; fehler?: string; ok?: string }> }) {
   await requireTeacher();
   await runBookingJobs();
   const d = db();
   syncFinishedDrives(d);
   const tid = mainTeacherId(d)!;
-  const { w, fehler } = await searchParams;
+  const { w, fehler, ok } = await searchParams;
   const now = Date.now();
   const today = dayKey(now);
   const monday = mondayOf(isDayKey(w) ? w : today);
@@ -75,6 +75,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     const b = s.bookings.find((x) => ["requested", "awaiting_payment", "paid"].includes(x.status));
     return b && (s.status === "reserved" || s.status === "booked") ? [{ b, start: s.startsAt, end: s.endsAt }] : [];
   });
+  const drivesOf = (day: string) => items.filter((i) => dayKey(i.start) === day && i.start > now && !i.b.examId)
+    .map((i) => ({ min: minOf(i.start, day), name: i.b.userName ?? "" }));
   const t = (k: "confirm" | "decline" | "cancel") => listTemplates(d, k).map(({ id, label, body }) => ({ id, label, body }));
   const confirmT = t("confirm"), declineT = t("decline"), cancelT = t("cancel");
   const providers = availableProviders();
@@ -106,6 +108,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       <PageHead title="Kalender" action={<Link className="btn btn-glass btn-small" href="/verwaltung/einstellungen/arbeitszeiten">Normale Woche & Urlaub</Link>} />
 
       {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
+      {ok && <div className="alert alert-ok" role="status">{ok}</div>}
       {providers.length === 0 && (
         <div className="alert alert-info"><strong>Online-Zahlung ist noch nicht eingerichtet.</strong> Buchungen funktionieren schon; Zahlungen markierst du mit „Bar/EC bezahlt“.</div>
       )}
@@ -182,7 +185,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               <div key={day} className={`tl-day ${day === today ? "today" : ""} ${day < today ? "past" : ""}`}>
                 <div className="tl-head">
                   <span>{fmtDayShort(berlinToMs(day, "12:00"))}{dr.custom && !closed && <i className="custom-dot" title="Für diesen Tag angepasst" />}</span>
-                  {!closed && day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} />}
+                  {!closed && day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} drives={drivesOf(day)} />}
                 </div>
                 <div className="tl-body">
                   {closed && <div className="tl-closed">{closed}</div>}
@@ -247,7 +250,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               <div key={day} className={`tl-list-day ${day === today ? "today" : ""}`}>
                 <div className="tl-list-head">
                   <strong>{fmtDay(berlinToMs(day, "12:00"))}</strong>
-                  {closed ? <span className="badge badge-muted">{closed}</span> : day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} />}
+                  {closed ? <span className="badge badge-muted">{closed}</span> : day >= today && <DayTools key={`${day}-${JSON.stringify(dr.ranges)}`} day={day} ranges={dr.ranges} custom={dr.custom} week={monday} drives={drivesOf(day)} />}
                 </div>
                 {cells.length > 0 && (
                   <div className="hour-chips" aria-label="Stunden antippen zum Durchstreichen">

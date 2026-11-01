@@ -6,6 +6,8 @@ import { testfahrtMinutes } from "@/lib/server/training-repo";
 import { availableProviders } from "@/lib/server/payments/service";
 import { PageHead } from "@/components/PageHead";
 import { SettingsForm } from "../SettingsForms";
+import { getBankDetails } from "@/lib/server/finance";
+import { saveBankAction } from "@/app/finance-actions";
 
 export const metadata = { title: "Regeln & Verbindungen" };
 export const dynamic = "force-dynamic";
@@ -22,6 +24,14 @@ export default async function RulesPage() {
       <section className="card">
         <h2>Regeln für Buchungen</h2>
         <SettingsForm s={getSettings(d)} testfahrtMinutes={testfahrtMinutes(d)} />
+      </section>
+      <section className="card">
+        <h2>Bankverbindung für Vorauszahlungen</h2>
+        <p className="hint">Schüler sehen diese Angaben bei „Guthaben aufladen“. Wenn Geld ankommt, trägst du es in der Schülerakte bei „Guthaben“ → „Einzahlung erhalten“ ein.</p>
+        <form action={saveBankAction} className="akte-form" key={getBankDetails(d)}>
+          <textarea name="bank" rows={4} maxLength={500} defaultValue={getBankDetails(d)} placeholder={"Kontoinhaber: Fahrschule beyourself\nIBAN: DE..\nBank: Kasseler Sparkasse"} aria-label="Bankverbindung" />
+          <button className="btn btn-secondary btn-small" type="submit">Speichern</button>
+        </form>
       </section>
       <section className="card">
         <h2>Verbindungen</h2>

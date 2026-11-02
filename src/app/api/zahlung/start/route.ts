@@ -1,7 +1,7 @@
 import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
-import { appUrl, PaymentError, startPayment, type Provider } from "@/lib/server/payments/service";
+import { appUrl, isAppRequest, PaymentError, startPayment, type Provider } from "@/lib/server/payments/service";
 
 /** Formular "Jetzt bezahlen" → weiter zur Bezahlseite von Stripe / PayPal. */
 export async function POST(req: Request) {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const back = (msg: string) => NextResponse.redirect(`${appUrl()}/termine?fehler=${encodeURIComponent(msg)}#offen`, 303);
   if (form.get("terms") !== "on") return back("Bitte bestätige die Buchungsbedingungen.");
   try {
-    const url = await startPayment(bookingId, user.id, provider);
+    const url = await startPayment(bookingId, user.id, provider, isAppRequest(req));
     return NextResponse.redirect(url, 303);
   } catch (e) {
     if (e instanceof PaymentError) return back(e.message);

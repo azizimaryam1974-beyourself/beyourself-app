@@ -19,6 +19,16 @@ import { fmtDay } from "@/lib/time";
 
 export type Provider = "stripe" | "paypal" | "test" | "guthaben";
 
+/** Kommt die Anfrage aus der beyourself-App (Kennung im User-Agent)? */
+export function isAppRequest(req: Request): boolean {
+  return /beyourselfApp\//.test(req.headers.get("user-agent") ?? "");
+}
+
+/** Zurück in die App springen (schließt den In-App-Browser von Stripe), Ziel-Seite wird dort geöffnet. */
+export function appReturnUrl(path: string): string {
+  return `beyourself://zurueck?ziel=${encodeURIComponent(path)}`;
+}
+
 export function appUrl(): string {
   return (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 }
@@ -73,7 +83,7 @@ export function notifySchool(b: Booking | null, title: string, body: string): vo
 export class PaymentError extends Error {}
 
 /** Liefert die Adresse der Bezahlseite (Stripe/PayPal) für eine bestätigte Buchung. */
-export async function startPayment(bookingId: string, userId: string, provider: Provider): Promise<string> {
+export async function startPayment(bookingId: string, userId: string, provider: Provider, app = false): Promise<string> {
   const b = getBooking(db(), bookingId);
   if (!b || b.userId !== userId) throw new PaymentError("Buchung nicht gefunden.");
   if (b.status !== "awaiting_payment") throw new PaymentError("Für diese Buchung ist keine Zahlung offen.");
@@ -92,14 +102,14 @@ export async function startPayment(bookingId: string, userId: string, provider: 
 
   if (provider === "stripe") {
     // Offene Bezahlseite wiederverwenden (Schüler klickt zweimal / kommt zurück).
-    if (b.provider === "stripe" && b.providerRef) {
+    if (!app && b.provider === "stripe" && b.providerRef) {
       try {
         const s = await stripe.getCheckout(b.providerRef);
         if (s.status === "open" && s.url) return s.url;
       } catch { /* neu anlegen */ }
     }
     const s = await stripe.createCheckout({
-      bookingId: b.id, title: b.title, description, amountCents: toPay, email: b.userEmail ?? "", expiresAt: b.payDeadline, baseUrl: appUrl(),
+      bookingId: b.id, title: b.title, description, amountCents: toPay, email: b.userEmail ?? "", expiresAt: b.payDeadline, baseUrl: appUrl(), app,
     });
     setPaymentRef(db(), b.id, "stripe", s.id, now);
     if (!s.url) throw new PaymentError("Stripe hat keine Bezahlseite geliefert.");

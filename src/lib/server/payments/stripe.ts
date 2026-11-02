@@ -51,7 +51,7 @@ export interface CheckoutSession {
 }
 
 export async function createCheckout(o: {
-  bookingId: string; title: string; description: string; amountCents: number; email: string; expiresAt: number; baseUrl: string;
+  bookingId: string; title: string; description: string; amountCents: number; email: string; expiresAt: number; baseUrl: string; app?: boolean;
 }): Promise<CheckoutSession> {
   // Stripe erlaubt 30 Min bis 24 Std Gültigkeit.
   const min = Date.now() + 31 * 60_000;
@@ -70,13 +70,13 @@ export async function createCheckout(o: {
     line_items: [{ quantity: "1", price_data: { currency: "eur", unit_amount: String(o.amountCents), product_data: { name: o.title, description: o.description || undefined } } } as Params],
     metadata: { booking: o.bookingId },
     payment_intent_data: { metadata: { booking: o.bookingId }, description: `${o.title} (${o.bookingId.slice(0, 8)})` },
-    success_url: `${o.baseUrl}/api/zahlung/stripe/zurueck?b=${o.bookingId}&s={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${o.baseUrl}/termine?zahlung=abgebrochen`,
-  }, `checkout-${o.bookingId}-${expires}`);
+    success_url: `${o.baseUrl}/api/zahlung/stripe/zurueck?b=${o.bookingId}&s={CHECKOUT_SESSION_ID}${o.app ? "&app=1" : ""}`,
+    cancel_url: o.app ? `${o.baseUrl}/api/app/zurueck?ziel=${encodeURIComponent("/termine?zahlung=abgebrochen")}` : `${o.baseUrl}/termine?zahlung=abgebrochen`,
+  }, `checkout-${o.bookingId}-${expires}${o.app ? "-app" : ""}`);
 }
 
 /** Guthaben aufladen: freier Betrag, kein Termin. Kennzeichen in metadata.kind = "topup". */
-export async function createTopupCheckout(o: { userId: string; amountCents: number; email: string; baseUrl: string }): Promise<CheckoutSession & { metadata?: Record<string, string> }> {
+export async function createTopupCheckout(o: { userId: string; amountCents: number; email: string; baseUrl: string; app?: boolean }): Promise<CheckoutSession & { metadata?: Record<string, string> }> {
   const pmc = process.env.STRIPE_PAYMENT_METHOD_CONFIG || undefined;
   return call("POST", "/checkout/sessions", {
     mode: "payment",
@@ -88,8 +88,8 @@ export async function createTopupCheckout(o: { userId: string; amountCents: numb
     line_items: [{ quantity: "1", price_data: { currency: "eur", unit_amount: String(o.amountCents), product_data: { name: "Guthaben aufladen – Fahrschule beyourself" } } } as Params],
     metadata: { kind: "topup", user: o.userId },
     payment_intent_data: { metadata: { kind: "topup", user: o.userId }, description: `Guthaben aufladen (${o.userId.slice(0, 8)})` },
-    success_url: `${o.baseUrl}/api/guthaben/zurueck?s={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${o.baseUrl}/termine?aufladen=abgebrochen#guthaben`,
+    success_url: `${o.baseUrl}/api/guthaben/zurueck?s={CHECKOUT_SESSION_ID}${o.app ? "&app=1" : ""}`,
+    cancel_url: o.app ? `${o.baseUrl}/api/app/zurueck?ziel=${encodeURIComponent("/termine?aufladen=abgebrochen#guthaben")}` : `${o.baseUrl}/termine?aufladen=abgebrochen#guthaben`,
   });
 }
 

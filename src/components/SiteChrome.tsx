@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppBridge } from "./AppBridge";
 import { currentUser } from "@/lib/server/auth";
 import { logoutAction } from "@/app/actions";
 import { Brand } from "./Brand";
@@ -78,6 +79,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
         </div>
       </div>
     </header>
+    {user && <AppBridge userId={user.id} />}
     {user && (
       <BottomNav items={bottom}>
         {user.role === "teacher" && <Link href="/verwaltung/finanzen">💶 Finanzen</Link>}

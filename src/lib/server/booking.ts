@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import { pushToUser } from "./push";
 import { randomUUID } from "node:crypto";
 
 /**
@@ -478,6 +479,7 @@ export interface Notification { id: string; userId: string; bookingId: string | 
 export function addNotification(db: Database.Database, userId: string, bookingId: string | null, title: string, body: string, now = Date.now()): Notification {
   const n = { id: randomUUID(), userId, bookingId, title, body, createdAt: now, readAt: null };
   db.prepare(`INSERT INTO notifications (id,user_id,booking_id,title,body,created_at) VALUES (?,?,?,?,?,?)`).run(n.id, userId, bookingId, title, body, now);
+  pushToUser(db, userId, title, body, bookingId); // zusätzlich aufs Handy (wenn die App installiert ist)
   return n;
 }
 

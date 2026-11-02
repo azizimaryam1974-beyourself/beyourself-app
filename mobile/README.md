@@ -1,8 +1,14 @@
-# beyourself – Handy-App (Expo)
+# beyourself – Handy-App (Expo) für iPhone und Android
 
-Schüler-App: Login · Mein Konto · Live-Untertitel in der eigenen Sprache · Vorlesen ·
-Schriftgröße · Arabisch/Farsi von rechts nach links · Nachlesen vergangener Stunden.
-Spricht mit https://fahrschule-beyourself.de (Token-Login, gleiche Konten wie die Webseite).
+Die App zeigt **die komplette Webseite** fahrschule-beyourself.de – für Schüler **und** Fahrschule, mit allem, was es dort gibt
+(Kalender, Schüler, Chat, Finanzen, Belege, Unterlagen, Live-Unterricht …). Neue Funktionen auf der Webseite sind sofort
+auch in der App, ohne neue App-Version.
+
+Dazu, was nur eine App kann:
+- **Push-Benachrichtigungen** (jede Mitteilung im Konto: Buchung, Erinnerung, Chat-Nachricht …) – Tipp darauf öffnet die passende Seite
+- **Bezahlen im sicheren In-App-Browser** (Apple Pay, Google Pay, Klarna funktionieren dort), danach automatisch zurück in die App
+- Kamera für Ausweis/Belege, Mikrofon für den Live-Unterricht, Wischen zurück, Ziehen zum Aktualisieren, Android-Zurück-Taste
+- Eigenes App-Symbol (goldenes „b“), Startbild, Telefon/E-Mail/Karten öffnen die passenden Apps
 
 ## Auf dem iPhone ansehen (Expo Go)
 
@@ -26,6 +32,10 @@ Später aktualisieren: `cd beyourself-app && git pull && cd mobile && npm instal
 
 - SDK 58, Expo Router (`src/app`), Pakete immer mit `npx expo install`
 - Server-Adresse: `EXPO_PUBLIC_API_URL` (Standard: https://fahrschule-beyourself.de)
-- API: `/api/app/login`, `/api/app/me`, `/api/app/lessons/[id]`, `/api/live/[id]/stream` (SSE),
-  `/api/app/tts` (Vorlesen, MP3 über den Server – Azure-Schlüssel bleibt auf dem Server)
+- Aufbau: `src/app/index.tsx` = WebView-Hülle. Kennung im User-Agent: `beyourselfApp/1.0` (der Server erkennt daran die App).
+- Push: Webseite (`src/components/AppBridge.tsx`) fragt per `postMessage` nach dem Token → App liefert Expo-Push-Token →
+  Webseite meldet ihn an `/api/push`. Der Server schickt jede `addNotification` zusätzlich als Push (`src/lib/server/push.ts`).
+  Push braucht ein EAS-Projekt (`eas init` → `extra.eas.projectId`) und eine echte App (Development Build/TestFlight), nicht Expo Go.
+- Bezahlen: Stripe-Checkout wird im `openAuthSessionAsync` geöffnet; Erfolg/Abbruch leiten auf `beyourself://zurueck?ziel=…`.
+- Bekannte Grenze: Datei-Downloads (Excel-Export, ZIP) bitte am PC/Laptop.
 - Prüfen: `npx tsc --noEmit` · `npx expo export --platform ios`

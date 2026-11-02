@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   other: { "geo.region": "DE-HE", "geo.placename": "Kassel", "geo.position": `${SCHOOL.geo.lat};${SCHOOL.geo.lon}`, ICBM: `${SCHOOL.geo.lat}, ${SCHOOL.geo.lon}` },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0f1a2c" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0f1a2c", viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

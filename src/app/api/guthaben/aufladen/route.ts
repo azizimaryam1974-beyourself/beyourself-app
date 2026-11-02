@@ -1,7 +1,7 @@
 import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
-import { appUrl } from "@/lib/server/payments/service";
+import { appUrl, isAppRequest } from "@/lib/server/payments/service";
 import { createTopupCheckout, stripeEnabled } from "@/lib/server/payments/stripe";
 import { parseTopupAmount, TOPUP_MAX_CENTS, TOPUP_MIN_CENTS } from "@/lib/server/topup";
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const cents = parseTopupAmount(own || String(form.get("amount") ?? ""));
   if (cents == null) return back(`Bitte einen Betrag zwischen ${TOPUP_MIN_CENTS / 100} € und ${TOPUP_MAX_CENTS / 100} € eingeben.`);
   try {
-    const s = await createTopupCheckout({ userId: user.id, amountCents: cents, email: user.email.endsWith("@invalid") ? "" : user.email, baseUrl: appUrl() });
+    const s = await createTopupCheckout({ userId: user.id, amountCents: cents, email: user.email.endsWith("@invalid") ? "" : user.email, baseUrl: appUrl(), app: isAppRequest(req) });
     if (!s.url) throw new Error("Stripe hat keine Bezahlseite geliefert.");
     return NextResponse.redirect(s.url, 303);
   } catch (e) {

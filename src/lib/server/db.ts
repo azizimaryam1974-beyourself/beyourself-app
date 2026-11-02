@@ -7,6 +7,7 @@ import { RECEIPT_SCHEMA } from "./receipts";
 import { DETAILS_SCHEMA } from "./user-details";
 import { DOCS_SCHEMA } from "./student-docs";
 import { AUDIT_SCHEMA } from "./audit";
+import { PUSH_SCHEMA } from "./push";
 
 /**
  * SQLite reicht für eine Fahrschule locker aus (eine Datei, einfache
@@ -83,6 +84,7 @@ export function openDatabase(file: string): Database.Database {
   db.exec(DETAILS_SCHEMA);
   db.exec(DOCS_SCHEMA);
   db.exec(AUDIT_SCHEMA);
+  db.exec(PUSH_SCHEMA);
   seedBookingDefaults(db);
   return db;
 }

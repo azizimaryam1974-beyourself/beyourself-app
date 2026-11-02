@@ -271,8 +271,16 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
                       {training.profile.manualApproval ? "Die Fahrschule bestätigt deine Anfrage; die Zeit ist so lange für dich reserviert."
                         : `Die Zeit wird sofort für dich reserviert. Danach hast du ${settings.payWindowMin} Minuten zum Bezahlen.`}
                     </p>
+                    {!training.profile.manualApproval && credit >= priceCents(opt.kind, minutes, cfg) && (
+                      <div className="credit-pay">
+                        <label className="check"><input type="checkbox" name="payCredit" defaultChecked />
+                          <span><strong>Gleich mit Guthaben bezahlen</strong> – du hast {formatPrice(credit)}, danach noch {formatPrice(credit - priceCents(opt.kind, minutes, cfg))}.</span></label>
+                        <label className="check"><input type="checkbox" name="terms" />
+                          <span>Ich akzeptiere die <Link href="/buchungsbedingungen" target="_blank">Buchungsbedingungen</Link> und verlange, dass die Fahrschule vor Ablauf der Widerrufsfrist mit der Leistung beginnt. Mir ist bekannt, dass mein Widerrufsrecht mit vollständiger Erbringung der Leistung erlischt.</span></label>
+                      </div>
+                    )}
                     <div className="row">
-                      <button className="btn btn-gold" type="submit">{training.profile.manualApproval ? "Anfrage senden" : "Verbindlich reservieren"}</button>
+                      <button className="btn btn-gold" type="submit">{training.profile.manualApproval ? "Anfrage senden" : credit >= priceCents(opt.kind, minutes, cfg) ? "Buchen" : "Verbindlich reservieren"}</button>
                       <Link className="btn btn-secondary btn-small" href={link({ k: opt.kind, d: minutes })}>Andere Zeit</Link>
                     </div>
                   </form>

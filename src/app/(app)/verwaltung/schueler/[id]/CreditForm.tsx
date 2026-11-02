@@ -8,7 +8,7 @@ export function CreditForm({ userId }: { userId: string }) {
   const [state, action, pending] = useActionState(adjustCreditAction, {} as ActionState);
   return (
     <details className="edit-box">
-      <summary className="btn btn-secondary btn-small">Einzahlung / Guthaben ändern</summary>
+      <summary className="btn btn-gold btn-small">Guthaben aufladen (Einzahlung bar/Überweisung)</summary>
       <form action={action} className="price-form">
         <input type="hidden" name="userId" value={userId} />
         <div className="row">

@@ -1153,3 +1153,4 @@ a.dash-kpi::after { content: "›"; margin-left: auto; opacity: .35; font-size: 
 .chip input { accent-color: var(--gold-deep); }
 .topup-own { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .topup-own input { width: 120px; }
+.credit-pay { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(198, 164, 101, 0.14); border: 1px solid rgba(198, 164, 101, 0.4); }

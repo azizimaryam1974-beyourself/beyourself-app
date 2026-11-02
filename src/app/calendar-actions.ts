@@ -9,7 +9,7 @@ import { requireTeacher, requireUser } from "@/lib/server/auth";
 import { BookingError, getBooking } from "@/lib/server/booking";
 import { addBlock, bookDrive, dayRanges, deleteBlock, finishEarly, mainTeacherId, saveTemplate, setDayOverride, toggleStrike } from "@/lib/server/drive-booking";
 import { isDriveKind } from "@/lib/server/training-repo";
-import { notifySchool, notifyStudent, when } from "@/lib/server/payments/service";
+import { notifySchool, notifyStudent, PaymentError, startPayment, when } from "@/lib/server/payments/service";
 import { applyShift, fillShiftText, planShift, ShiftError, type ShiftItem } from "@/lib/server/shift-day";
 import { sendMessage } from "@/lib/server/chat";
 import { formatPrice } from "@/lib/language-package";
@@ -145,6 +145,18 @@ export async function bookDriveAction(form: FormData): Promise<void> {
     if (b.status === "requested") {
       notifySchool(b, `Neue Anfrage: ${user.name}`, `${user.name} möchte ${b.title} am ${when(b)} (${formatPrice(b.priceCents)}). Bitte bestätigen oder ablehnen.`);
       target = "/termine?angefragt=1#meine";
+    } else if (b.status === "awaiting_payment" && form.get("payCredit") === "on") {
+      // Direkt mit Guthaben bezahlen (Schüler hat vorab eingezahlt) – nur mit Zustimmung zu den Bedingungen
+      if (form.get("terms") !== "on") {
+        target = `/termine?fehler=${encodeURIComponent("Termin ist reserviert. Bitte noch die Buchungsbedingungen bestätigen und bezahlen.")}#offen`;
+      } else {
+        try {
+          const url = await startPayment(b.id, user.id, "guthaben");
+          target = url.replace(/^https?:\/\/[^/]+/, "") || "/termine?bezahlt=1";
+        } catch (e) {
+          target = `/termine?fehler=${encodeURIComponent(e instanceof PaymentError ? e.message : "Bezahlen mit Guthaben hat nicht geklappt – bitte unten bezahlen.")}#offen`;
+        }
+      }
     }
   } catch (e) {
     const msg = e instanceof BookingError ? e.message : "Das hat nicht geklappt. Bitte versuche es noch einmal.";

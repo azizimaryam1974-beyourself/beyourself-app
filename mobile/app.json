@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "beyourself Fahrschule",
-    "slug": "beyourself",
+    "slug": "fahrschule-be-yourself",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
@@ -63,6 +63,7 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "owner": "beyourself-fahrschule"
   }
 }

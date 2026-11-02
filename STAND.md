@@ -110,7 +110,10 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
    Schüler gibt Betrag ein (z. B. 750 €) → Stripe Checkout (Karte/Apple Pay/Google Pay/Link/Klarna) → Webhook bucht
    automatisch „Einzahlung“ (reason deposit, zählt als Einnahme) → Nachricht an Schüler + Fahrschule.
    Vorher mit Maryam klären: Mindest-/Höchstbetrag (Gebühren ~1,5 % Karte, Klarna mehr; Überweisung Finom kostenlos).
-2. Danach: App (Expo) starten. Vorher klären: iPhone zuerst oder auch Android, Push-Benachrichtigungen,
+2. ✔ (02.11.) App-Grundgerüst fertig: komplette Webseite in der App + Push + Bezahlen im In-App-Browser. OFFEN: Expo-Konto (expo.dev),
+   Apple-Entwicklerkonto (99 €/Jahr, Prüfung 1–2 Tage), Google Play Konsole (25 € einmalig), dann `eas init` + `eas build` + TestFlight.
+   Risiko App-Store-Prüfung (Regel 4.2 „nur Webseite“): Push, Kamera, Apple Pay, App-Symbol helfen; ggf. später mehr native Bildschirme.
+   (alt:) App (Expo) starten. Vorher klären: iPhone zuerst oder auch Android, Push-Benachrichtigungen,
    Apple-Entwicklerkonto (99 €/Jahr), Expo Go auf Maryams iPhone installieren. Gleiche Glas-Leiste unten wie im Web.
 3. Stripe läuft im Testmodus (Sandbox, Webhook eingerichtet, Grundbetrag 520 € erfolgreich bezahlt am 01.11.).
    Zahlarten im Stripe-Dashboard: Karte, Apple Pay, Google Pay, Link, Klarna an; SEPA/Überweisung/ausländische Wallets aus.

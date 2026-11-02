@@ -8,8 +8,8 @@ export const SCHOOL = {
   shortName: "beyourself",
   url: (process.env.APP_URL || "https://fahrschule-beyourself.de").replace(/\/$/, ""),
   email: "info@fahrschule-beyourself.de",
-  phone: process.env.SCHOOL_PHONE || "", // z. B. "+49 561 1234567"
-  owner: process.env.SCHOOL_OWNER || "",  // Inhaberin (für das Impressum)
+  phone: process.env.SCHOOL_PHONE || "+49 176 57985042",
+  owner: process.env.SCHOOL_OWNER || "Maryam Azizi", // Inhaberin (für das Impressum)
   street: "Rudolf-Schwander-Straße 9",
   zip: "34117",
   city: "Kassel",

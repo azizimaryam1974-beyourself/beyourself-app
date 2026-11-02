@@ -1145,3 +1145,11 @@ a.dash-kpi::after { content: "›"; margin-left: auto; opacity: .35; font-size: 
 .audit-target { max-width: 260px; overflow-wrap: anywhere; color: rgba(30, 30, 30, .7); }
 .audit-det summary { cursor: pointer; font-size: .78rem; color: var(--gold-deep); }
 .audit-det pre { margin: 6px 0; padding: 8px; border-radius: 8px; background: rgba(15, 26, 44, .06); font-size: .75rem; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 520px; }
+.topup-form { display: grid; gap: 10px; padding: 12px; border-radius: 14px; background: rgba(198, 164, 101, 0.1); border: 1px solid rgba(198, 164, 101, 0.35); }
+.topup-form p { margin: 0; }
+.topup-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid rgba(15, 26, 44, 0.2); cursor: pointer; background: #fff; font-weight: 600; }
+.chip:has(input:checked) { border-color: var(--gold); background: rgba(198, 164, 101, 0.2); }
+.chip input { accent-color: var(--gold-deep); }
+.topup-own { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.topup-own input { width: 120px; }

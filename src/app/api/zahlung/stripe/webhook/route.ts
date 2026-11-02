@@ -4,6 +4,7 @@ import { db } from "@/lib/server/db";
 import { firstTimeEvent } from "@/lib/server/booking";
 import { verifyWebhook, type CheckoutSession } from "@/lib/server/payments/stripe";
 import { finalizePayment } from "@/lib/server/payments/service";
+import { applyTopup } from "@/lib/server/topup";
 
 /**
  * Stripe meldet Zahlungen hierher (auch wenn der Schüler den Browser vorher schließt).
@@ -19,6 +20,10 @@ export async function POST(req: Request) {
   const event = JSON.parse(payload) as { id: string; type: string; data: { object: CheckoutSession } };
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     const s = event.data.object;
+    if (s.metadata?.kind === "topup") {
+      if (s.payment_status === "paid" && firstTimeEvent(db(), `stripe:${event.id}`)) await applyTopup(s);
+      return NextResponse.json({ received: true });
+    }
     if (s.payment_status === "paid" && s.client_reference_id && s.payment_intent && s.currency === "eur") {
       if (firstTimeEvent(db(), `stripe:${event.id}`)) {
         await finalizePayment(s.client_reference_id, "stripe", s.payment_intent, s.amount_total);

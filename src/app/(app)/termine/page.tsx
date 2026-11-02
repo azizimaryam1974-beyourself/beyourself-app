@@ -1,5 +1,6 @@
 import { getBankDetails } from "@/lib/server/finance";
 import { stripeTestMode } from "@/lib/server/payments/stripe";
+import { TOPUP_MAX_CENTS, TOPUP_MIN_CENTS } from "@/lib/server/topup";
 import { driveHistory } from "@/lib/server/drive-history";
 import { DriveHistoryList } from "@/components/training/DriveHistory";
 import Link from "next/link";
@@ -395,9 +396,25 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
         <p>Es wird bei deiner nächsten Buchung automatisch verrechnet – du musst nichts tun. Am Ende der Ausbildung kann es auf Wunsch ausgezahlt werden.</p>
         <p><strong>Guthaben aufladen:</strong> Du kannst auch vorab einen größeren Betrag überweisen oder bar in der Fahrschule zahlen (z. B. 750 €). Davon bezahlst du dann Grundbetrag, Fahrstunden und Prüfungen mit einem Tipp.</p>
       </>}>
-        <details className="mini-details"><summary>Guthaben aufladen</summary>
+        {sp.aufgeladen && <div className="alert alert-ok" role="status">Danke! Dein Guthaben wurde aufgeladen.</div>}
+        {sp.aufladen === "pruefen" && <div className="alert alert-info" role="status">Die Zahlung wird noch geprüft – dein Guthaben erscheint in wenigen Minuten. Du bekommst eine Nachricht.</div>}
+        {sp.aufladen === "abgebrochen" && <div className="alert alert-info" role="status">Aufladen abgebrochen – es wurde nichts bezahlt.</div>}
+        {sp.aufladen_fehler && <div className="alert alert-error" role="alert">{sp.aufladen_fehler}</div>}
+        <details className="mini-details" open={!!(sp.aufladen_fehler || sp.aufladen)}><summary>Guthaben aufladen</summary>
           <div className="topup">
-            <p>Überweise einen Betrag deiner Wahl oder zahl bar in der Fahrschule. Sobald das Geld da ist, trägt die Fahrschule es ein – du bekommst eine Nachricht.</p>
+            {providers.includes("stripe") && (
+              <form action="/api/guthaben/aufladen" method="post" className="topup-form">
+                <p><strong>Online aufladen</strong> – mit Karte, Apple Pay, Google Pay oder Klarna. {formatPrice(TOPUP_MIN_CENTS).replace(",00", "")} bis {formatPrice(TOPUP_MAX_CENTS).replace(",00", "")}.</p>
+                <div className="topup-quick">
+                  {[200, 500, 750, 1000].map((v) => <label key={v} className="chip"><input type="radio" name="amount" value={v} defaultChecked={v === 500} /> <span>{v} €</span></label>)}
+                </div>
+                <label className="topup-own">oder eigener Betrag: <input type="number" name="own" min={TOPUP_MIN_CENTS / 100} max={TOPUP_MAX_CENTS / 100} step={1} inputMode="numeric" placeholder="z. B. 650" aria-label="Eigener Betrag in Euro" /> €</label>
+                {stripeTestMode() && <p className="test-hint">Testmodus – kein echtes Geld. Testkarte <strong>4242 4242 4242 4242</strong>, Datum in der Zukunft, Prüfnummer 123.</p>}
+                <label className="check"><input type="checkbox" name="terms" required /> <span>Ich weiß: Guthaben wird mit Grundbetrag, Fahrstunden und Prüfungen verrechnet. Nicht verbrauchtes Guthaben zahlt die Fahrschule am Ende der Ausbildung auf Wunsch zurück.</span></label>
+                <button className="btn btn-gold" type="submit">Jetzt aufladen</button>
+              </form>
+            )}
+            <p><strong>Per Überweisung</strong> (kostenlos) oder bar in der Fahrschule – sobald das Geld da ist, trägt die Fahrschule es ein und du bekommst eine Nachricht.</p>
             {bank ? <pre className="bank-box">{bank}{"\n"}Verwendungszweck: Guthaben {user.name}</pre>
               : <p className="hint">Die Bankverbindung trägt die Fahrschule bald hier ein. Bis dahin: bar in der Fahrschule oder im Chat nachfragen.</p>}
           </div>

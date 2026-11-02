@@ -58,7 +58,7 @@ export function moneyEntries(db: Database.Database): MoneyEntry[] {
     const cents = Number(r.amount_cents);
     const deposit = r.reason === "deposit";
     const note = (r.note as string) || "";
-    const method = deposit ? (/^bar\b/i.test(note) ? "bar" : "ueberweisung") : "ueberweisung";
+    const method = deposit ? (/^bar\b/i.test(note) ? "bar" : /stripe/i.test(note) ? "stripe" : "ueberweisung") : "ueberweisung";
     out.push({ id: r.id as string, kind: "einnahme", at: Number(r.created_at), deadline: null, userId: r.user_id as string, userName: r.name as string,
       title: deposit ? `Einzahlung aufs Guthaben${note ? ` · ${note}` : ""}` : `Guthaben ausgezahlt${note ? ` · ${note}` : ""}`,
       category: "guthaben", provider: method, schoolCents: cents, tuevCents: 0, totalCents: cents });

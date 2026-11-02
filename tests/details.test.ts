@@ -75,3 +75,12 @@ test("Tag verschieben: alle ab Uhrzeit, Überschneidung wird verhindert", () => 
   assert.equal(fillShiftText("{name}: {alt}→{neu} ({minuten})", plan[0], 30), "Sina: 11:00→11:30 (30)");
   assert.throws(() => planShift(db, day, 13 * 60, -60), ShiftError); // nur 13:30 → 12:30 würde in 11:30–13:00 fallen
 });
+
+import { parseTopupAmount } from "../src/lib/server/topup";
+test("Guthaben aufladen: nur 200 € bis 2.000 €", () => {
+  assert.equal(parseTopupAmount("500"), 50000);
+  assert.equal(parseTopupAmount("1.500,50"), 150050);
+  assert.equal(parseTopupAmount("199"), null);
+  assert.equal(parseTopupAmount("2001"), null);
+  assert.equal(parseTopupAmount("abc"), null);
+});

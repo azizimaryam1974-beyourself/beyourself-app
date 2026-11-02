@@ -45,6 +45,7 @@ async function call<T>(method: "GET" | "POST", path: string, params?: Params, id
 }
 
 export interface CheckoutSession {
+  metadata?: Record<string, string>;
   id: string; url: string | null; status: "open" | "complete" | "expired"; payment_status: "paid" | "unpaid" | "no_payment_required";
   amount_total: number | null; currency: string | null; client_reference_id: string | null; payment_intent: string | null;
 }
@@ -72,6 +73,24 @@ export async function createCheckout(o: {
     success_url: `${o.baseUrl}/api/zahlung/stripe/zurueck?b=${o.bookingId}&s={CHECKOUT_SESSION_ID}`,
     cancel_url: `${o.baseUrl}/termine?zahlung=abgebrochen`,
   }, `checkout-${o.bookingId}-${expires}`);
+}
+
+/** Guthaben aufladen: freier Betrag, kein Termin. Kennzeichen in metadata.kind = "topup". */
+export async function createTopupCheckout(o: { userId: string; amountCents: number; email: string; baseUrl: string }): Promise<CheckoutSession & { metadata?: Record<string, string> }> {
+  const pmc = process.env.STRIPE_PAYMENT_METHOD_CONFIG || undefined;
+  return call("POST", "/checkout/sessions", {
+    mode: "payment",
+    client_reference_id: `topup:${o.userId}`,
+    customer_email: o.email || undefined,
+    locale: "de",
+    expires_at: Math.floor((Date.now() + 60 * 60_000) / 1000),
+    payment_method_configuration: pmc,
+    line_items: [{ quantity: "1", price_data: { currency: "eur", unit_amount: String(o.amountCents), product_data: { name: "Guthaben aufladen – Fahrschule beyourself" } } } as Params],
+    metadata: { kind: "topup", user: o.userId },
+    payment_intent_data: { metadata: { kind: "topup", user: o.userId }, description: `Guthaben aufladen (${o.userId.slice(0, 8)})` },
+    success_url: `${o.baseUrl}/api/guthaben/zurueck?s={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${o.baseUrl}/termine?aufladen=abgebrochen#guthaben`,
+  });
 }
 
 export const getCheckout = (id: string) => call<CheckoutSession>("GET", `/checkout/sessions/${encodeURIComponent(id)}`);

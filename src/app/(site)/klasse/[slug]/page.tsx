@@ -4,6 +4,8 @@ import { SiteHeader } from "@/components/SiteChrome";
 import { getLicenseClass, LICENSE_CLASSES, VIDEO } from "@/lib/classes";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 import { BgVideo } from "./BgVideo";
+import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
+import { SCHOOL } from "@/lib/school";
 
 export function generateStaticParams() {
   return LICENSE_CLASSES.map((c) => ({ slug: c.slug }));
@@ -11,7 +13,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const c = getLicenseClass((await params).slug);
-  return { title: c ? `Klasse ${c.k} – ${c.name}` : "Klasse" };
+  if (!c) return { title: "Klasse" };
+  return {
+    title: `Führerschein Klasse ${c.k} in Kassel – ${c.name}`,
+    description: `${c.short} Fahrschule beyourself, ${SCHOOL.street}, Kassel. Fahrstunden online buchen, Theorie auf Wunsch live übersetzt.`,
+    alternates: { canonical: `/klasse/${c.slug}` },
+    openGraph: { title: `Klasse ${c.k} in Kassel – ${c.name} | Fahrschule beyourself`, description: c.short, url: `/klasse/${c.slug}` },
+  };
 }
 
 const INCLUDED = [
@@ -44,7 +52,7 @@ export default async function ClassPage({ params }: { params: Promise<{ slug: st
             {c.long.map((p, i) => <p key={i}>{p}</p>)}
             <div className="row" style={{ marginTop: 22 }}>
               <Link href={`/anmelden?klasse=${c.slug}`} className="btn btn-gold">Für Klasse {c.k} anmelden</Link>
-              <a href="mailto:info@fahrschule-beyourself.de" className="btn btn-glass">Preis anfragen</a>
+              <a href={`mailto:${SCHOOL.email}`} className="btn btn-glass">Preis anfragen</a>
             </div>
           </div>
           <ul className="included">
@@ -61,6 +69,9 @@ export default async function ClassPage({ params }: { params: Promise<{ slug: st
           </ul>
         </div>
 
+        <JsonLd data={breadcrumbJsonLd([{ name: "Fahrschule beyourself Kassel", path: "/" }, { name: `Klasse ${c.k}`, path: `/klasse/${c.slug}` }])} />
+        <JsonLd data={{ "@context": "https://schema.org", "@type": "Service", name: `Führerschein Klasse ${c.k} – ${c.name}`, description: [c.short, ...c.long].join(" "),
+          provider: { "@id": `${SCHOOL.url}/#fahrschule` }, areaServed: SCHOOL.city, url: `${SCHOOL.url}/klasse/${c.slug}` }} />
         <nav className="other-streets" aria-label="Andere Klassen">
           <span>Andere Straßen:</span>
           {others.map((o) => <Link key={o.slug} href={`/klasse/${o.slug}`} className="street-sign as-link">{o.sign}</Link>)}

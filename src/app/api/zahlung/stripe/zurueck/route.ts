@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { getBooking } from "@/lib/server/booking";
@@ -6,6 +7,7 @@ import { appUrl, finalizePayment } from "@/lib/server/payments/service";
 
 /** Rückkehr von Stripe. Zahlung direkt prüfen (der Webhook kommt zusätzlich). */
 export async function GET(req: Request) {
+  void auditRequest(req, "GET /api/zahlung/stripe/zurueck");
   const u = new URL(req.url);
   const bookingId = u.searchParams.get("b") ?? "";
   const sessionId = u.searchParams.get("s") ?? "";

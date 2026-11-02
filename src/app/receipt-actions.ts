@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
@@ -9,6 +11,7 @@ import { deleteUpload } from "@/lib/server/uploads";
 const s = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 export async function updateReceiptAction(form: FormData): Promise<void> {
+  await auditAction("receipt-actions:updateReceiptAction", [form]);
   await requireTeacher();
   const m = /^(\d{1,6})(?:[.,](\d{1,2}))?$/.exec(s(form, "amount").replace(/[€\s]/g, ""));
   updateReceipt(db(), s(form, "id"), {
@@ -21,6 +24,7 @@ export async function updateReceiptAction(form: FormData): Promise<void> {
 }
 
 export async function deleteReceiptAction(form: FormData): Promise<void> {
+  await auditAction("receipt-actions:deleteReceiptAction", [form]);
   await requireTeacher();
   const r = deleteReceipt(db(), s(form, "id"));
   if (r) deleteUpload(r.filePath);

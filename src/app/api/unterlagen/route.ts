@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/lib/server/auth";
@@ -8,6 +9,7 @@ import { storeUpload, UploadError } from "@/lib/server/uploads";
 
 /** Unterlagen hochladen – Schüler für sich selbst, die Fahrschule auch für einen Schüler. Bis zu 4 Dateien auf einmal. */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/unterlagen");
   const me = await currentUser();
   if (!me) return NextResponse.json({ error: "Bitte einloggen." }, { status: 401 });
   const f = await req.formData();

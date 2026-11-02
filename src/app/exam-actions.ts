@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
@@ -29,6 +31,7 @@ const hhmm = (s: string) => /^\d{2}:\d{2}$/.test(s);
 
 /** Einladung zur Theorie- oder Praxisprüfung (nach TÜV-Bestätigung). */
 export async function inviteExamAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("exam-actions:inviteExamAction", [_p, form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const u = getUser(db(), userId);
@@ -58,6 +61,7 @@ export async function inviteExamAction(_p: ActionState, form: FormData): Promise
 
 /** Prüfung absagen (TÜV verschiebt / Fahrschule sagt ab) – Bezahltes geht als Guthaben zurück. */
 export async function cancelExamAction(form: FormData): Promise<void> {
+  await auditAction("exam-actions:cancelExamAction", [form]);
   await requireTeacher();
   const id = str(form, "examId");
   const e = getExam(db(), id);
@@ -76,6 +80,7 @@ export async function cancelExamAction(form: FormData): Promise<void> {
 }
 
 export async function examResultAction(form: FormData): Promise<void> {
+  await auditAction("exam-actions:examResultAction", [form]);
   await requireTeacher();
   const id = str(form, "examId");
   const result = str(form, "result");
@@ -99,6 +104,7 @@ export async function examResultAction(form: FormData): Promise<void> {
 
 /** Grundbetrag: bar/EC bezahlt, oder „anders geregelt“ (vor der App bezahlt / erlassen) bzw. zurücknehmen. */
 export async function grundbetragAction(form: FormData): Promise<void> {
+  await auditAction("exam-actions:grundbetragAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const what = str(form, "do");
@@ -121,6 +127,7 @@ export async function grundbetragAction(form: FormData): Promise<void> {
 
 /** Einladung ablehnen (solange noch nicht bezahlt) – die Fahrschule wird informiert. */
 export async function declineExamAction(form: FormData): Promise<void> {
+  await auditAction("exam-actions:declineExamAction", [form]);
   const user = await requireUser();
   let target = "/termine?abgesagt=1";
   try {

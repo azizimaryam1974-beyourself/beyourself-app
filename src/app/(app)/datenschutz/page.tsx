@@ -1,4 +1,4 @@
-export const metadata = { title: "Datenschutz" };
+export const metadata = { title: "Datenschutz", description: "Datenschutzhinweise der Fahrschule beyourself, Kassel.", alternates: { canonical: "/datenschutz" }, robots: { index: true, follow: true } };
 export default function Datenschutz() {
   return (
     <div className="card">

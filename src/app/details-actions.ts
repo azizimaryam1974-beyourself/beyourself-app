@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { requireUser } from "@/lib/server/auth";
@@ -10,6 +12,7 @@ export interface DetailsState { ok?: boolean; errors?: DetailsErrors; values?: R
 
 /** Persönliche Angaben speichern – Schüler für sich selbst, die Fahrschule für jeden Schüler. */
 export async function saveDetailsAction(_prev: DetailsState, form: FormData): Promise<DetailsState> {
+  await auditAction("details-actions:saveDetailsAction", [_prev, form]);
   const me = await requireUser();
   const target = String(form.get("userId") ?? "") || me.id;
   if (target !== me.id && me.role !== "teacher") return { errors: { birthday: "Keine Berechtigung." } };

@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/server/db";
@@ -25,6 +27,7 @@ const refresh = (userId: string) => { revalidatePath(`/verwaltung/schueler/${use
 
 /** Klasse festlegen (auch für Schüler, die sich vor der Klassenwahl angemeldet haben). */
 export async function setClassAction(form: FormData): Promise<void> {
+  await auditAction("training-actions:setClassAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId"), c = str(form, "licenseClass");
   student(userId);
@@ -41,6 +44,7 @@ export async function setClassAction(form: FormData): Promise<void> {
 }
 
 export async function saveTargetsAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("training-actions:saveTargetsAction", [_p, form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const u = student(userId);
@@ -71,6 +75,7 @@ export async function saveTargetsAction(_p: ActionState, form: FormData): Promis
 
 /** B197-Testfahrt: bestanden oder nicht bestanden (+ zusätzliche Schaltstunden). */
 export async function testfahrtAction(form: FormData): Promise<void> {
+  await auditAction("training-actions:testfahrtAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const u = student(userId);
@@ -91,6 +96,7 @@ export async function testfahrtAction(form: FormData): Promise<void> {
 
 /** Prüfungsreife bestätigen (Nachricht „Zertifizierung“) oder zurücknehmen. */
 export async function examReadyAction(form: FormData): Promise<void> {
+  await auditAction("training-actions:examReadyAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const u = student(userId);
@@ -107,6 +113,7 @@ export async function examReadyAction(form: FormData): Promise<void> {
 const DOCS = ["sehtestAt", "ersteHilfeAt", "antragAt", "pruefauftragAt", "theoryPassedAt"] as const;
 
 export async function saveDocsAction(form: FormData): Promise<void> {
+  await auditAction("training-actions:saveDocsAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId");
   student(userId);
@@ -123,6 +130,7 @@ export async function saveDocsAction(form: FormData): Promise<void> {
 
 /** Fahrt nachtragen (z. B. vor Einführung der App gefahren oder bar bezahlt). */
 export async function addRecordAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("training-actions:addRecordAction", [_p, form]);
   const teacher = await requireTeacher();
   const userId = str(form, "userId");
   student(userId);
@@ -140,6 +148,7 @@ export async function addRecordAction(_p: ActionState, form: FormData): Promise<
 }
 
 export async function recordStatusAction(form: FormData): Promise<void> {
+  await auditAction("training-actions:recordStatusAction", [form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const status = str(form, "status") as RecordStatus;

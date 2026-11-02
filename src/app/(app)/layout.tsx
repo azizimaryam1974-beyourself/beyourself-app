@@ -1,5 +1,8 @@
 import { AppFooter, SiteHeader } from "@/components/SiteChrome";
 
+/** Konto-, Verwaltungs- und Unterrichtsseiten gehören nicht in Suchmaschinen. */
+export const metadata = { robots: { index: false, follow: false } };
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>

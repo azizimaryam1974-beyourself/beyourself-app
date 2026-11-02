@@ -1,4 +1,5 @@
 import { db } from "../db";
+import { writeAudit } from "../audit";
 import { sendMail } from "../mail";
 import {
   addNotification, dueForReminder, expireDue, getBooking, markPaid, noteRefundProblem, setPaymentRef,
@@ -117,6 +118,8 @@ export async function startPayment(bookingId: string, userId: string, provider: 
 
 export async function finalizePayment(bookingId: string, provider: Provider | "bar", paymentRef: string, amountCents: number | null): Promise<MarkPaidResult> {
   const res = markPaid(db(), bookingId, { provider, paymentRef, amountCents });
+  writeAudit(db(), { kind: "payment", action: res.ok ? (res.already ? "Zahlung erneut gemeldet (schon bezahlt)" : "Zahlung eingegangen") : "Zahlung konnte nicht verbucht werden",
+    target: `Buchung ${bookingId}`, ok: res.ok, details: { anbieter: provider, referenz: paymentRef, betragCent: amountCents, schueler: res.ok ? res.booking.userName : undefined, leistung: res.ok ? res.booking.title : undefined } });
   if (res.ok) {
     if (!res.already && res.booking.examId) {
       const b = res.booking;

@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
@@ -44,6 +46,7 @@ function refresh() {
 // ============ Schüler =========================================================
 
 export async function requestSlotAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:requestSlotAction", [form]);
   const user = await requireUser();
   let target = "/termine?angefragt=1#meine";
   try {
@@ -57,6 +60,7 @@ export async function requestSlotAction(form: FormData): Promise<void> {
 }
 
 export async function orderProductAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:orderProductAction", [form]);
   const user = await requireUser();
   const offerId = str(form, "offerId");
   let target = "/termine#offen";
@@ -81,6 +85,7 @@ export async function orderProductAction(form: FormData): Promise<void> {
 }
 
 export async function cancelMyBookingAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:cancelMyBookingAction", [form]);
   const user = await requireUser();
   let target = "/termine?abgesagt=1#meine";
   try {
@@ -109,6 +114,7 @@ export async function cancelMyBookingAction(form: FormData): Promise<void> {
 }
 
 export async function markReadAction(): Promise<void> {
+  await auditAction("booking-actions:markReadAction", []);
   const user = await requireUser();
   markNotificationsRead(db(), user.id);
   refresh();
@@ -118,6 +124,7 @@ export async function markReadAction(): Promise<void> {
 
 /** Termine freigeben: ab Datum, Startzeit, n Stunden hintereinander, an Wochentagen, für x Wochen. */
 export async function createSlotsAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:createSlotsAction", [_p, form]);
   await requireTeacher();
   const date = str(form, "date"), time = str(form, "time"), offerId = str(form, "offerId");
   const count = Math.min(12, Math.max(1, Number(form.get("count") ?? 1) | 0));
@@ -146,6 +153,7 @@ export async function createSlotsAction(_p: ActionState, form: FormData): Promis
 }
 
 export async function closeSlotAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:closeSlotAction", [form]);
   await requireTeacher();
   try {
     const msg = str(form, "message") || "Dieser Termin entfällt leider. Bitte wähle einen anderen freien Termin.";
@@ -161,6 +169,7 @@ function autoDeclineText(): string {
 }
 
 export async function decideAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:decideAction", [_p, form]);
   await requireTeacher();
   const id = str(form, "bookingId"), decision = str(form, "decision"), message = str(form, "message");
   try {
@@ -188,6 +197,7 @@ export async function decideAction(_p: ActionState, form: FormData): Promise<Act
 }
 
 export async function adminCancelAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:adminCancelAction", [_p, form]);
   await requireTeacher();
   const message = str(form, "message");
   if (!message) return { error: "Bitte einen Grund auswählen oder schreiben." };
@@ -214,12 +224,14 @@ export async function adminCancelAction(_p: ActionState, form: FormData): Promis
 
 /** Bar/EC in der Fahrschule bezahlt. */
 export async function markPaidCashAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:markPaidCashAction", [form]);
   await requireTeacher();
   await finalizePayment(str(form, "bookingId"), "bar", `bar-${Date.now()}`, null);
   refresh();
 }
 
 export async function saveOfferAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:saveOfferAction", [_p, form]);
   await requireTeacher();
   const price = parseEuro(str(form, "price"));
   if (!Number.isFinite(price)) return { error: "Preis bitte als Zahl, z. B. 65 oder 65,50." };
@@ -240,6 +252,7 @@ export async function saveOfferAction(_p: ActionState, form: FormData): Promise<
 }
 
 export async function saveSettingsAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:saveSettingsAction", [_p, form]);
   await requireTeacher();
   saveSettings(db(), {
     payWindowMin: Number(form.get("payWindowMin")), freeCancelHours: Number(form.get("freeCancelHours")),
@@ -254,6 +267,7 @@ export async function saveSettingsAction(_p: ActionState, form: FormData): Promi
 }
 
 export async function saveTemplateAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:saveTemplateAction", [_p, form]);
   await requireTeacher();
   try {
     saveTemplate(db(), { id: str(form, "id") || undefined, kind: str(form, "kind") as TemplateKind, label: str(form, "label"), body: str(form, "body") });
@@ -266,6 +280,7 @@ export async function saveTemplateAction(_p: ActionState, form: FormData): Promi
 }
 
 export async function deleteTemplateAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:deleteTemplateAction", [form]);
   await requireTeacher();
   deleteTemplate(db(), str(form, "id"));
   revalidatePath("/verwaltung", "layout");
@@ -276,6 +291,7 @@ export async function deleteTemplateAction(form: FormData): Promise<void> {
 
 /** Guthaben gutschreiben (+) oder als ausgezahlt buchen (−). */
 export async function adjustCreditAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("booking-actions:adjustCreditAction", [_p, form]);
   await requireTeacher();
   const userId = str(form, "userId");
   const u = getUser(db(), userId);
@@ -300,6 +316,7 @@ export async function adjustCreditAction(_p: ActionState, form: FormData): Promi
 // ============ Warteliste (Schüler) ===================================================
 
 export async function addWaitlistAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:addWaitlistAction", [form]);
   const user = await requireUser();
   const toMin = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; };
   let target = "/termine?warteliste=1#warteliste";
@@ -315,6 +332,7 @@ export async function addWaitlistAction(form: FormData): Promise<void> {
 }
 
 export async function removeWaitlistAction(form: FormData): Promise<void> {
+  await auditAction("booking-actions:removeWaitlistAction", [form]);
   const user = await requireUser();
   removeWaitlist(db(), user.id, str(form, "id"));
   refresh();

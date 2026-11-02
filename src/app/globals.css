@@ -1141,3 +1141,7 @@ a.dash-kpi::after { content: "›"; margin-left: auto; opacity: .35; font-size: 
 .dh-when span, .dh-what span { font-size: .85rem; color: rgba(30, 30, 30, .65); }
 .dh-side { display: grid; gap: 4px; justify-items: end; }
 @media (max-width: 600px) { .dh-item { grid-template-columns: 1fr auto; } .dh-what { grid-column: 1 / -1; grid-row: 2; } }
+.audit-list td { font-size: .85rem; }
+.audit-target { max-width: 260px; overflow-wrap: anywhere; color: rgba(30, 30, 30, .7); }
+.audit-det summary { cursor: pointer; font-size: .78rem; color: var(--gold-deep); }
+.audit-det pre { margin: 6px 0; padding: 8px; border-radius: 8px; background: rgba(15, 26, 44, .06); font-size: .75rem; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 520px; }

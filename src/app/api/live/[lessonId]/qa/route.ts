@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
@@ -19,6 +20,7 @@ const WAIT_MS = 20_000; // Zeit zwischen zwei Fragen pro Schüler
  * Fahrschule: {action:"beamer", id|null} | {action:"status", id, status} | {action:"mute", userId, muted} | {action:"lower", userId}
  */
 export async function POST(req: Request, ctx: { params: Promise<{ lessonId: string }> }) {
+  void auditRequest(req, "POST /api/live/[lessonId]/qa");
   const { lessonId } = await ctx.params;
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Bitte anmelden." }, { status: 401 });

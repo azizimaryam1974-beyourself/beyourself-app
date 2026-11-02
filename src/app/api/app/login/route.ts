@@ -1,3 +1,4 @@
+import { audit, auditRequest } from "@/lib/server/audit-context";
 import { headers } from "next/headers";
 import { db } from "@/lib/server/db";
 import { issueAppToken } from "@/lib/server/auth";
@@ -10,6 +11,7 @@ export const runtime = "nodejs";
 
 /** Login für die Handy-App: liefert ein Token (30 Tage). Gleicher Schutz wie im Web. */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/app/login");
   const body = (await req.json().catch(() => ({}))) as { email?: unknown; password?: unknown };
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const password = typeof body.password === "string" ? body.password : "";
@@ -22,6 +24,7 @@ export async function POST(req: Request) {
   }
   const user = findUserByEmail(db(), email);
   if (!user || !(await verifyPassword(password, user.password_hash))) {
+    await audit("auth", "App-Login fehlgeschlagen", { details: { email }, ok: false });
     lim.email.fail(email);
     lim.ip.fail(ip);
     await new Promise((r) => setTimeout(r, 400));
@@ -29,5 +32,6 @@ export async function POST(req: Request) {
   }
   lim.email.reset(email);
   const { token, expiresAt } = issueAppToken(user.id);
+  await audit("auth", "App-Login", { actor: { id: user.id, name: user.name, role: user.role } });
   return Response.json({ token, expiresAt }, { headers: { "Cache-Control": "no-store" } });
 }

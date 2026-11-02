@@ -27,6 +27,10 @@ if ! docker compose build app; then
   echo "$REMOTE" > .deploy-failed; exit 1
 fi
 docker compose up -d
+# Caddy-Einstellungen geändert? → Caddy neu laden (ohne Unterbrechung)
+if ! git diff --quiet "$LOCAL" "$REMOTE" -- deploy/Caddyfile; then
+  docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile && echo "Caddy neu geladen"
+fi
 docker image prune -f >/dev/null 2>&1
 rm -f .deploy-failed
 echo "Fertig: Webseite läuft jetzt mit ${REMOTE:0:7}"

@@ -1,5 +1,7 @@
 "use server";
 
+import { audit, auditAction } from "@/lib/server/audit-context";
+
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -44,6 +46,7 @@ export interface FormState {
 // ---------- Anmeldung ---------------------------------------------------------
 
 export async function signupAction(_prev: FormState, form: FormData): Promise<FormState> {
+  await auditAction("actions:signupAction", [_prev, form]);
   const input = parseSignupForm(form);
   const values = {
     name: input.name,
@@ -91,10 +94,12 @@ export async function signupAction(_prev: FormState, form: FormData): Promise<Fo
   }
 
   await startSession(user.id);
+  await audit("auth", "Neu angemeldet (Fahrschüler)", { actor: { id: user.id, name: user.name, role: "student" }, details: { klasse: result.value.licenseClass, sprachpaket: !!result.value.language } });
   redirect(result.value.language ? "/konto?gebucht=1&willkommen=1" : "/konto?willkommen=1");
 }
 
 export async function loginAction(_prev: FormState, form: FormData): Promise<FormState> {
+  await auditAction("actions:loginAction", [_prev, form]);
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
   const h = await headers();
@@ -102,11 +107,13 @@ export async function loginAction(_prev: FormState, form: FormData): Promise<For
   const lim = loginLimiters();
   const wait = Math.max(lim.email.blockedFor(email), lim.ip.blockedFor(ip));
   if (wait > 0) {
+    await audit("auth", "Login gesperrt (zu viele Fehlversuche)", { details: { email }, ok: false });
     return { error: `Zu viele Fehlversuche. Bitte in ${Math.ceil(wait / 60_000)} Minuten erneut versuchen.`, values: { email } };
   }
   const user = findUserByEmail(db(), email);
   // Gleiche Meldung für beide Fälle, damit niemand Konten ausprobieren kann.
   if (!user || !(await verifyPassword(password, user.password_hash))) {
+    await audit("auth", "Login fehlgeschlagen", { details: { email, kontoVorhanden: !!user }, ok: false });
     lim.email.fail(email);
     lim.ip.fail(ip);
     await new Promise((r) => setTimeout(r, 400));
@@ -114,16 +121,19 @@ export async function loginAction(_prev: FormState, form: FormData): Promise<For
   }
   lim.email.reset(email);
   await startSession(user.id);
+  await audit("auth", "Login", { actor: { id: user.id, name: user.name, role: user.role } });
   redirect(user.role === "teacher" ? "/verwaltung/uebersicht" : "/konto");
 }
 
 export async function logoutAction(): Promise<void> {
+  await auditAction("actions:logoutAction", []);
   await endSession();
   redirect("/");
 }
 
 /** Paket nachträglich buchen (wer es bei der Anmeldung nicht gewählt hat). */
 export async function bookLaterAction(_prev: FormState, form: FormData): Promise<FormState> {
+  await auditAction("actions:bookLaterAction", [_prev, form]);
   const user = await requireUser();
   const language = String(form.get("language") ?? "");
   const choice = validateSignupChoice({ wantsPackage: true, language });
@@ -142,6 +152,7 @@ export async function bookLaterAction(_prev: FormState, form: FormData): Promise
 // ---------- Verwaltung (nur Lehrkraft) ----------------------------------------
 
 export async function setPackageStatusAction(form: FormData): Promise<void> {
+  await auditAction("actions:setPackageStatusAction", [form]);
   await requireTeacher();
   const id = String(form.get("packageId"));
   const status = String(form.get("status"));
@@ -151,6 +162,7 @@ export async function setPackageStatusAction(form: FormData): Promise<void> {
 }
 
 export async function setPackageLanguageAction(form: FormData): Promise<void> {
+  await auditAction("actions:setPackageLanguageAction", [form]);
   await requireTeacher();
   const id = String(form.get("packageId"));
   const language = String(form.get("language"));
@@ -161,6 +173,7 @@ export async function setPackageLanguageAction(form: FormData): Promise<void> {
 
 /** Lehrkraft bucht für einen Schüler (z. B. bei Anmeldung im Büro). */
 export async function teacherBookAction(form: FormData): Promise<void> {
+  await auditAction("actions:teacherBookAction", [form]);
   await requireTeacher();
   const userId = String(form.get("userId"));
   const language = String(form.get("language"));
@@ -174,12 +187,14 @@ export async function teacherBookAction(form: FormData): Promise<void> {
 // ---------- Theoriestunden ----------------------------------------------------
 
 export async function createLessonAction(form: FormData): Promise<void> {
+  await auditAction("actions:createLessonAction", [form]);
   const teacher = await requireTeacher();
   const lesson = createLesson(db(), String(form.get("title") ?? ""), teacher.id);
   redirect(`/unterricht/${lesson.id}`);
 }
 
 export async function setLessonLiveAction(lessonId: string, live: boolean): Promise<void> {
+  await auditAction("actions:setLessonLiveAction", [lessonId, live]);
   await requireTeacher();
   if (!getLesson(db(), lessonId)) return;
   const wasLive = getLesson(db(), lessonId)?.status === "live";
@@ -197,6 +212,7 @@ export async function setLessonLiveAction(lessonId: string, live: boolean): Prom
 
 /** Live-Stunde direkt aus der Liste beenden. */
 export async function endLessonAction(form: FormData): Promise<void> {
+  await auditAction("actions:endLessonAction", [form]);
   await setLessonLiveAction(String(form.get("lessonId") ?? ""), false);
 }
 
@@ -206,6 +222,7 @@ const RESET_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Lehrkraft erzeugt einen Einmal-Link (24 h) und gibt ihn dem Schüler. */
 export async function createResetLinkAction(_prev: { link?: string; error?: string }, form: FormData) {
+  await auditAction("actions:createResetLinkAction", [_prev, form]);
   const teacher = await requireTeacher();
   const userId = String(form.get("userId"));
   const user = getUser(db(), userId);
@@ -217,6 +234,7 @@ export async function createResetLinkAction(_prev: { link?: string; error?: stri
 }
 
 export async function resetPasswordAction(_prev: FormState, form: FormData): Promise<FormState> {
+  await auditAction("actions:resetPasswordAction", [_prev, form]);
   const token = String(form.get("token") ?? "");
   const pw = String(form.get("password") ?? "");
   const pw2 = String(form.get("password2") ?? "");
@@ -232,6 +250,7 @@ export async function resetPasswordAction(_prev: FormState, form: FormData): Pro
 // ---------- DSGVO: Konto löschen ---------------------------------------------
 
 export async function deleteStudentAction(form: FormData): Promise<void> {
+  await auditAction("actions:deleteStudentAction", [form]);
   await requireTeacher();
   if (form.get("confirm") !== "on") return;
   deleteStudent(db(), String(form.get("userId")));

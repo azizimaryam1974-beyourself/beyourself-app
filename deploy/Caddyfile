@@ -1,6 +1,16 @@
 # HTTPS-Zertifikat holt Caddy automatisch (Let's Encrypt),
 # sobald die DNS-Einträge bei IONOS auf diesen Server zeigen.
 fahrschule-beyourself.de {
+	# Zugriffsprotokoll: jede Anfrage (Zeit, IP, Seite, Ergebnis) – für die Auswertung bei Vorfällen.
+	# Liegt auf dem Server unter caddy_data/logs, wird bei 20 MB gewechselt, 90 Tage aufbewahrt.
+	log {
+		output file /data/logs/access.log {
+			roll_size 20MiB
+			roll_keep 50
+			roll_keep_for 2160h
+		}
+		format json
+	}
 	encode zstd gzip
 	header Strict-Transport-Security "max-age=31536000"
 	reverse_proxy app:3000 {

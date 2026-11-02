@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
@@ -31,6 +32,7 @@ export async function GET(req: Request, { params }: Ctx) {
 }
 
 export async function POST(req: Request, { params }: Ctx) {
+  void auditRequest(req, "POST /api/chat/[studentId]");
   const a = await access((await params).studentId);
   if (!a) return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   const form = await req.formData();

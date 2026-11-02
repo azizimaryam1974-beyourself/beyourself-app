@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { purgeAudit, writeAudit } from "./audit";
 import { purgeAuthSessionsSafe } from "./maintenance-helpers";
 import { endStaleLessons, purgeOldSegments } from "./repo";
 
@@ -12,6 +13,9 @@ export function runMaintenance(): void {
   try {
     const removed = purgeOldSegments(db(), retentionDays());
     purgeAuthSessionsSafe();
+    const keep = Number(process.env.AUDIT_RETENTION_DAYS) > 0 ? Number(process.env.AUDIT_RETENTION_DAYS) : 365;
+    const gone = purgeAudit(db(), keep);
+    writeAudit(db(), { kind: "system", action: "Wartung", details: { protokollGeloescht: gone, aufbewahrungTage: keep, alteUnterrichtssaetze: removed } });
     if (removed) console.log(`[wartung] ${removed} alte Unterrichtssätze gelöscht (Frist ${retentionDays()} Tage)`);
   } catch (e) {
     console.error("[wartung] fehlgeschlagen", e);

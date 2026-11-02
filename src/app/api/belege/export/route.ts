@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { exportName, listReceipts, markExported, receiptsCsv } from "@/lib/server/receipts";
@@ -9,6 +10,7 @@ import { makeZip } from "@/lib/server/zip";
  * Alle exportierten Belege werden mit dem Export-Datum markiert.
  */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/belege/export");
   const user = await currentUser();
   if (!user || user.role !== "teacher") return new Response("Kein Zugriff", { status: 403 });
   const f = await req.formData();

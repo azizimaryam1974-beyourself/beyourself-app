@@ -10,8 +10,12 @@ import path from "node:path";
 
 const hasPublicFile = (url: string) => fs.existsSync(path.join(process.cwd(), "public", url));
 import { EXTRA_CLASSES, LICENSE_CLASSES, VIDEO } from "@/lib/classes";
+import { faqs } from "@/lib/faq";
+import { faqJsonLd, JsonLd, schoolJsonLd } from "@/lib/seo";
+import { SCHOOL } from "@/lib/school";
 
 export const dynamic = "force-dynamic";
+export const metadata = { alternates: { canonical: "/" } };
 
 /** Echte Ausgaben aus dem Live-Test vom 31.10.2026 (Claude, mit Fachbegriff-Liste). */
 const DEMO: Record<string, string> = {
@@ -28,6 +32,7 @@ const CLASSES = [...LICENSE_CLASSES.map((c) => ({ k: c.k, slug: c.slug, name: c.
 
 export default function Home() {
   const langs = bookableLanguages();
+  const faqList = faqs();
   const demo: DemoLine[] = langs.map((l) => ({ code: l.code, label: l.labelDe, native: l.nativeLabel, rtl: l.rtl, text: DEMO[l.code] }));
   const price = formatPrice(LANGUAGE_PACKAGE_PRICE_CENTS).replace(",00", "");
 
@@ -70,7 +75,7 @@ export default function Home() {
 
         <div className="wrap hero-grid">
           <div className="hero-copy">
-            <h1 className="slogan">Fahre deinen eigenen Weg.</h1>
+            <h1 className="slogan"><span className="slogan-kicker">Fahrschule in Kassel</span>Fahre deinen eigenen Weg.</h1>
             <p className="hero-sub">
               Führerschein bei beyourself: ruhig erklärt, in deinem Tempo – und der Theorieunterricht kommt live
               übersetzt auf dein Handy.
@@ -133,7 +138,7 @@ export default function Home() {
                   <p>{c.text}</p>
                 </div>
                 {c.slug === "umschreibung"
-                  ? <a className="class-link" href="#kontakt">Beratung anfragen</a>
+                  ? <Link className="class-link" href="/fuehrerschein-umschreiben">Mehr erfahren</Link>
                   : <Link className="class-link" href={`/klasse/${c.slug}`}>Mehr erfahren</Link>}
               </article>
             ))}
@@ -181,6 +186,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ---------------- Häufige Fragen (auch für Google & KI-Suchen) ---------------- */}
+      <section id="fragen" className="section" aria-labelledby="fragen-h">
+        <div className="wrap faq">
+          <h2 id="fragen-h" className="section-title">Häufige Fragen</h2>
+          <div className="faq-list">
+            {faqList.map((f) => (
+              <details key={f.q} className="faq-item">
+                <summary><h3>{f.q}</h3></summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---------------- Kontakt ---------------- */}
       <section id="kontakt" className="section" aria-labelledby="kontakt-h">
         <div className="wrap contact">
@@ -194,13 +214,16 @@ export default function Home() {
           </div>
           <dl className="contact-card">
             <div><dt>E-Mail</dt><dd><a href="mailto:info@fahrschule-beyourself.de">info@fahrschule-beyourself.de</a></dd></div>
-            <div><dt>Telefon</dt><dd>folgt</dd></div>
-            <div><dt>Adresse</dt><dd>folgt</dd></div>
-            <div><dt>Bürozeiten</dt><dd>folgt</dd></div>
+            {SCHOOL.phone && <div><dt>Telefon</dt><dd><a href={`tel:${SCHOOL.phone.replace(/\s/g, "")}`}>{SCHOOL.phone}</a></dd></div>}
+            <div><dt>Adresse</dt><dd><address style={{ fontStyle: "normal" }}>{SCHOOL.street}<br />{SCHOOL.zip} {SCHOOL.city}</address>
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SCHOOL.name}, ${SCHOOL.street}, ${SCHOOL.zip} ${SCHOOL.city}`)}`} target="_blank" rel="noreferrer">In Google Maps öffnen</a></dd></div>
+            {SCHOOL.hours.length > 0 && <div><dt>Bürozeiten</dt><dd>{SCHOOL.hours.map((h) => `${h.days.join(", ")} ${h.from}–${h.to}`).join(" · ")}</dd></div>}
           </dl>
         </div>
       </section>
       </div>
+      <JsonLd data={schoolJsonLd()} />
+      <JsonLd data={faqJsonLd(faqList)} />
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { requireTeacher } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { filterMoney, moneyCsv, moneyEntries } from "@/lib/server/finance";
@@ -5,6 +6,7 @@ import { parseFinance } from "@/lib/server/finance-query";
 
 /** Die gefilterte Liste als CSV (öffnet in Excel/Numbers) – z. B. für die Steuerberatung. */
 export async function GET(req: Request) {
+  void auditRequest(req, "GET /api/finanzen/export");
   await requireTeacher();
   const p = Object.fromEntries(new URL(req.url).searchParams.entries());
   const { filter } = parseFinance(p);

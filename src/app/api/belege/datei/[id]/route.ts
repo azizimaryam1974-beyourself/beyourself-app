@@ -1,9 +1,11 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getReceipt } from "@/lib/server/receipts";
 import { readUpload } from "@/lib/server/uploads";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  void auditRequest(req, "GET /api/belege/datei/[id]");
   const user = await currentUser();
   const r = getReceipt(db(), (await params).id);
   if (!user || user.role !== "teacher" || !r) return new Response("Nicht gefunden", { status: 404 });

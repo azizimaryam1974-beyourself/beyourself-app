@@ -119,3 +119,17 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
 5. Finom-Bankverbindung in Einstellungen → Regeln eintragen (falls noch nicht).
 6. Anthropic-Schlüssel tauschen nach Freischaltung (war teilweise auf Bildschirmfoto); Azure-Schlüssel am 01.11. getauscht ✔.
 7. Offene Frage an Maryam: Fahrstunden ohne Ausweis wirklich sperren oder nur Hinweis?
+8. **Rechnungen automatisch mit sevDesk** (Maryams Wunsch, 02.11.): Bei jeder Zahlung (Stripe, bar, Guthaben-Einzahlung)
+   automatisch eine Rechnung in sevDesk anlegen und dem Schüler schicken. Braucht: sevDesk-Konto mit API-Zugang (Tarif prüfen),
+   API-Token in .env, Klärung mit Steuerberater: Kleinunternehmer ja/nein, Umsatzsteuer (ob Fahrschulunterricht steuerfrei
+   ist, klärt der Steuerberater), TÜV-Gebühren als durchlaufender Posten. Erst testen, wenn Firma/Steuernummer da.
+9. **SEO/GEO – was Maryam selbst tun muss** (wirkt stärker als alles auf der Webseite):
+   Google Unternehmensprofil anlegen und bestätigen (wichtigster Punkt für „Fahrschule Kassel“ in Google Maps),
+   Google Search Console + Bing Webmaster Tools (Code in .env: GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION),
+   Sitemap dort einreichen, Apple Business Connect, Einträge in Fahrschul-Verzeichnissen (immer GLEICHE Schreibweise
+   von Name/Adresse/Telefon), echte Google-Bewertungen von Schülern sammeln, Fotos (Auto, Büro, Maryam) hochladen.
+   In .env eintragen: SCHOOL_OWNER, SCHOOL_PHONE (+ ggf. SCHOOL_VAT_ID, SCHOOL_PERMIT_AUTHORITY) → erscheinen im Impressum und bei Google.
+   Später: Unterseiten je Sprache („Fahrschule Kassel Arabisch/Türkisch/Russisch“), Preise öffentlich (hilft KI-Suchen), Blog/Ratgeber.
+10. **Protokoll** (seit 02.11.): Verwaltung → Einstellungen → Protokoll. Alles wird mitgeschrieben (Logins, Seiten, Aktionen,
+   Zahlungen, Fehler), Hash-Kette gegen Manipulation, 365 Tage. Zusätzlich Zugriffsprotokoll von Caddy (90 Tage).
+   Für den Verkauf an andere Fahrschulen: Datenschutzerklärung + Auftragsverarbeitungsvertrag müssen das Protokoll erwähnen.

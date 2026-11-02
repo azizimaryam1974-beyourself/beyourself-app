@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { db } from "./db";
 import { hashToken, newSessionToken } from "./password";
 import { deleteAuthSession, insertAuthSession, purgeExpiredSessions, userForSession, type User } from "./repo";
@@ -52,9 +53,21 @@ export async function currentUser(): Promise<User | null> {
   return userForSession(db(), hashToken(token)) ?? null;
 }
 
+/** Seitenaufruf eines eingeloggten Nutzers protokollieren – einmal pro Anfrage, nicht bei Formular-Aktionen/Vorabladen. */
+const logPageView = cache(async (userId: string) => {
+  const h = await headers();
+  if (h.get("next-action") || h.get("next-router-prefetch") || h.get("purpose") === "prefetch") return;
+  const path = h.get("x-by-path");
+  if (!path || path.startsWith("/api/")) return;
+  const { audit } = await import("./audit-context");
+  await audit("page", "Seite geöffnet", { target: path });
+  void userId;
+});
+
 export async function requireUser(): Promise<User> {
   const u = await currentUser();
   if (!u) redirect("/login");
+  await logPageView(u.id);
   return u;
 }
 

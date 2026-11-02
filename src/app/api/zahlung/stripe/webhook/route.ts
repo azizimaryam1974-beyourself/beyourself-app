@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { firstTimeEvent } from "@/lib/server/booking";
@@ -10,6 +11,7 @@ import { finalizePayment } from "@/lib/server/payments/service";
  * mit den Ereignissen checkout.session.completed und checkout.session.async_payment_succeeded.
  */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/zahlung/stripe/webhook");
   const payload = await req.text();
   if (!verifyWebhook(payload, req.headers.get("stripe-signature"), process.env.STRIPE_WEBHOOK_SECRET ?? "")) {
     return NextResponse.json({ error: "Signatur ungültig" }, { status: 400 });

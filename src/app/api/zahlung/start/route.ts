@@ -1,9 +1,11 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
 import { appUrl, PaymentError, startPayment, type Provider } from "@/lib/server/payments/service";
 
 /** Formular "Jetzt bezahlen" → weiter zur Bezahlseite von Stripe / PayPal. */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/zahlung/start");
   const user = await currentUser();
   if (!user) return NextResponse.redirect(`${appUrl()}/login`, 303);
   const form = await req.formData();

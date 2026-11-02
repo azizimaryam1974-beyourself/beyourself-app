@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { requireTeacher } from "@/lib/server/auth";
@@ -14,6 +16,7 @@ function euro(s: string): number {
 }
 
 export async function savePriceAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("price-actions:savePriceAction", [_p, form]);
   await requireTeacher();
   const item = CATALOG[Number(form.get("item"))];
   if (!item) return { error: "Position nicht gefunden." };
@@ -31,6 +34,7 @@ export async function savePriceAction(_p: ActionState, form: FormData): Promise<
 }
 
 export async function setTestfahrtAction(form: FormData): Promise<void> {
+  await auditAction("price-actions:setTestfahrtAction", [form]);
   await requireTeacher();
   const m = String(form.get("minutes")) === "45" ? "45" : "30";
   db().prepare(`INSERT INTO settings (key,value) VALUES ('testfahrt_minutes', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(m);

@@ -8,6 +8,7 @@ const TILES = [
   { href: "/verwaltung/einstellungen/arbeitszeiten", icon: "🕘", title: "Arbeitszeiten & Urlaub", text: "Deine normale Woche, Pausen, Urlaub und freie Tage." },
   { href: "/verwaltung/einstellungen/preise", icon: "€", title: "Preise & Leistungen", text: "Was du anbietest, was es kostet und was dazugehört." },
   { href: "/verwaltung/einstellungen/vorlagen", icon: "✉", title: "Nachrichten-Vorlagen", text: "Fertige Texte für Bestätigung, Ablehnung und Absage." },
+  { href: "/verwaltung/protokoll", icon: "🛡", title: "Protokoll", text: "Wer hat wann was gemacht – Logins, Buchungen, Zahlungen, Änderungen, Fehler." },
   { href: "/verwaltung/einstellungen/regeln", icon: "⚙", title: "Regeln & Verbindungen", text: "Zahlungsfrist, Absagefrist, Testfahrt-Länge, Zahlung und E-Mail." },
 ];
 

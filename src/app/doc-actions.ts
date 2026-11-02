@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
 import { requireTeacher, requireUser } from "@/lib/server/auth";
@@ -13,6 +15,7 @@ const refresh = (userId: string) => { revalidatePath("/konto"); revalidatePath(`
 
 /** Fahrschule: Unterlage als geprüft markieren oder ablehnen (mit kurzem Grund). */
 export async function docStatusAction(form: FormData): Promise<void> {
+  await auditAction("doc-actions:docStatusAction", [form]);
   await requireTeacher();
   const doc = getDoc(db(), String(form.get("id") ?? ""));
   if (!doc) return;
@@ -35,6 +38,7 @@ export async function docStatusAction(form: FormData): Promise<void> {
 
 /** Unterlage löschen: Fahrschule immer, Schüler nur, solange sie noch nicht geprüft ist. */
 export async function deleteDocAction(form: FormData): Promise<void> {
+  await auditAction("doc-actions:deleteDocAction", [form]);
   const me = await requireUser();
   const doc = getDoc(db(), String(form.get("id") ?? ""));
   if (!doc) return;

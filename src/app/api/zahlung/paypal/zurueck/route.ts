@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { getBooking } from "@/lib/server/booking";
@@ -6,6 +7,7 @@ import { appUrl, finalizePayment } from "@/lib/server/payments/service";
 
 /** Rückkehr von PayPal (Parameter "token" = Bestell-Nummer) → Zahlung einziehen. */
 export async function GET(req: Request) {
+  void auditRequest(req, "GET /api/zahlung/paypal/zurueck");
   const u = new URL(req.url);
   const bookingId = u.searchParams.get("b") ?? "";
   const orderId = u.searchParams.get("token") ?? "";

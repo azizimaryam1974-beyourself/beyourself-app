@@ -1,7 +1,7 @@
 import { db } from "@/lib/server/db";
 import { getSettings } from "@/lib/server/booking";
 
-export const metadata = { title: "Buchungsbedingungen" };
+export const metadata = { title: "Buchungsbedingungen", description: "Buchungs-, Zahlungs- und Absagebedingungen der Fahrschule beyourself in Kassel.", alternates: { canonical: "/buchungsbedingungen" }, robots: { index: true, follow: true } };
 export const dynamic = "force-dynamic";
 
 export default function TermsPage() {

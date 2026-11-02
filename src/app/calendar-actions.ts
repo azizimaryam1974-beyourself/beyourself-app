@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/server/db";
@@ -28,6 +30,7 @@ async function teacherId(): Promise<string> {
 
 /** Wochenvorlage: je Wochentag bis zu 3 Zeitbereiche (from0/to0 …). */
 export async function saveWorkHoursAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("calendar-actions:saveWorkHoursAction", [_p, form]);
   const tid = await teacherId();
   const days: DayRange[][] = [];
   for (let wd = 0; wd < 6; wd++) {
@@ -53,6 +56,7 @@ export async function saveWorkHoursAction(_p: ActionState, form: FormData): Prom
 
 /** Sperrzeit: von Datum/Uhrzeit bis Datum/Uhrzeit (z. B. Urlaub, Arzttermin). */
 export async function addBlockAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("calendar-actions:addBlockAction", [_p, form]);
   const tid = await teacherId();
   const d1 = str(form, "fromDay"), d2 = str(form, "toDay") || d1;
   if (!isDayKey(d1) || !isDayKey(d2)) return { error: "Bitte ein Datum wählen." };
@@ -69,6 +73,7 @@ export async function addBlockAction(_p: ActionState, form: FormData): Promise<A
 
 /** Einen ganzen Tag mit einem Tipp sperren. */
 export async function blockDayAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:blockDayAction", [form]);
   const tid = await teacherId();
   const day = str(form, "day");
   if (isDayKey(day)) addBlock(db(), tid, berlinToMs(day, "00:00"), berlinToMs(addDays(day, 1), "00:00"), str(form, "note") || "Tag gesperrt");
@@ -76,6 +81,7 @@ export async function blockDayAction(form: FormData): Promise<void> {
 }
 
 export async function deleteBlockAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:deleteBlockAction", [form]);
   await teacherId();
   deleteBlock(db(), str(form, "id"));
   refresh();
@@ -85,6 +91,7 @@ export async function deleteBlockAction(form: FormData): Promise<void> {
 
 /** Stunde antippen → durchstreichen / wieder freigeben. */
 export async function toggleHourAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:toggleHourAction", [form]);
   const tid = await teacherId();
   const start = Number(str(form, "start")), end = Number(str(form, "end"));
   let msg = "";
@@ -99,6 +106,7 @@ export async function toggleHourAction(form: FormData): Promise<void> {
 
 /** „Feierabend ab …“ für einen Tag. */
 export async function finishEarlyAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:finishEarlyAction", [form]);
   const tid = await teacherId();
   const day = str(form, "day"), m = toMin(str(form, "time"));
   if (isDayKey(day) && !Number.isNaN(m)) finishEarly(db(), tid, day, m);
@@ -107,6 +115,7 @@ export async function finishEarlyAction(form: FormData): Promise<void> {
 
 /** Eigene Zeiten für ein Datum (bis zu 3 Bereiche) oder zurück zur Wochenvorlage. */
 export async function saveDayAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:saveDayAction", [form]);
   const tid = await teacherId();
   const day = str(form, "day");
   if (!isDayKey(day)) return;
@@ -123,6 +132,7 @@ export async function saveDayAction(form: FormData): Promise<void> {
 // ---------- Schüler bucht eine Fahrt ------------------------------------------------
 
 export async function bookDriveAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:bookDriveAction", [form]);
   const user = await requireUser();
   const kind = str(form, "kind");
   let target = "/termine?gebucht=1#offen";
@@ -149,6 +159,7 @@ export async function bookDriveAction(form: FormData): Promise<void> {
 
 /** Alle Termine eines Tages ab Uhrzeit um X Minuten verschieben und alle betroffenen Schüler benachrichtigen. */
 export async function shiftDayAction(form: FormData): Promise<void> {
+  await auditAction("calendar-actions:shiftDayAction", [form]);
   const teacher = await requireTeacher();
   const day = str(form, "day"), week = str(form, "w");
   const fromMin = toMin(str(form, "from") || "00:00"), delta = Number(str(form, "delta"));

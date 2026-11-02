@@ -1,7 +1,7 @@
 import { bookableLanguages } from "@/lib/languages";
 import { formatPrice, LANGUAGE_PACKAGE_PRICE_CENTS } from "@/lib/language-package";
 
-export const metadata = { title: "Sprachpaket-Bedingungen" };
+export const metadata = { title: "Sprachpaket – Theorie live übersetzt", description: "Theorieunterricht der Fahrschule beyourself in Kassel live übersetzt auf dein Handy: Türkisch, Arabisch, Russisch, Englisch, Spanisch, Französisch.", alternates: { canonical: "/sprachpaket" }, robots: { index: true, follow: true } };
 export default function Terms() {
   return (
     <div className="card">

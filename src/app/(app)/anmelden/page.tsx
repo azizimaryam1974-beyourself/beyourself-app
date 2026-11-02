@@ -7,7 +7,7 @@ import { SignupForm } from "./SignupForm";
 import { db } from "@/lib/server/db";
 import { getOffer } from "@/lib/server/booking";
 
-export const metadata = { title: "Anmelden" };
+export const metadata = { title: "Anmelden – Fahrschüler werden", description: "Melde dich online bei der Fahrschule beyourself in Kassel an: Klasse wählen, Daten eingeben, fertig. Auf Wunsch mit Sprachpaket für den Theorieunterricht.", alternates: { canonical: "/anmelden" }, robots: { index: true, follow: true } };
 export const dynamic = "force-dynamic";
 
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ klasse?: string }> }) {

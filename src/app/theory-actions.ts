@@ -1,5 +1,7 @@
 "use server";
 
+import { auditAction } from "@/lib/server/audit-context";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/server/db";
@@ -12,6 +14,7 @@ export interface ActionState { ok?: string; error?: string }
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 export async function scheduleLessonAction(_p: ActionState, form: FormData): Promise<ActionState> {
+  await auditAction("theory-actions:scheduleLessonAction", [_p, form]);
   const teacher = await requireTeacher();
   const day = str(form, "date"), time = str(form, "time");
   const weeks = Math.min(26, Math.max(1, Number(str(form, "weeks")) || 1));
@@ -27,12 +30,14 @@ export async function scheduleLessonAction(_p: ActionState, form: FormData): Pro
 }
 
 export async function deleteLessonAction(form: FormData): Promise<void> {
+  await auditAction("theory-actions:deleteLessonAction", [form]);
   await requireTeacher();
   deleteScheduledLesson(db(), str(form, "lessonId"));
   revalidatePath("/unterricht"); revalidatePath("/theorie");
 }
 
 export async function signupAction(form: FormData): Promise<void> {
+  await auditAction("theory-actions:signupAction", [form]);
   const user = await requireUser();
   const mode = str(form, "mode");
   try {

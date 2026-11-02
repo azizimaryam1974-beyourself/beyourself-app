@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
@@ -6,6 +7,7 @@ import { deleteUpload, storeUpload, UploadError } from "@/lib/server/uploads";
 
 /** Eigenes Profilfoto hochladen (wird im Browser schon verkleinert) oder entfernen. */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/profilbild");
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Bitte einloggen." }, { status: 401 });
   const f = await req.formData();

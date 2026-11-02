@@ -1,3 +1,4 @@
+import { auditRequest } from "@/lib/server/audit-context";
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
@@ -6,6 +7,7 @@ import { storeUpload, UploadError } from "@/lib/server/uploads";
 
 /** Beleg hochladen (Foto vom Handy oder PDF) – nur die Fahrschule. */
 export async function POST(req: Request) {
+  void auditRequest(req, "POST /api/belege");
   const user = await currentUser();
   if (!user || user.role !== "teacher") return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   const f = await req.formData();

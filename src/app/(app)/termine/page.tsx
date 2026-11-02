@@ -408,7 +408,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
                 <div className="topup-quick">
                   {[200, 500, 750, 1000].map((v) => <label key={v} className="chip"><input type="radio" name="amount" value={v} defaultChecked={v === 500} /> <span>{v} €</span></label>)}
                 </div>
-                <label className="topup-own">oder eigener Betrag: <input type="number" name="own" min={TOPUP_MIN_CENTS / 100} max={TOPUP_MAX_CENTS / 100} step={1} inputMode="numeric" placeholder="z. B. 650" aria-label="Eigener Betrag in Euro" /> €</label>
+                <label className="topup-own">oder eigener Betrag: <span style={{ whiteSpace: "nowrap" }}><input type="number" name="own" min={TOPUP_MIN_CENTS / 100} max={TOPUP_MAX_CENTS / 100} step={1} inputMode="numeric" placeholder="z. B. 650" aria-label="Eigener Betrag in Euro" /> €</span></label>
                 {stripeTestMode() && <p className="test-hint">Testmodus – kein echtes Geld. Testkarte <strong>4242 4242 4242 4242</strong>, Datum in der Zukunft, Prüfnummer 123.</p>}
                 <label className="check"><input type="checkbox" name="terms" required /> <span>Ich weiß: Guthaben wird mit Grundbetrag, Fahrstunden und Prüfungen verrechnet. Nicht verbrauchtes Guthaben zahlt die Fahrschule am Ende der Ausbildung auf Wunsch zurück.</span></label>
                 <button className="btn btn-gold" type="submit">Jetzt aufladen</button>

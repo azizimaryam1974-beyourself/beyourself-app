@@ -38,7 +38,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: "Abgesagt", cls: "badge-muted" },
   withdrawn: { label: "Zurückgezogen", cls: "badge-muted" },
 };
-const PROVIDER_BTN: Record<Provider, string> = { stripe: "Karte · Apple Pay · Google Pay", paypal: "PayPal", test: "Test-Zahlung (Testmodus)", guthaben: "Mit Guthaben bezahlen" };
+const PROVIDER_BTN: Record<Provider, string> = { stripe: "Jetzt zahlen", paypal: "Mit PayPal zahlen", test: "Test-Zahlung (Testmodus)", guthaben: "Mit Guthaben bezahlen" };
 const NOTICE: Record<string, { cls: string; text: string }> = {
   bezahlt: { cls: "alert-ok", text: "Danke! Deine Zahlung ist angekommen – die Fahrt ist fest gebucht." },
   gebucht: { cls: "alert-ok", text: "Die Zeit ist für dich reserviert. Bitte bezahle jetzt, dann ist sie fest." },
@@ -109,6 +109,7 @@ function PayBox({ b, providers, credit, now }: { b: Booking; providers: Provider
             {providers.map((p) => (
               <button key={p} className={`btn ${p === "stripe" ? "btn-gold" : p === "paypal" ? "btn-paypal" : "btn-secondary"}`} type="submit" name="provider" value={p}>{PROVIDER_BTN[p]}</button>
             ))}
+            {providers.includes("stripe") && <span className="hint pay-methods">Karte · Apple Pay · Google Pay · Klarna</span>}
           </div>
         </form>
       ) : <p className="hint">Online-Zahlung ist noch nicht eingerichtet. Bitte bezahle bar oder mit EC-Karte in der Fahrschule.</p>}

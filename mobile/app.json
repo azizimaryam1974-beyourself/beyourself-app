@@ -64,6 +64,11 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "owner": "beyourself-fahrschule"
+    "owner": "beyourself-fahrschule",
+    "extra": {
+      "eas": {
+        "projectId": "f9fa8c4e-75b1-4181-939c-96cffff11d4a"
+      }
+    }
   }
 }

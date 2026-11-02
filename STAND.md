@@ -106,7 +106,7 @@ Einspielen: `cd /opt/beyourself && git pull && docker compose up -d --build`
   `PAYMENTS_TEST_MODE=0` vor echtem Start.
 
 ## 7. Nächste Schritte (Stand 01.11.2026, 23:40)
-1. **ALS ERSTES (Maryam will direkt damit anfangen): Guthaben online aufladen mit Stripe.**
+1. ✔ (02.11.) **Guthaben online aufladen mit Stripe** – 200 € bis 2.000 €. Noch echt testen (Testkarte).
    Schüler gibt Betrag ein (z. B. 750 €) → Stripe Checkout (Karte/Apple Pay/Google Pay/Link/Klarna) → Webhook bucht
    automatisch „Einzahlung“ (reason deposit, zählt als Einnahme) → Nachricht an Schüler + Fahrschule.
    Vorher mit Maryam klären: Mindest-/Höchstbetrag (Gebühren ~1,5 % Karte, Klarna mehr; Überweisung Finom kostenlos).

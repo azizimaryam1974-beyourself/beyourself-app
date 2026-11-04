@@ -3,6 +3,7 @@ import { stripeTestMode } from "@/lib/server/payments/stripe";
 import { TOPUP_MAX_CENTS, TOPUP_MIN_CENTS } from "@/lib/server/topup";
 import { driveHistory } from "@/lib/server/drive-history";
 import { DriveHistoryList } from "@/components/training/DriveHistory";
+import { hasIdDocument } from "@/lib/server/student-docs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/server/auth";
@@ -142,6 +143,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
   const settings = getSettings(d);
   ensureGrundbetrag(d, user.id, now);
   const grundOk = grundbetragPaid(d, user.id);
+  const hasId = hasIdDocument(d, user.id);
   const exams = listExams(d, user.id).slice(0, 6);
   const training = trainingWithBookings(d, user.id, now);
   const mine = listBookingsForUser(d, user.id);
@@ -215,12 +217,41 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
         <p>So geht&apos;s: 1. Art und Länge wählen (60, 75 oder 90 Minuten) · 2. Tag antippen · 3. Uhrzeit antippen · 4. reservieren und bezahlen.</p>
         <p>Der Preis wird genau anteilig berechnet. Beleuchtungsfahrten gibt es nur, wenn es draußen dunkel ist.</p>
       </>}>
-        {!training ? (
-          <Empty icon="wait" text="Wartet auf deine Klasse – die Fahrschule legt sie fest." action={<Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule fragen</Link>} />
-        ) : training.profile.blocked ? (
-          <Empty icon="chat" text="Buchen ist gerade pausiert." action={<Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule schreiben</Link>} />
-        ) : !grundOk ? (
-          <Empty icon="pay" text="Erst den Grundbetrag bezahlen – dann geht's los." action={<a className="btn btn-gold btn-small" href="#offen">Zum Bezahlen</a>} />
+        {!training || training.profile.blocked || !grundOk ? (
+          <div className="book-check">
+            <p className="book-check-lead"><strong>Du kannst noch keine Fahrt buchen.</strong> Das fehlt noch:</p>
+            <ul>
+              <li className={training ? "ok" : "todo"}>
+                <span className="bc-dot" aria-hidden>{training ? "✓" : "1"}</span>
+                <div><strong>Führerscheinklasse</strong>
+                  <span>{training ? CLASS_LABEL[training.profile.licenseClass] : "Die Fahrschule legt deine Klasse fest (B, B197, B78 oder Umschreibung). Das dauert meist nicht lange – du bekommst eine Nachricht."}</span>
+                  {!training && <Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule fragen</Link>}</div>
+              </li>
+              <li className={grundOk ? "ok" : "todo"}>
+                <span className="bc-dot" aria-hidden>{grundOk ? "✓" : "2"}</span>
+                <div><strong>Grundbetrag bezahlt</strong>
+                  <span>{grundOk ? "erledigt" : "Einmalig mit der Anmeldung fällig (Theorie, Lernmaterial, App). Erst danach sind Fahrstunden buchbar. Bezahlen kannst du online, mit Guthaben oder bar/EC in der Fahrschule."}</span>
+                  {!grundOk && <a className="btn btn-gold btn-small" href="#offen">Jetzt bezahlen</a>}</div>
+              </li>
+              {training?.profile.blocked && (
+                <li className="todo">
+                  <span className="bc-dot" aria-hidden>!</span>
+                  <div><strong>Buchen ist gerade pausiert</strong>
+                    <span>Die Fahrschule hat das Buchen für dich vorübergehend angehalten – zum Beispiel, um erst etwas zu besprechen.</span>
+                    <Link className="btn btn-secondary btn-small" href="/nachrichten">Fahrschule schreiben</Link></div>
+                </li>
+              )}
+              {!hasId && (
+                <li className="todo">
+                  <span className="bc-dot" aria-hidden>!</span>
+                  <div><strong>Ausweis hochladen</strong>
+                    <span>Ohne Ausweis bekommst du keine Fahrstunden.</span>
+                    <Link className="btn btn-secondary btn-small" href="/konto#angaben">Zum Hochladen</Link></div>
+                </li>
+              )}
+            </ul>
+            <p className="hint" style={{ margin: 0 }}>Sobald alles einen Haken hat, siehst du hier die freien Tage und Uhrzeiten der Fahrschule.</p>
+          </div>
         ) : (
           <>
             <p className="book-next"><span className="hint">{CLASS_LABEL[training.profile.licenseClass]} · </span>{training.state.next}
@@ -286,7 +317,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
                   </form>
                 )}
                 {!withTimes.length ? (
-                  <p className="hint">In den nächsten 14 Tagen ist leider nichts frei. Schau bald wieder vorbei.</p>
+                  <p className="hint">In den nächsten 14 Tagen ist für diese Fahrt leider nichts frei – die Fahrschule ist ausgebucht oder im Urlaub. Trag dich unten auf die <a href="#warteliste">Warteliste</a> ein, dann bekommst du eine Nachricht, sobald etwas frei wird.</p>
                 ) : (
                   <>
                     <div className="day-picker" role="group" aria-label="Tag wählen">

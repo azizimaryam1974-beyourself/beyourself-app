@@ -1154,3 +1154,14 @@ a.dash-kpi::after { content: "›"; margin-left: auto; opacity: .35; font-size: 
 .topup-own { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .topup-own input { width: 120px; }
 .credit-pay { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(198, 164, 101, 0.14); border: 1px solid rgba(198, 164, 101, 0.4); }
+
+/* ---- Warum kann ich (noch) nicht buchen? ---- */
+.book-check { display: grid; gap: 12px; }
+.book-check-lead { margin: 0; }
+.book-check ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.book-check li { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; background: rgba(15, 26, 44, 0.04); border: 1px solid rgba(15, 26, 44, 0.08); }
+.book-check li.todo { border-color: rgba(198, 164, 101, 0.6); background: rgba(198, 164, 101, 0.1); }
+.book-check li > div { display: grid; gap: 4px; justify-items: start; }
+.book-check li span:not(.bc-dot) { color: rgba(30, 30, 30, 0.7); font-size: .92rem; }
+.bc-dot { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; border: 2px solid var(--gold); color: var(--gold-deep); }
+.book-check li.ok .bc-dot { background: var(--gold-grad); border-color: transparent; color: var(--ink); }

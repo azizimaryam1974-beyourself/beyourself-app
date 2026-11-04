@@ -250,29 +250,44 @@ export function drivesInWeek(db: Database.Database, userId: string, at: number):
 
 export interface BookDriveInput { userId: string; kind: DriveKind; minutes: number; start: number; meetingPoint: string; note: string }
 
-export function bookDrive(db: Database.Database, inp: BookDriveInput, now = Date.now()): Booking {
+/**
+ * Fahrt buchen. `byTeacher`: die Fahrschule trägt selbst ein (z. B. am Telefon vereinbart) – dann gelten die
+ * Schüler-Regeln (Phase, max. pro Woche, Vorlauf, Freigabe, Grundbetrag, Pause) nicht; die Zeit muss aber frei sein.
+ */
+export function bookDrive(db: Database.Database, inp: BookDriveInput, now = Date.now(), opts: { byTeacher?: boolean } = {}): Booking {
   return db.transaction(() => {
     const t = trainingWithBookings(db, inp.userId, now);
-    if (!t) throw new BookingError("Deine Führerscheinklasse ist noch nicht festgelegt. Bitte melde dich bei der Fahrschule.");
-    if (t.profile.blocked) throw new BookingError("Online-Buchung ist für dich gerade gesperrt. Bitte melde dich bei der Fahrschule.");
-    if (!grundbetragPaid(db, inp.userId)) throw new BookingError("Fahrstunden kannst du buchen, sobald dein Grundbetrag bezahlt ist (oben unter „Bitte bezahlen“ oder bar in der Fahrschule).");
-    const ok = canBook(t.state, inp.kind, inp.minutes);
-    if (!ok.ok) throw new BookingError(ok.reason);
-    if (drivesInWeek(db, inp.userId, inp.start) >= t.profile.maxPerWeek) {
-      throw new BookingError(`Du hast in dieser Woche schon ${t.profile.maxPerWeek} Fahrten gebucht. Bitte wähle eine andere Woche.`);
+    if (!t) throw new BookingError(opts.byTeacher ? "Für diesen Schüler ist noch keine Klasse festgelegt (Schülerakte)." : "Deine Führerscheinklasse ist noch nicht festgelegt. Bitte melde dich bei der Fahrschule.");
+    if (!opts.byTeacher) {
+      if (t.profile.blocked) throw new BookingError("Online-Buchung ist für dich gerade gesperrt. Bitte melde dich bei der Fahrschule.");
+      if (!grundbetragPaid(db, inp.userId)) throw new BookingError("Fahrstunden kannst du buchen, sobald dein Grundbetrag bezahlt ist (oben unter „Bitte bezahlen“ oder bar in der Fahrschule).");
+      const ok = canBook(t.state, inp.kind, inp.minutes);
+      if (!ok.ok) throw new BookingError(ok.reason);
+      if (drivesInWeek(db, inp.userId, inp.start) >= t.profile.maxPerWeek) {
+        throw new BookingError(`Du hast in dieser Woche schon ${t.profile.maxPerWeek} Fahrten gebucht. Bitte wähle eine andere Woche.`);
+      }
     }
+    if (inp.minutes < 30 || inp.minutes > 240) throw new BookingError("Bitte eine Dauer zwischen 30 und 240 Minuten.");
     const day = dayKey(inp.start);
     const teacher = mainTeacherId(db);
     if (!teacher) throw new BookingError("Gerade sind keine Termine buchbar.");
-    const free = startTimes(freeIntervals(db, teacher, day, inp.userId, now), inp.minutes, { notBefore: earliestStart(db, inp.kind, day, now) });
-    if (!free.includes(inp.start)) throw new BookingError("Diese Zeit ist leider nicht mehr frei. Bitte wähle eine andere.");
+    if (opts.byTeacher) {
+      // Fahrschule: Zeit muss in Arbeitszeit liegen und frei sein (Raster egal, Vorlauf egal)
+      const ivs = freeIntervals(db, teacher, day, inp.userId, now);
+      if (inp.start < now || !ivs.some((i) => inp.start >= i.start && inp.start + inp.minutes * 60_000 <= i.end)) {
+        throw new BookingError("Diese Zeit ist nicht frei (andere Fahrt, privater Termin oder außerhalb der Arbeitszeit).");
+      }
+    } else {
+      const free = startTimes(freeIntervals(db, teacher, day, inp.userId, now), inp.minutes, { notBefore: earliestStart(db, inp.kind, day, now) });
+      if (!free.includes(inp.start)) throw new BookingError("Diese Zeit ist leider nicht mehr frei. Bitte wähle eine andere.");
+    }
     const meeting = (MEETING_POINTS as readonly string[]).includes(inp.meetingPoint) ? inp.meetingPoint : MEETING_POINTS[0];
 
     const offerId = inp.kind === "testfahrt" ? "drive-testfahrt" : ["ueberland", "autobahn", "beleuchtung"].includes(inp.kind) ? "drive-sonder" : "drive-uebung";
     const slotId = randomUUID();
     db.prepare(`INSERT INTO slots (id, offer_id, starts_at, ends_at, status, note, created_at) VALUES (?,?,?,?,'reserved','',?)`)
       .run(slotId, offerId, inp.start, inp.start + inp.minutes * 60_000, now);
-    const manual = t.profile.manualApproval;
+    const manual = t.profile.manualApproval && !opts.byTeacher;
     const id = randomUUID();
     const s = getSettings(db);
     db.prepare(

@@ -84,3 +84,14 @@ test("Guthaben aufladen: nur 200 € bis 2.000 €", () => {
   assert.equal(parseTopupAmount("2001"), null);
   assert.equal(parseTopupAmount("abc"), null);
 });
+
+import { buildIcs, newIcsToken, getIcsToken } from "../src/lib/server/ics";
+test("Kalender-Abo: Token und iCalendar", () => {
+  const db = openDatabase(":memory:");
+  assert.equal(getIcsToken(db), null);
+  const t = newIcsToken(db);
+  assert.equal(getIcsToken(db), t);
+  const ics = buildIcs(db);
+  assert.match(ics, /^BEGIN:VCALENDAR\r\n/);
+  assert.match(ics, /END:VCALENDAR\r\n$/);
+});

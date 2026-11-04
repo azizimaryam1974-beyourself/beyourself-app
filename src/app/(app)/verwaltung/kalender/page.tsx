@@ -8,6 +8,7 @@ import { markPaidCashAction } from "@/app/booking-actions";
 import { deleteBlockAction, toggleHourAction } from "@/app/calendar-actions";
 import { BlockForm } from "../einstellungen/arbeitszeiten/Forms";
 import { DayTools } from "./DayTools";
+import { MonthView } from "./MonthView";
 import { stripeTestMode } from "@/lib/server/payments/stripe";
 import { closedReason, frameFor, sunsetMs, workIntervals, type Interval } from "@/lib/calendar";
 import { formatPrice } from "@/lib/language-package";
@@ -56,13 +57,26 @@ function hourCells(work: Interval[], blocks: Block[], items: Item[]): Cell[] {
   return cells;
 }
 
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ w?: string; fehler?: string; ok?: string }> }) {
+type Sp = { w?: string; fehler?: string; ok?: string; ansicht?: string; m?: string; tag?: string; neu?: string };
+
+/** Kalender: Standard = Monat + Tagesliste (neu, 04.11.2026). „Woche (Zeitleiste)“ = die bisherige Ansicht. */
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<Sp> }) {
   await requireTeacher();
+  const sp = await searchParams;
+  if (sp.ansicht !== "woche" && !sp.w) {
+    await runBookingJobs();
+    syncFinishedDrives(db());
+    return <MonthView sp={sp} now={Date.now()} />;
+  }
+  return WeekView(sp);
+}
+
+async function WeekView(sp: Sp) {
   await runBookingJobs();
   const d = db();
   syncFinishedDrives(d);
   const tid = mainTeacherId(d)!;
-  const { w, fehler, ok } = await searchParams;
+  const { w, fehler, ok } = sp;
   const now = Date.now();
   const today = dayKey(now);
   const monday = mondayOf(isDayKey(w) ? w : today);
@@ -107,6 +121,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHead title="Kalender" action={<Link className="btn btn-glass btn-small" href="/verwaltung/einstellungen/arbeitszeiten">Normale Woche & Urlaub</Link>} />
+      <div className="mcal-seg" style={{ marginBottom: 16 }}><Link href={`/verwaltung/kalender?tag=${isDayKey(w) ? w : dayKey(Date.now())}`}>Monat</Link><span className="on">Woche (Zeitleiste)</span></div>
 
       {fehler && <div className="alert alert-error" role="alert">{fehler}</div>}
       {ok && <div className="alert alert-ok" role="status">{ok}</div>}

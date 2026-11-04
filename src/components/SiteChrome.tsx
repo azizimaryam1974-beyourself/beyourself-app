@@ -89,6 +89,7 @@ export async function SiteHeader({ tone = "light" }: { tone?: "light" | "dark" }
         {user.role === "student" && <Link href="/konto">Mein Konto</Link>}
         <Link href="/">Webseite ansehen</Link>
         <form action={logoutAction}><button type="submit">Abmelden</button></form>
+        <span className="bnav-legal"><Link href="/impressum">Impressum</Link> · <Link href="/datenschutz">Datenschutz</Link></span>
       </BottomNav>
     )}
     </>

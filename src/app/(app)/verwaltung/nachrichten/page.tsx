@@ -22,7 +22,7 @@ export default async function SchoolChats({ searchParams }: { searchParams: Prom
     <>
       <h1>Nachrichten</h1>
       <form className="row chat-new" method="get">
-        <select name="an" aria-label="Schüler wählen" defaultValue="" required style={{ width: "auto", flex: "1 1 220px" }}>
+        <select name="an" aria-label="Schüler wählen" defaultValue="" required>
           <option value="" disabled>Neue Nachricht an …</option>
           {students.map((s) => { const a = det.get(s.id) ? addressLine(det.get(s.id)!) : ""; return <option key={s.id} value={s.id}>{a ? `${s.name} – ${a}` : `${s.name} – (keine Adresse)`}</option>; })}
         </select>

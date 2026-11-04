@@ -1,3 +1,4 @@
+import { DetailsMenu } from "@/components/ui/Popover";
 import { blockDayAction, finishEarlyAction, saveDayAction, shiftDayAction } from "@/app/calendar-actions";
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
@@ -8,8 +9,7 @@ export function DayTools({ day, ranges, custom, week, drives = [] }: { day: stri
   const ends: number[] = [];
   for (let m = first + 60; m < last; m += 30) ends.push(m);
   return (
-    <details className="day-tools">
-      <summary className="link-btn">Tag anpassen</summary>
+    <DetailsMenu className="day-tools" summaryClass="link-btn" summary="Tag anpassen">
       <div className="day-tools-pop">
         {ends.length > 0 && (
           <form action={finishEarlyAction} className="row">
@@ -63,6 +63,6 @@ export function DayTools({ day, ranges, custom, week, drives = [] }: { day: stri
           <button className="btn btn-danger btn-small" type="submit">Ganzen Tag sperren</button>
         </form>
       </div>
-    </details>
+    </DetailsMenu>
   );
 }

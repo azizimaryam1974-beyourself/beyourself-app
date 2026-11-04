@@ -29,8 +29,10 @@ export function TargetsForm({ userId, isB197, practiceTarget, repeatTarget, maxP
       </div>
       <label className="check"><input type="checkbox" name="notify" defaultChecked /> <span>Schüler über geänderte Stundenzahl benachrichtigen</span></label>
       <textarea name="message" rows={2} maxLength={600} placeholder="Persönliche Nachricht dazu (optional), z. B.: Wir üben noch das Einparken." />
-      <label className="check"><input type="checkbox" name="manualApproval" defaultChecked={manualApproval} /> <span>Buchungen nur mit meiner Freigabe</span></label>
-      <label className="check"><input type="checkbox" name="blocked" defaultChecked={blocked} /> <span>Buchen gesperrt</span></label>
+      <label className="check"><input type="checkbox" name="manualApproval" defaultChecked={manualApproval} />
+        <span>Buchungen nur mit meiner Freigabe <span className="hint" style={{ display: "block" }}>Dauerhaft: Der Schüler kann Zeiten anfragen, du bestätigst sie.</span></span></label>
+      <label className="check"><input type="checkbox" name="blocked" defaultChecked={blocked} />
+        <span>Buchen vorübergehend pausieren <span className="hint" style={{ display: "block" }}>Der Schüler kann gar nichts buchen oder anfragen, bis du das wieder ausschaltest. Die Freigabe-Einstellung bleibt dabei gespeichert.</span></span></label>
       <FormMessage state={state} />
       <button className="btn btn-small" type="submit" disabled={pending}>Speichern</button>
     </form>

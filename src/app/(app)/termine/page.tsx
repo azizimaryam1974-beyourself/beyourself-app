@@ -166,8 +166,9 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
 
   // Auswahl: Art (k), Länge (d), Startzeit (t)
   const options = training && !training.profile.blocked && grundOk ? training.state.bookable : [];
-  const opt = options.find((o) => o.kind === sp.k) ?? null;
-  const minutes = opt && opt.durations.includes(Number(sp.d)) ? Number(sp.d) : null;
+  // Ohne Auswahl gleich die erste passende Fahrt vorauswählen – damit sofort freie Zeiten zu sehen sind
+  const opt = options.find((o) => o.kind === sp.k) ?? options[0] ?? null;
+  const minutes = opt ? (opt.durations.includes(Number(sp.d)) ? Number(sp.d) : (opt.durations.includes(90) ? 90 : opt.durations[0] ?? null)) : null;
   const days = opt && minutes ? availableStarts(d, opt.kind as DriveKind, minutes, firstBookableDay(d, now), 14, now, user.id) : [];
   const chosen = minutes && sp.t && days.some((x) => x.starts.includes(Number(sp.t))) ? Number(sp.t) : null;
   const withTimes = days.filter((x) => x.starts.length);
@@ -279,6 +280,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
             {opt && minutes && (
               <div className="times">
                 <h3>Freie Zeiten für {KIND_LABEL[opt.kind]} ({minutes} Min)</h3>
+                {settings.minLeadHours > 0 && <p className="hint" style={{ marginTop: 0 }}>Buchen geht frühestens {settings.minLeadHours} Stunden vorher – kurzfristige Lücken findest du deshalb nicht hier. Frag dafür im Chat.</p>}
                 {opt.kind === "beleuchtung" && <p className="hint">Beleuchtungsfahrten gibt es erst, wenn es dunkel ist – die Zeiten passen sich jeden Tag an.</p>}
                 {chosen && (
                   <form action={bookDriveAction} className="confirm-box">

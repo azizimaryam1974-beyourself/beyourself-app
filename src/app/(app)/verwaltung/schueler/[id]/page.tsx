@@ -23,6 +23,9 @@ import { getOffer } from "@/lib/server/booking";
 import { fmtDay, fmtTime } from "@/lib/time";
 import { Avatar } from "@/components/ui/Avatar";
 import { ClassSelect } from "@/components/ClassSelect";
+import { availableStarts, firstBookableDay } from "@/lib/server/drive-booking";
+import { grundbetragPaid } from "@/lib/server/training-repo";
+import { getSettings } from "@/lib/server/booking";
 import { driveHistory } from "@/lib/server/drive-history";
 import { DriveHistoryList } from "@/components/training/DriveHistory";
 import { DetailsForm } from "@/components/DetailsForm";
@@ -65,6 +68,16 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
   const detMissing = Object.keys(validateDetails({ birthday: det.birthday ?? "", street: det.street, zip: det.zip, city: det.city, phone: user.phone ?? "" })).length > 0;
   const age = det.birthday ? Math.floor((now - Date.parse(det.birthday)) / (365.25 * 86_400_000)) : null;
   const hist = driveHistory(d, id, now);
+  // Was sieht der Schüler beim Buchen? (gleiche Regeln wie auf seiner Seite)
+  const diag = (() => {
+    const grund = !!t && (t.profile.grundWaived || grundbetragPaid(d, id));
+    const first = t && !t.profile.blocked && grund ? t.state.bookable[0] ?? null : null;
+    const mins = first ? (first.durations.includes(90) ? 90 : first.durations[0]) : 0;
+    const days = first && mins ? availableStarts(d, first.kind as DriveKind, mins, firstBookableDay(d, now), 14, now, id) : [];
+    const lead = getSettings(d).minLeadHours;
+    return { grund, first, free: days.reduce((a, x) => a + x.starts.length, 0), days: days.filter((x) => x.starts.length).length,
+      earliest: `${fmtDay(now + lead * 3_600_000)}, ${fmtTime(now + lead * 3_600_000)} Uhr (${lead} Std. Vorlauf)` };
+  })();
   const docs = listDocs(d, id);
   const hasId = hasIdDocument(d, id);
   const docsNew = docs.filter((x) => x.status === "neu").length;
@@ -142,6 +155,20 @@ export default async function StudentFile({ params, searchParams }: { params: Pr
                 )}
               </section>
             )}
+
+            <section className="card book-diag">
+              <h2>Kann {user.name.split(" ")[0]} gerade buchen?</h2>
+              <ul className="list">
+                <li><span>Klasse</span><span className="badge badge-ok">{CLASS_LABEL[t.profile.licenseClass]}</span></li>
+                <li><span>Grundbetrag</span>{diag.grund ? <span className="badge badge-ok">bezahlt/erlassen</span> : <span className="badge badge-error">offen – blockiert das Buchen</span>}</li>
+                <li><span>Pausiert</span>{t.profile.blocked ? <span className="badge badge-error">ja – blockiert das Buchen</span> : <span className="badge badge-ok">nein</span>}</li>
+                <li><span>Modus</span><span className="badge">{t.profile.manualApproval ? "nur Anfrage (deine Freigabe)" : "bucht direkt"}</span></li>
+                <li><span>Jetzt dran</span><span>{diag.first ? `${KIND_LABEL[diag.first.kind as DriveKind]} (${diag.first.durations.join("/")} Min)` : "nichts – alles gebucht oder Ausbildung fertig"}</span></li>
+                <li><span>Freie Zeiten (14 Tage)</span>{diag.first ? (diag.free > 0 ? <span className="badge badge-ok">{diag.free} Startzeiten an {diag.days} Tagen</span> : <span className="badge badge-error">keine – Arbeitszeiten prüfen</span>) : <span>–</span>}</li>
+                <li><span>Frühestens buchbar</span><span>{diag.earliest}</span></li>
+                <li><span>Ausweis</span>{hasId ? <span className="badge badge-ok">hochgeladen</span> : <span className="badge badge-warn">fehlt (nur Hinweis)</span>}</li>
+              </ul>
+            </section>
 
             <section className="card">
               <h2>Stunden & Regeln</h2>
